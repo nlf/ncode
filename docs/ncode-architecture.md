@@ -1,6 +1,6 @@
 # ncode architecture and roadmap
 
-ncode will be a **product-owned fork of Zot** whose inherited capabilities are evaluated deliberately rather than kept or removed by default. It starts with Zot's Go runtime, provider boundary, TUI, tools, and host capabilities; connects directly to Claude, Codex, and local OpenAI-compatible endpoints; and evolves behind explicit decisions and regression tests. ncode owns the prompt and agent loop. Provider-specific compatibility stays behind provider adapters.
+ncode is a **product-owned fork of Zot** with settled capability dispositions and an intentionally incremental implementation path. The canonical [inherited capability decision register](inherited-capabilities.md) retains the Go runtime, provider boundary, every inherited provider and authentication path, headless modes, sessions, tools, swarm, extensions, and skills; replaces the interactive UI with Bubble Tea; and removes Zotfiles and Zot compatibility. ncode owns the prompt and agent loop. Provider-specific compatibility stays behind provider adapters.
 
 > [!WARNING]
 > Claude Pro/Max and ChatGPT Plus/Pro subscription login is an unofficial compatibility path. It reuses public OAuth client identities from first-party CLIs and may violate provider terms, stop working without notice, or cause tokens or accounts to be revoked. API keys and documented provider APIs are the safe default. Subscription OAuth must remain explicit, removable, and clearly labeled as unsupported by the providers.
@@ -9,33 +9,35 @@ ncode will be a **product-owned fork of Zot** whose inherited capabilities are e
 
 | Area | Decision |
 |---|---|
-| Product shape | Fork Zot, establish ncode's ownership boundaries, and evaluate inherited capabilities individually before deciding what to retain, reshape, defer, or remove. |
-| Runtime | Keep the provider-neutral types and tool loop in [`packages/core`](../packages/core) and [`packages/provider/provider.go`](../packages/provider/provider.go). |
-| Host | Establish a clear ncode-owned composition layer while evaluating inherited [`packages/agent`](../packages/agent) capabilities individually. |
-| Interface | Keep the reusable terminal primitives in [`packages/tui`](../packages/tui); ncode owns the interaction policy above them. |
-| Providers | Initially support Anthropic, OpenAI Codex subscription access, and local OpenAI-compatible endpoints. Retain normal API-key access where it shares those adapters. |
-| Authentication | Use direct PKCE OAuth and self-managed refresh for subscription access. Do not delegate the agent loop to ACP or a first-party CLI subprocess. |
+| Product shape | Fork Zot and implement the settled dispositions in the [capability decision register](inherited-capabilities.md) as reviewable changes. Implementation design and sequencing remain open where the register says so. |
+| Runtime | Keep and harden the provider-neutral types and tool loop in [`packages/core`](../packages/core) and [`packages/provider/provider.go`](../packages/provider/provider.go). |
+| Host | Establish one clear ncode-owned composition root while retaining sessions, tools, swarm, extensions, skills, and every headless mode. |
+| Interface | Fully replace the inherited interactive TUI and its UI integrations with Bubble Tea/Bubbles; retain the user-facing capabilities being rebuilt. |
+| Providers | Retain and harden every inherited provider, custom/local adapter, and authentication method. Anthropic, Codex, and local OpenAI-compatible contract work remains an early hardening priority, not a scope boundary. |
+| Authentication | Use direct PKCE OAuth and self-managed refresh for subscription access. Refresh and rotated-token persistence remain automatic. Do not delegate the agent loop to ACP or a first-party CLI subprocess. |
+| Identity and state | Use lowercase `ncode` with no Zot naming compatibility and no Zot state import, migration, or fallback path. |
 | Behavioral reference | Treat [oh-my-pi (OMP)](https://github.com/can1357/oh-my-pi) as the Anthropic protocol oracle. Port observed behavior and contracts, not TypeScript structure. |
-| Prompt ownership | ncode owns its system prompt, context assembly, tool policy, compaction policy, and multi-turn loop. Transport-required provider identity is a compatibility envelope, not the product prompt. |
-| Upstream | Watch [Zot upstream](https://github.com/patriceckhart/zot) for narrow core/TUI/security fixes; do not routinely merge its growing host layer. |
+| Prompt ownership | Start from the inherited system prompt baseline. ncode owns its later evolution, context assembly, tool policy, compaction policy, and multi-turn loop; transport-required provider identity remains a separate compatibility envelope. |
+| Upstream | Watch [Zot upstream](https://github.com/patriceckhart/zot) for narrow core, security, and relevant terminal fixes; do not routinely merge its growing host layer. |
 
 ## Goals and non-goals
 
 ### Goals
 
-- Ship a small, dependency-light Go coding agent with one understandable execution path.
+- Ship a dependency-light Go coding agent with one understandable composition path and one core model/tool loop.
 - Preserve a provider-neutral conversation, tool, event, usage, and stop-reason model.
-- Make Claude and Codex subscription access work directly, including token refresh and provider-required request shapes.
-- Make local OpenAI-compatible inference a first-class path rather than an afterthought.
+- Retain and harden all inherited providers and authentication methods, including direct Claude/Codex subscription access and custom/local OpenAI-compatible endpoints.
+- Preserve headless modes, sessions, tools, swarm, extensions, and skills while giving them explicit ncode-owned boundaries.
+- Replace the inherited interactive TUI and UI integrations with Bubble Tea without discarding the retained user capabilities.
 - Match current Anthropic behavior using reproducible contracts derived from OMP.
-- Preserve read, write, edit, and bash as baseline tools while evaluating the broader default tool surface.
-- Keep protocol risk visible to users and isolate volatile compatibility code.
+- Keep protocol and containment risk visible to users and isolate volatile compatibility code.
 - Make upstream intake selective and reviewable.
 
 ### Non-goals
 
-- Predetermine the final feature or provider set before evaluating inherited behavior and dependencies.
-- Treat inherited features as automatically retained or removed without an explicit decision; swarm and extensions are the first stated retention requirements.
+- Reopen settled capability dispositions during implementation; changes belong first in the [decision register](inherited-capabilities.md).
+- Build a Zot compatibility layer or any Zot state import, migration, or fallback path.
+- Claim that the inherited containment is a full OS sandbox or promise sandbox guarantees before the implementation is decided and verified.
 - Build an ACP client or use ACP as the model execution layer.
 - Shell out to Claude Code or Codex CLI to run the agent on ncode's behalf.
 - Reproduce a first-party CLI UI or claim provider endorsement.
@@ -45,9 +47,9 @@ ncode will be a **product-owned fork of Zot** whose inherited capabilities are e
 
 ## Why start from Zot
 
-At the fork point, Zot is MIT-licensed, dependency-light, and approximately 82k lines of Go. Its layers include core (about 4.7k lines), providers (about 17k), TUI (about 10.8k), and a substantial host layer (about 49k). The fork provides mature streaming, terminal, session, tool-loop, swarm, extension, and other host behavior that ncode can evaluate from a working baseline.
+At the fork point, Zot is MIT-licensed, dependency-light, and approximately 82k lines of Go. Its layers include core (about 4.7k lines), providers (about 17k), TUI (about 10.8k), and a substantial host layer (about 49k). The fork provides mature streaming, terminal, session, tool-loop, swarm, extension, and other host behavior that ncode inherited from a working baseline.
 
-Starting over would recreate low-level terminal and stream handling and discard capabilities that may belong in ncode. Forking preserves known-good mechanics while allowing ownership boundaries and product scope to be decided incrementally.
+Starting over would recreate low-level terminal and stream handling and discard retained capabilities. Forking preserves known-good mechanics while allowing ncode-owned boundaries and implementations to be introduced incrementally.
 
 The existing MIT license in [`LICENSE`](../LICENSE) remains applicable; preserve required notices when code is retained or redistributed.
 
@@ -82,31 +84,35 @@ packages/provider.Client
 Anthropic adapter   Codex Responses adapter   OpenAI-compatible local adapter
       |
       v
-HTTP/SSE wire protocols (never exposed to the TUI or core)
+HTTP/SSE wire protocols (never exposed to the UI or core)
 ```
 
-### Current ownership and evaluation status
+The three adapters shown are representative early hardening paths, not the complete retained provider set. Every inherited adapter remains in scope.
 
-This table is a starting inventory, not a final keep/remove list. No inherited capability is removed until it has been evaluated, an explicit decision is recorded, and focused regression tests protect the behavior ncode still needs.
+### Current ownership and settled disposition
 
-| Current path | Disposition | ncode responsibility |
+The [inherited capability decision register](inherited-capabilities.md) is authoritative for the full capability-by-capability disposition. This summary maps those settled choices onto the major ownership seams without repeating all 47 decisions. Detailed implementation design and sequencing remain open where noted.
+
+| Current path or capability | Disposition | ncode responsibility |
 |---|---|---|
-| [`packages/core`](../packages/core) | **Retain** | Provider-neutral transcript, tool loop, events, retries, compaction primitive, and session mechanics. Simplify only when behavior is covered. |
-| [`packages/provider/provider.go`](../packages/provider/provider.go) | **Retain and tighten** | Neutral message/content/request/client contract. Opaque replay metadata is allowed; provider wire types are not. |
-| [`packages/provider/anthropic.go`](../packages/provider/anthropic.go) | **Retain, then port behavior** | Anthropic Messages serialization, OAuth compatibility envelope, signed thinking replay, stream parsing, and Anthropic-only quirks. |
-| [`packages/provider/openai_codex.go`](../packages/provider/openai_codex.go) | **Retain** | ChatGPT Codex private Responses endpoint, account header, reasoning replay, and Codex stream translation. |
-| [`packages/provider/openai.go`](../packages/provider/openai.go), [`packages/provider/openai_responses.go`](../packages/provider/openai_responses.go), [`packages/provider/usermodels.go`](../packages/provider/usermodels.go) | **Retain and evaluate** | Preserve API-key OpenAI and configurable local OpenAI-compatible behavior; evaluate adjacent catalog capabilities individually. |
-| [`packages/provider/auth`](../packages/provider/auth) | **Retain and evaluate** | Preserve PKCE, loopback/manual callback, credential storage, refresh, and logout; add explicit risk UX for Claude and Codex while evaluating other auth paths separately. |
-| [`packages/tui`](../packages/tui) | **Retain** | Terminal input, layout, rendering, markdown, image, and theme primitives. Product dialogs and policy belong to the host. |
-| [`packages/agent/tools`](../packages/agent/tools) | **Retain and evaluate** | Preserve read, write, edit, bash, permissions, and their filesystem helpers as the baseline; evaluate the broader tool surface separately. |
-| [`packages/ignore`](../packages/ignore) | **Retain if required** | Gitignore-aware file behavior used by the retained tools. |
-| [`packages/agent/build.go`](../packages/agent/build.go) and interactive/session code | **Evaluate and reshape** | Establish a clear ncode composition root while preserving useful host behavior until replacement decisions are tested. |
-| [`packages/agent/swarm`](../packages/agent/swarm), [`packages/agent/extensions`](../packages/agent/extensions) | **Expected to retain** | Swarm and extensions are current ncode requirements; evaluate their boundaries and dependencies before reshaping them. |
-| Other modes and host capabilities under [`packages/agent`](../packages/agent) | **Undecided** | Review capabilities one by one. Document evidence and dependencies before choosing to retain, reshape, defer, or remove anything. |
-| Provider catalog and cloud adapters under [`packages/provider`](../packages/provider) | **Undecided beyond initial priorities** | Anthropic, Codex/OpenAI, and local-compatible paths are initial priorities; evaluate other adapters individually rather than deleting them as a group. |
-| [`cmd/zot`](../cmd/zot) | **Reshape late** | Keep the build working while product boundaries are established; switch product naming/module paths only after the baseline remains stable. |
+| [`packages/core`](../packages/core) | **Retain and harden** | Preserve the provider-neutral transcript, tool loop, events, retries, compaction, and session mechanics. Characterize current behavior before reshaping it. |
+| [`packages/provider/provider.go`](../packages/provider/provider.go) | **Retain and harden** | Preserve the neutral message/content/request/client contract. Opaque replay metadata is allowed; provider wire types are not. |
+| Provider adapters under [`packages/provider`](../packages/provider) | **Retain and harden** | Keep every inherited direct, cloud, gateway, vendor, custom, and local provider path. Initial hardening priorities do not limit retained scope. |
+| Model catalog and discovery under [`packages/provider`](../packages/provider) | **Reshape and extend** | Preserve built-in, cached, live-discovered, custom, and local model handling while making precedence, refresh behavior, and capability data explicit. |
+| [`packages/provider/anthropic.go`](../packages/provider/anthropic.go) | **Retain and harden** | Preserve Anthropic Messages and API-key behavior, then port verified OAuth compatibility, signed-thinking replay, streaming, and model quirks from pinned evidence. |
+| [`packages/provider/openai_codex.go`](../packages/provider/openai_codex.go) | **Retain and harden** | Preserve the private Responses route, account header, reasoning replay, and stream translation behind the neutral contract. |
+| [`packages/provider/auth`](../packages/provider/auth) | **Retain and harden** | Preserve every inherited authentication method. Subscription OAuth refresh and rotated-token persistence remain automatic; login, logout, and failure UX remain explicit. |
+| Inherited interactive TUI and UI integrations | **Replace implementation** | Fully replace the inherited TUI, editor, commands, dialogs, renderers, themes, images, and clipboard integrations with Bubble Tea/Bubbles while retaining their user-facing capabilities. |
+| Headless modes and sessions under [`packages/agent`](../packages/agent) | **Retain and harden** | Keep print, stream, JSON event, RPC, session persistence/resume/branching, and related management surfaces. |
+| [`packages/agent/tools`](../packages/agent/tools) and [`packages/ignore`](../packages/ignore) | **Retain and harden** | Preserve tools, permissions, and Gitignore-aware behavior. Keep sandbox capability, but do not choose or claim a full sandbox implementation until research settles it. |
+| [`packages/agent/build.go`](../packages/agent/build.go) and host callbacks | **Reshape** | Establish one ncode composition root and explicit event/middleware contracts after current behavior is protected. This is composition work, not a second core implementation. |
+| [`packages/agent/swarm`](../packages/agent/swarm) | **Retain and harden** | Keep durable swarm with shared repository/CWD as the default. Optional worktree isolation remains research and may become a general agent tool. |
+| [`packages/agent/extensions`](../packages/agent/extensions) and skills | **Retain and reshape** | Preserve extensions and skills across interactive and headless modes; evolve trust, protocol, metadata, and Bubble Tea integration explicitly. |
+| Telegram bridge | **Retain as-is; defer investment** | Keep the inherited implementation and defer further product investment. |
+| Zotfiles | **Remove** | Remove only Zotfiles while protecting the general tools, skills, permissions, and sessions they reuse. |
+| [`cmd/zot`](../cmd/zot), Zot naming, and Zot state | **Replace without compatibility** | Move to lowercase `ncode` naming with no Zot naming compatibility and no Zot state import, migration, or fallback. Keep each rename step buildable and reviewable. |
 
-Removal requires an explicit capability decision, no unresolved retained dependency, and passing replacement/regression contracts. Line count alone is never a removal criterion.
+Any future disposition change must update the canonical register first. Removal work must still prove that retained capabilities do not depend on the removed path.
 
 ## Provider-neutral contract
 
@@ -132,12 +138,14 @@ When a provider requires opaque data to be replayed, the neutral transcript may 
 
 ncode, not OMP, Jcode, Zot upstream, ACP, Claude Code, or Codex CLI, owns:
 
-1. the ncode system prompt and standing instructions;
+1. the system prompt and standing instructions;
 2. context-file discovery and ordering;
 3. the enabled tools and confirmation policy;
 4. transcript persistence and compaction policy;
 5. turn limits, retries, cancellation, and tool execution;
-6. all user-visible events and TUI behavior.
+6. all user-visible events and interactive behavior.
+
+The inherited system prompt is the initial ncode baseline. It already exists in the inherited composition, so establishing ncode ownership does not require a redundant prompt-extraction change; later prompt evolution should be evidence-driven and snapshot-tested.
 
 The core loop in [`packages/core/agent.go`](../packages/core/agent.go) remains the single model/tool loop. A provider adapter may prepend a transport-required identity block—for example, the Claude Code identity required by Anthropic OAuth—but that block must be assembled inside the adapter and must not replace, rewrite, or leak into ncode's product prompt.
 
@@ -153,7 +161,7 @@ Subscription login is direct OAuth 2.0 with PKCE:
 2. It opens the provider authorization URL using the public client identity and registered redirect shape of the first-party CLI.
 3. A fixed loopback callback receives the code; a manual/headless flow is used where supported.
 4. ncode exchanges the code itself and stores access token, refresh token, expiry, and only the provider metadata needed for inference.
-5. Before credential use, ncode refreshes an expired token with a safety margin and persists rotated refresh tokens.
+5. Before credential use, ncode automatically refreshes an expired token with a safety margin and automatically persists rotated refresh tokens; routine refresh does not prompt the user.
 6. Logout removes the complete provider credential record.
 7. The provider adapter sends the token directly to the provider; no first-party CLI process or ACP server is involved.
 
@@ -194,6 +202,10 @@ The current Zot adapter already has a minimal OAuth shape—bearer auth, Claude 
 - Make logout complete and make switching to an API key straightforward.
 - Keep protocol fingerprints and billing fields centralized so emergency removal is a small patch.
 - Never imply that a successful login means the integration is supported by Anthropic or OpenAI.
+
+### Configuration integrity
+
+Configuration is never silently repaired. Interactive mode must show the exact proposed change and ask before writing it. Print, stream, JSON, RPC, swarm-child, bot, and other noninteractive paths must exit with an actionable error and leave the configuration unchanged.
 
 ## Local OpenAI-compatible endpoints
 
@@ -316,88 +328,146 @@ The fork already distinguishes `origin` (`nlf/ncode`) from `upstream` (`patricec
 5. Update the source commit in fixture provenance and this roadmap if ownership boundaries change.
 6. Revisit prior scope decisions only with an explicit ncode requirement and updated evidence.
 
-Do not resolve long-lived divergence by merging upstream `main`. ncode intentionally diverges in host scope, prompts, provider set, and risk UX.
+Do not resolve long-lived divergence by merging upstream `main`. ncode intentionally diverges in host ownership, prompts, UI, identity, and risk UX.
 
 ## Staged execution plan
 
-### Stage 0 — Freeze the baseline
+These stages describe dependency and delivery order, not the chronology of discovery or documentation. Stage 2 capability evaluation was completed before Stage 1 implementation and remains satisfied.
+
+The first implementation work proceeds as ordered, separately reviewable units:
+
+1. **Characterize only the composition behavior at risk.** Audit existing tests first, then add the smallest missing evidence for retained behavior that the composition-root change can plausibly break. Existing tests count; this is not an exhaustive core test campaign or a second core implementation.
+2. **Establish one ncode composition root.** Move assembly behind one explicit config → credentials → provider → core → host path while the relevant existing and newly added characterization tests stay green.
+3. **Apply ncode identity in mechanical slices.** Rename binary, module/import, state, environment, and internal-protocol identity as a clean break before replacing the interactive UI.
+
+Keep characterization, composition, each identity slice, the Bubble Tea replacement, and provider hardening separate from one another. Each remains its own reviewable work unit rather than one cross-cutting change.
+
+### Stage 0 — Freeze and inventory the baseline
 
 - [x] Record the frozen Zot fork baseline commit: `82191b33a9d54993ce9c85988dc250421623b75b`.
-- [ ] Inventory imports, binary entry points, package sizes, and tests across inherited layers.
+- [x] Inventory inherited entry points, package composition, capabilities, dependency seams, and existing tests in [`inherited-capabilities.md`](inherited-capabilities.md).
+- [x] Record the inherited baseline validation evidence and explicit test gaps in that inventory.
+- [ ] Complete a package-size inventory across inherited layers.
 - [ ] Add the provider contract matrix and fixture provenance format.
-- [x] Use lowercase `ncode` as the canonical project spelling in all product-facing artifacts.
-- [ ] Confirm the state directory, binary/module rename sequence, and migration policy before renaming paths.
+- [x] Use lowercase `ncode` as the canonical product spelling.
+- [x] Set the identity policy: no Zot naming compatibility and no Zot state import, migration, or fallback.
+- [ ] Define the build-preserving binary/module/state-directory rename sequence.
 
-**Exit:** Current behavior is reproducible, the inherited capability inventory is complete, and no scope decision relies on an untested assumption.
+**Exit status:** Baseline anchoring and capability inventory are complete. Package-size evidence, provider contract fixtures/matrix, and rename sequencing remain before the full Stage 0 exit is satisfied.
 
-### Stage 1 — Establish the ncode composition root
+### Stage 1 — Characterize composition behavior at risk
 
-- [ ] Create one ncode composition path for config → credentials → provider → core → TUI.
-- [ ] Make ncode's prompt and context assembly explicit and snapshot-tested.
-- [ ] Preserve read/write/edit/bash and required permission/filesystem helpers while inventorying other tools separately.
-- [ ] Keep the existing command building throughout the transition.
+- [ ] Inventory existing tests across only the config → credentials → provider → core → host seams that Stage 3 will restructure.
+- [ ] Identify concrete retained behaviors the composition-root change can plausibly break and that existing tests would not detect.
+- [ ] Add the smallest focused fake-provider or headless fixture for each proven gap; do not add speculative coverage for untouched retry, cancellation, compaction, provider, extension, swarm, or session behavior.
+- [ ] Protect inherited prompt/tool attachment and session behavior only where their assembly will move and existing evidence is insufficient.
+- [ ] Keep the existing command building throughout characterization.
 
-**Exit:** A scripted fake provider can complete a multi-turn tool call through the TUI/print host while inherited capability boundaries remain understood and testable.
+**Exit:** Existing tests plus the smallest justified additions protect the composition behavior Stage 3 will move, with every new fixture tied to a documented evidence gap and the inherited command still buildable.
 
 ### Stage 2 — Evaluate inherited capabilities
 
-- [ ] Inventory each host mode, swarm, extensions, updater, remote-agent, skills, Zotfiles, and their dependency boundaries.
-- [ ] Inventory provider adapters and catalog behavior without assuming the final provider set.
-- [ ] For each capability, record a retain, reshape, defer, or remove decision with rationale and test evidence.
-- [ ] Keep any resulting changes capability-scoped and independently reviewable.
+- [x] Inventory host modes, sessions, tools, swarm, extensions, updater, Telegram, skills, Zotfiles, and their dependency boundaries.
+- [x] Inventory inherited provider adapters, authentication paths, and catalog behavior.
+- [x] Record a disposition, rationale, and constraint for every inherited capability.
+- [x] Publish the canonical register in [`inherited-capabilities.md`](inherited-capabilities.md).
 
-**Exit:** Every inherited capability has a documented disposition; swarm and extensions have supported ncode boundaries; any removal is justified independently and protected by regression tests.
+**Exit status:** Complete. The decision register settles every inherited capability disposition, including retained swarm/extensions boundaries and the isolated removal of Zotfiles. Implementation evidence is added capability by capability as work proceeds.
 
-### Stage 3 — Stabilize provider and local contracts
+### Stage 3 — Establish the ncode composition root
 
-- [ ] Lock the neutral `provider.Client` contract.
-- [ ] Add common adapter tests and local OpenAI-compatible fixtures.
+- [ ] Create one ncode composition path for config → credentials → provider → core → host without creating another core loop.
+- [ ] Preserve all retained tools and required permission/filesystem helpers.
+- [ ] Keep the inherited command building throughout this transition.
+- [ ] Keep the Stage 1 characterization and headless E2E fixtures green through the new composition path.
+
+**Exit:** The focused characterization fixtures pass through one ncode composition root, retained tools and helpers remain available, and the inherited command remains buildable.
+
+### Stage 4 — Apply ncode identity as a clean break
+
+- [ ] Execute the build-preserving rename sequence as mechanical, separately reviewable slices after the composition root and before the Bubble Tea replacement.
+- [ ] Rename the binary, Go module and imports, state directory, environment variables, and internal-protocol identifiers from Zot identity to lowercase `ncode` identity.
+- [ ] Provide no compatibility alias, compatibility import, migration, or fallback for the old Zot identity on any renamed surface.
+- [ ] Keep the command building after each slice and add tests proving Zot binary/module/import/state/environment/internal-protocol identity is not accepted or reused.
+
+**Exit:** The binary, module/import graph, state, environment, and internal protocols use only lowercase `ncode` identity, with no Zot compatibility alias/import, migration, or fallback.
+
+### Stage 5 — Replace the interactive UI with Bubble Tea
+
+- [ ] Replace the inherited interactive event loop, editor, commands, dialogs, renderers, themes, image, and clipboard integrations with Bubble Tea/Bubbles.
+- [ ] Preserve retained interactive capabilities, including sessions, tool confirmation, swarm, extensions, skills, login, models, and compaction.
+- [ ] Define explicit behavior for extension UI hooks and headless-mode equivalents.
+- [ ] Remove inherited TUI implementation only after focused replacement contracts pass.
+
+**Exit:** Bubble Tea fully owns the interactive experience, retained capabilities remain available, and headless modes continue to pass their independent contracts.
+
+### Stage 6 — Stabilize all-provider contracts
+
+- [ ] Lock the neutral `provider.Client` contract with a common scripted conversation suite.
+- [ ] Add adapter-family fixtures in reviewable increments for every retained provider path; do not prune providers because they are not an initial hardening priority.
+- [ ] Add local OpenAI-compatible chat-completions and unsupported-capability fixtures.
 - [ ] Verify API-key and local paths contain no subscription-only behavior.
-- [ ] Keep Codex encrypted-reasoning replay green while simplifying surrounding catalog code.
+- [ ] Keep Codex encrypted-reasoning replay green while hardening surrounding catalog code.
 
-**Exit:** Anthropic API-key, Codex, and a fake local OpenAI-compatible endpoint pass the same neutral conversation contract where capabilities overlap.
+**Exit:** Every retained adapter is represented in the provider contract matrix, with shared behavior tested uniformly and adapter-specific behavior tested separately. Anthropic API-key, Codex, and fake local paths provide the first complete vertical fixtures.
 
-### Stage 4 — Harden direct OAuth
+### Stage 7 — Harden direct OAuth
 
 - [ ] Make unofficial status and ToS/revocation risk explicit in login UX.
-- [ ] Test PKCE state/verifier, callbacks, manual flow, token permissions, refresh rotation, logout, and revoked grants.
+- [ ] Test PKCE state/verifier, callbacks, manual flow, token permissions, automatic refresh and rotated-token persistence, logout, and revoked grants.
 - [ ] Centralize volatile client/fingerprint/account metadata per provider.
 - [ ] Ensure API key remains the safe, straightforward alternative.
 
-**Exit:** OAuth can be enabled, refreshed, revoked, and completely removed without touching the agent loop or local provider path.
+**Exit:** OAuth refreshes and persists tokens automatically, can be revoked or completely removed without touching the agent loop, and leaves local/API-key paths isolated.
 
-### Stage 5 — Port Anthropic behavior from OMP
+### Stage 8 — Port Anthropic behavior from OMP
 
 Execute the ordered Anthropic roadmap above, one contract at a time.
 
 **Exit:** The pinned OMP behavior matrix is either implemented and tested or explicitly marked out of scope with rationale; signed-thinking replay and tool continuations pass.
 
-### Stage 6 — Productize and maintain
+### Stage 9 — Productize and maintain
 
-- [ ] Complete binary/module/state-directory branding with migration tests.
-- [ ] Document supported providers, risk policy, local endpoint setup, and troubleshooting.
+- [ ] Enforce configuration integrity: interactive repair is proposed and confirmed; noninteractive validation exits without mutation.
+- [ ] Replace inherited self-update integration with ncode release, asset, checksum, changelog, and configurable background-check behavior.
+- [ ] Document every retained provider, risk policy, local endpoint setup, sandbox/containment limits, and troubleshooting.
 - [ ] Add release checks that run unit, contract, race/static, and packaging validations selected for the repository.
 - [ ] Begin the upstream watch cadence and record compatibility incidents.
 
-**Exit:** A new user can install ncode, choose API key/unofficial OAuth/local inference, complete a tool-using task, resume safely, and understand the support boundaries.
+**Exit:** A new user can install and update ncode, choose any retained provider/auth path, complete a tool-using task in Bubble Tea or a headless mode, resume safely, and understand the support and containment boundaries.
 
 ## Final acceptance checklist
 
-### Architecture
+### Product and architecture
 
-- [ ] ncode has one product-owned prompt and one core model/tool loop.
-- [ ] Core and TUI contain no provider OAuth headers, endpoints, or account bootstrap logic.
-- [ ] Provider adapters contain all wire-specific behavior and expose normalized events.
-- [ ] Every inherited subsystem and provider has a documented, evidence-based disposition.
-- [ ] Read/write/edit/bash remain available while the default tool surface is decided explicitly.
+- [ ] ncode has one composition root, the inherited prompt as its explicit initial baseline, and one core model/tool loop.
+- [ ] Bubble Tea/Bubbles fully replaces the inherited interactive TUI and UI integrations while preserving the retained user capabilities.
+- [ ] Print, stream, JSON event, RPC, and management/headless interfaces remain available and independently tested; one-shot persistence is configurable, and RPC supports explicit ephemeral/persistent operation plus its optional token gate.
+- [ ] Core and UI code contain no provider OAuth headers, endpoints, or account bootstrap logic.
+- [ ] Provider adapters contain wire-specific behavior and expose normalized events.
+- [ ] Sessions, tools, skills, swarm, and extensions remain supported across their documented modes.
+- [ ] Zotfiles are removed without removing the general tools, skills, permissions, or sessions they reused.
+- [ ] Lowercase `ncode` binary, module/import, state, environment, and internal-protocol naming has no Zot compatibility alias/import, migration, or fallback path.
+
+### Configuration, safety, swarm, and extensions
+
+- [ ] Interactive config repair shows the exact proposal and writes only after confirmation.
+- [ ] Noninteractive config validation exits with the config unchanged.
+- [ ] Read/write/edit/bash and Gitignore-aware behavior remain available; retained additional tools are changed only through explicit decisions.
+- [ ] Sandbox capability remains available, but documentation and UX claim only guarantees proven by the selected implementation.
+- [ ] Shared repository/CWD remains the swarm default; optional worktree isolation is not required for acceptance and is not presented as automatic safety.
+- [ ] Durable swarm state, model-initiated spawning controls, extensions, subprocess trust disclosure, and skills remain supported.
+- [ ] Telegram remains operational at its inherited support level without implying new investment.
 
 ### Authentication and providers
 
-- [ ] Claude and Codex OAuth are direct PKCE flows with self-managed refresh and complete logout.
+- [ ] Every inherited provider and authentication method remains available and has appropriate focused contract coverage.
+- [ ] Claude and Codex OAuth are direct PKCE flows with automatic refresh, automatic rotated-token persistence, and complete logout.
 - [ ] Login visibly states unofficial status, possible ToS conflict, and revocation/account risk.
 - [ ] API-key operation remains available and does not inherit OAuth compatibility behavior.
 - [ ] Codex uses the private Responses route and required account identity without leaking it into transcripts.
-- [ ] Local OpenAI-compatible endpoints work with explicit model/capability configuration and receive no hosted-provider identity.
+- [ ] Custom and local OpenAI-compatible endpoints work with explicit model/capability configuration and receive no hosted-provider identity.
+- [ ] Model catalog/discovery precedence and refresh behavior are explicit, and usage accounting surfaces quota, rate-limit, or subscription-limit data where providers expose it.
 
 ### Anthropic parity
 
@@ -410,10 +480,11 @@ Execute the ordered Anthropic roadmap above, one contract at a time.
 
 ### Quality and maintenance
 
-- [ ] Pure, golden, fake-HTTP, common-provider, negative, and interruption tests pass offline.
+- [ ] Existing coverage plus the smallest change-justified characterization fixtures pass; production-shaped headless E2E, pure, golden, fake-HTTP, common-provider, negative, and interruption tests are added and run when their corresponding work changes those behaviors.
 - [ ] Live tests are opt-in and no secret or personal data exists in repository fixtures/logs.
 - [ ] Every retained upstream change is reviewed by capability and covered by focused tests.
 - [ ] Broad upstream merges are not part of the maintenance process.
+- [ ] Self-update uses only ncode releases, assets, checksums, and changelogs, with configurable background checks.
 - [ ] Documentation identifies the baseline Zot commit, pinned OMP commit, and any Jcode commit actually used as evidence.
 
 ## Source map
@@ -425,9 +496,9 @@ Execute the ordered Anthropic roadmap above, one contract at a time.
 | Zot Anthropic baseline | [`packages/provider/anthropic.go`](../packages/provider/anthropic.go) |
 | Zot Codex baseline | [`packages/provider/openai_codex.go`](../packages/provider/openai_codex.go) |
 | OAuth and refresh baseline | [`packages/provider/auth/oauth.go`](../packages/provider/auth/oauth.go), [`packages/provider/auth/manager.go`](../packages/provider/auth/manager.go) |
-| Host composition to evaluate and reshape | [`packages/agent/build.go`](../packages/agent/build.go) |
+| Inherited host composition to reshape | [`packages/agent/build.go`](../packages/agent/build.go) |
 | Upstream Zot | [github.com/patriceckhart/zot](https://github.com/patriceckhart/zot) |
 | Anthropic behavioral oracle | [github.com/can1357/oh-my-pi](https://github.com/can1357/oh-my-pi) |
 | Corroborating direct-provider implementation | [github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
 
-This document is the decision record for scope and sequencing. Implementation plans may add detail, but changing provider ownership, the OMP-oracle policy, the unofficial-OAuth warning, or the retained/removed layer boundary requires updating this document first.
+This document records architecture and sequencing. The [inherited capability decision register](inherited-capabilities.md) is authoritative for capability disposition; change that register first when retained, replaced, deferred, or removed scope changes. Changes to provider ownership, the OMP-oracle policy, or the unofficial-OAuth warning also require this architecture document to be updated.
