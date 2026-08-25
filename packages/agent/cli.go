@@ -383,15 +383,15 @@ func runPrintMode(ctx context.Context, args Args, version string) error {
 	if args.NoYolo {
 		fmt.Fprintln(os.Stderr, "warning: --no-yolo has no effect in print mode (no interactive prompt available); tools will run without confirmation")
 	}
-	r, err := Resolve(args, true)
+	composition, err := composeHeadlessAgent(ctx, args, version)
 	if err != nil {
 		return err
 	}
-	extMgr, stopExt := setupNonInteractiveExtensions(ctx, args, &r, version)
-	defer stopExt()
+	defer composition.Close()
 
-	ag := r.NewAgent()
-	wireNonInteractiveAgentExtHooks(ctx, ag, extMgr)
+	r := composition.resolved
+	ag := composition.agent
+	extMgr := composition.extMgr
 	sess, _ := openOrCreateSession(args, r, ag, version)
 	defer sess.Close()
 
@@ -423,15 +423,15 @@ func runStreamMode(ctx context.Context, args Args, version string) error {
 	if args.NoYolo {
 		fmt.Fprintln(os.Stderr, "warning: --no-yolo has no effect in stream mode (no interactive prompt available); tools will run without confirmation")
 	}
-	r, err := Resolve(args, true)
+	composition, err := composeHeadlessAgent(ctx, args, version)
 	if err != nil {
 		return err
 	}
-	extMgr, stopExt := setupNonInteractiveExtensions(ctx, args, &r, version)
-	defer stopExt()
+	defer composition.Close()
 
-	ag := r.NewAgent()
-	wireNonInteractiveAgentExtHooks(ctx, ag, extMgr)
+	r := composition.resolved
+	ag := composition.agent
+	extMgr := composition.extMgr
 	sess, _ := openOrCreateSession(args, r, ag, version)
 	defer sess.Close()
 
@@ -502,15 +502,15 @@ func runJSONMode(ctx context.Context, args Args, version string) error {
 	if args.NoYolo {
 		fmt.Fprintln(os.Stderr, "warning: --no-yolo has no effect in json mode (no interactive prompt available); tools will run without confirmation")
 	}
-	r, err := Resolve(args, true)
+	composition, err := composeHeadlessAgent(ctx, args, version)
 	if err != nil {
 		return err
 	}
-	extMgr, stopExt := setupNonInteractiveExtensions(ctx, args, &r, version)
-	defer stopExt()
+	defer composition.Close()
 
-	ag := r.NewAgent()
-	wireNonInteractiveAgentExtHooks(ctx, ag, extMgr)
+	r := composition.resolved
+	ag := composition.agent
+	extMgr := composition.extMgr
 	sess, _ := openOrCreateSession(args, r, ag, version)
 	defer sess.Close()
 
