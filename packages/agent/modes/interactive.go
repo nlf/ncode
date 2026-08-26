@@ -170,12 +170,12 @@ type InteractiveConfig struct {
 	// picker to only show reachable models.
 	LoggedInProviders func() []string
 
-	// ZotHome is zot's global state directory, used by authentication,
+	// NcodeHome is ncode's global state directory, used by authentication,
 	// themes, extensions, and other shared configuration.
-	ZotHome string
+	NcodeHome string
 
 	// SessionsRoot is the root passed to core session operations.
-	// Empty falls back to ZotHome for embedders and tests.
+	// Empty falls back to NcodeHome for embedders and tests.
 	SessionsRoot string
 
 	// Version is the binary's current version (from main.version).
@@ -734,7 +734,7 @@ func (i *Interactive) Run(ctx context.Context) error {
 	// want to dismiss it (e.g. to check /help or /exit first).
 	if i.agent == nil {
 		i.statusErr = "not logged in. pick a login method below or press esc to dismiss."
-		i.dialog.Open(i.cfg.ZotHome)
+		i.dialog.Open(i.cfg.NcodeHome)
 	}
 
 	// Input goroutine. Buffered generously so a drag-drop that the
@@ -1117,7 +1117,7 @@ func (i *Interactive) sessionsRoot() string {
 	if i.cfg.SessionsRoot != "" {
 		return i.cfg.SessionsRoot
 	}
-	return i.cfg.ZotHome
+	return i.cfg.NcodeHome
 }
 
 // lastCols returns the current terminal width in columns.
@@ -3332,7 +3332,7 @@ func (i *Interactive) openSettingsDialog() {
 	if themeName == "" {
 		themeName = "auto"
 	}
-	if themeName != "auto" && !tui.ThemeExists(i.cfg.ZotHome, themeName) {
+	if themeName != "auto" && !tui.ThemeExists(i.cfg.NcodeHome, themeName) {
 		themeName = "auto"
 		i.cfg.ThemeName = ""
 		if i.cfg.SettingsStore != nil {
@@ -3342,7 +3342,7 @@ func (i *Interactive) openSettingsDialog() {
 	}
 	themeOptions := []settingsOption{}
 	themeChoice := 0
-	availableThemes := tui.AvailableThemes(i.cfg.ZotHome)
+	availableThemes := tui.AvailableThemes(i.cfg.NcodeHome)
 	if i.cfg.ExtensionThemes != nil {
 		availableThemes = append(availableThemes, i.cfg.ExtensionThemes()...)
 	}
@@ -3958,13 +3958,13 @@ func (i *Interactive) applyThemeNow(name string) {
 	if tui.IsLightTheme(i.cfg.Theme) {
 		detected = tui.Light
 	}
-	th, applied, err := tui.LoadThemeFromHome(i.cfg.ZotHome, name, detected)
+	th, applied, err := tui.LoadThemeFromHome(i.cfg.NcodeHome, name, detected)
 	if err != nil {
 		if i.cfg.SettingsStore != nil {
 			_ = i.cfg.SettingsStore.SetTheme("auto")
 		}
 		i.cfg.ThemeName = ""
-		th, applied, _ = tui.LoadThemeFromHome(i.cfg.ZotHome, "auto", detected)
+		th, applied, _ = tui.LoadThemeFromHome(i.cfg.NcodeHome, "auto", detected)
 		i.mu.Lock()
 		i.statusErr = "theme missing; reset to default"
 		i.mu.Unlock()
@@ -4310,7 +4310,7 @@ func (i *Interactive) runSlash(ctx context.Context, cmd string) (done bool) {
 		i.scrollOffset = 0
 		i.mu.Unlock()
 	case "/login":
-		i.dialog.Open(i.cfg.ZotHome)
+		i.dialog.Open(i.cfg.NcodeHome)
 	case "/logout":
 		if len(parts) >= 2 {
 			// Explicit target: /logout anthropic | openai | all
@@ -6149,7 +6149,7 @@ func (i *Interactive) openTelegramDialog() {
 // bridge state. Returns empty when no bot.json exists so the
 // caller can show a helpful status line instead of an empty menu.
 func (i *Interactive) telegramMenuItems() []telegramItem {
-	cfg, err := telegram.LoadConfig(i.cfg.ZotHome)
+	cfg, err := telegram.LoadConfig(i.cfg.NcodeHome)
 	if err != nil || cfg.BotToken == "" {
 		return nil
 	}
@@ -6203,7 +6203,7 @@ func (i *Interactive) telegramConnect() {
 		i.invalidate()
 		return
 	}
-	cfg, err := telegram.LoadConfig(i.cfg.ZotHome)
+	cfg, err := telegram.LoadConfig(i.cfg.NcodeHome)
 	if err != nil {
 		i.mu.Lock()
 		i.statusErr = "telegram: " + err.Error()
@@ -6222,7 +6222,7 @@ func (i *Interactive) telegramConnect() {
 	// the same bot. Two concurrent long-poll consumers race each
 	// update and one always loses, so DMs get half-delivered. The
 	// user can `zot telegram-bot stop` first, then /telegram connect.
-	if pid, alive, _ := telegram.IsRunning(i.cfg.ZotHome); alive && pid > 0 {
+	if pid, alive, _ := telegram.IsRunning(i.cfg.NcodeHome); alive && pid > 0 {
 		i.mu.Lock()
 		i.statusErr = fmt.Sprintf("telegram: bot daemon already running (pid %d). stop it with `zot telegram-bot stop` first.", pid)
 		i.mu.Unlock()
@@ -6233,7 +6233,7 @@ func (i *Interactive) telegramConnect() {
 		Client: telegram.NewClient(cfg.BotToken),
 		Config: cfg,
 		Save: func(next telegram.Config) error {
-			return telegram.SaveConfig(i.cfg.ZotHome, next)
+			return telegram.SaveConfig(i.cfg.NcodeHome, next)
 		},
 		Host: &telegramHost{iv: i},
 	}
@@ -6539,10 +6539,10 @@ func (i *Interactive) telegramStatus() {
 		} else {
 			msg += " - awaiting pairing"
 		}
-	} else if pid, alive, _ := telegram.IsRunning(i.cfg.ZotHome); alive && pid > 0 {
+	} else if pid, alive, _ := telegram.IsRunning(i.cfg.NcodeHome); alive && pid > 0 {
 		msg = fmt.Sprintf("telegram: background daemon running (pid %d) - /telegram connect won't work until you stop it", pid)
 	} else {
-		cfg, _ := telegram.LoadConfig(i.cfg.ZotHome)
+		cfg, _ := telegram.LoadConfig(i.cfg.NcodeHome)
 		if cfg.BotToken == "" {
 			msg = "telegram: not configured. run `zot telegram-bot setup` first."
 		} else {

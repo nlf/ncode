@@ -1,18 +1,18 @@
 # Apply progress: clean-break-ncode-identity
 
-Updated: 2026-08-26T16:47:59Z
+Updated: 2026-08-26T18:23:48Z
 
 ## Attempt summary
 
-- **Status:** WU 1 is merged and WU 2 is complete; the broader change remains in progress, with WU 3 next and not started.
-- **Assigned boundary:** WU 2 — Move the canonical module and import graph atomically — complete; WU 3 is the next boundary.
+- **Status:** WU 1 is merged and WU 2–WU 3 are complete; the broader change remains in progress, with WU 4 next and not started.
+- **Assigned boundary:** WU 3 — Rename Go product symbols and package comments — complete; WU 4 is the next boundary.
 - **Delivery:** WU 2–WU 12 remain on the single long-lived branch `feat/clean-break-ncode-identity-02`. Preserve each WU as an independently revertible commit, push checkpoints as appropriate, create no intermediate PRs, and open one final PR to `main` linked to issue #1 with exactly `type:breaking-change`.
-- **Review budget:** WU 2 implementation scope remains 569 changed lines (281 additions + 288 deletions) across 164 files under its approved atomic `size:exception`. The user also explicitly accepts the combined final-PR size exception because they are not reviewing intermediate PRs and see no material benefit in PR overhead.
-- **Commits/branches/PRs:** WU 2 apply created no commit, push, or PR, as instructed at the time. Subsequent parent lifecycle must preserve WU 2 and each later WU as separate commits on `feat/clean-break-ncode-identity-02`; no intermediate PRs are to be created.
-- **Verification:** WU 2 root `go mod tidy`, `go list ./...`, `go test ./...`, and `make test` passed. Both nested modules passed tidy and tests through a transient untracked local-root validation overlay; tracked modules contain no `replace`. Focused verification and `make test` remain required before beginning each next WU.
+- **Review budget:** the prior correction was exactly 43 changed lines relative to the reset candidate (22 additions + 21 deletions across 5 files), below its authorized 120-line maximum. The cumulative WU3-final-comments attempt stayed within its separate 100-line maximum; exact attempt and worktree statistics are recorded in the WU 3 evidence below.
+- **Commits/branches/PRs:** WU 3 apply created no commit, push, or PR. Parent lifecycle must preserve WU 3 and each later WU as separate commits on `feat/clean-break-ncode-identity-02`; no intermediate PRs are to be created.
+- **Verification:** WU 3 baseline, post-rename, and corrective comment-only REFACTOR rounds include focused and full package tests, `go vet ./...`, a comprehensive tracked-Go comment inventory, architecture-seam inspection, `git diff --check`, and `make test`, all passing. The authoritative OpenSpec status and parent continuation keep WU 4 unstarted.
 - **Review/gates:** clone-local bounded review remains disabled. Strict TDD, native SDD attempt authority, issue linkage, verification, CI, the final PR, and final merge gates remain.
 - **Delivery decision timing:** this single-feature-branch/final-PR decision was made after WU 2 apply; it changes delivery only and does not alter WU 2 evidence or implementation statistics.
-- **Opaque attempt token consumed:** `sha256:52e97c3da60f2abf31baffbceced281078a957b812ef62639342c8779f4f9613`.
+- **Opaque correction attempts consumed:** prior `sha256:e9bbdf8ae822620cf981a130054fc26a9d7a644b54b16356c1d8da5ea9c5f1a2`; final parser-comment attempt `sha256:39875b93e6f8475e355d832717e5de698aff782c10303674aaf27e5c4147cffa`. The reset-candidate remediation binding matched `sha256:cba34272f556f3830479f8e98f2da5d22939bea1de89f35388632bedacd84539`.
 
 ## Structured status consumed/produced
 
@@ -29,8 +29,8 @@ artifacts:
   applyProgress: done
 taskProgress:
   total: 44
-  complete: 7
-  remaining: 37
+  complete: 10
+  remaining: 34
 deferredParentActions:
   total: 2
   complete: 2
@@ -42,11 +42,11 @@ actionContext:
   allowedEditRoots:
     - /Users/nlf/Projects/nlf/ncode
   warnings: []
-workUnit: WU2-complete
-nextWorkUnit: WU3
+workUnit: WU3-complete
+nextWorkUnit: WU4
 nextWorkUnitStarted: false
-maxChangedLines: 1000
-sizeException: approved-for-WU2-only
+correctionLineBudget: { max: 100, actual: 70, cumulativeWorktreeChangedLines: 709 }
+sizeException: approved-combined-final-pr
 deliveryStrategy: single-long-lived-feature-branch
 deliveryBranch: feat/clean-break-ncode-identity-02
 workUnitCommits: independently-revertible
@@ -66,11 +66,11 @@ retainedGates:
   - make-test-before-next-work-unit
   - ci
   - final-merge
-nextRecommended: parent-lifecycle-then-WU3
+nextRecommended: parent-lifecycle
 isNonAuthoritative: false
 ```
 
-The active change was explicitly selected by the parent and confirmed in the `both` store through complete OpenSpec artifacts plus Engram observations 114, 115, and 117. No malformed task ownership markers were found.
+The active change was explicitly selected by the parent and confirmed from the complete authoritative OpenSpec artifacts under safe repo-local edit roots. Native `gentle-ai` status was unavailable, so the shape-compatible status above was produced from the installed status contract. No malformed task ownership markers were found.
 
 ## Completed implementation tasks and persisted checkboxes
 
@@ -406,11 +406,51 @@ Two initial REFACTOR search attempts used ineffective `rg` glob exclusions and s
 - `tasks.md` was admitted early to the exact provenance manifest because its checked characterization/audit commands must retain legacy literals; the final WU12 line review remains unchecked and deferred.
 - No live providers or credentials were used.
 
+## WU 3 apply evidence
+- [x] Characterization, symbol/comment rename, and post-rename verification remain persisted at `tasks.md:85-87`; the surgical correction preserved every task checkbox and WU3-complete/WU4-next marker.
+- The authorized corrections cumulatively reworded 20 stale WU3 comments: the prior eight at `sdk.go:94`, `provider.go:70`, `skills.go:57,166,195`, `builtin.go:10`, and `session.go:300,608`, plus the corrective 12 Zot-bearing lines in `ignore/gitignore.go`, `provider/{llamacpp,reasoning}.go`, `tui/render.go`, `agent/build.go`, and `core/session.go`. No behavior, executable, UI, state, environment, path, protocol, task checkbox, or docs literal changed.
+### TDD Cycle Evidence
+
+| Task | Layer | Safety Net / RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|
+| WU3 characterize | Approval/structural | Baseline focused package tests passed; no RED was manufactured for the mechanical rename. | N/A | 190 symbol/local occurrences were classified against later work-unit boundaries. | No edits during characterization. |
+| WU3 rename | Structural/API | Existing tests were the approval safety net. | Five symbol/local groups were renamed; focused tests passed. | Uncached direct-package consumers passed. | Go formatting, package docs, and inherited-parser comments were cleaned. |
+| WU3 comment corrections | REFACTOR/remediation | Prior core, SDK, skills, provider, and full WU3 package safety nets were green. | N/A; these are comment-only REFACTOR corrections, no behavior changed, and no RED was manufactured. | All 20 corrected comments use lowercase `ncode` or neutral history and contain zero case-insensitive `zot` matches. | Focused package tests, `go vet ./...`, `make test`, comprehensive comment inventory, and `git diff --check` passed. |
+
+### Exact verification and searches
+
+- `go test ./packages/agent/sdk ./packages/agent/skills ./packages/provider -count=1` and `go test ./packages/agent/... ./packages/core/... ./packages/provider/... ./packages/tui/... -count=1` before and after correction — PASS.
+- `go test -count=1 ./packages/agent ./packages/agent/ext ./packages/agent/extensions ./packages/agent/modes ./packages/agent/modes/telegram ./packages/agent/sdk ./packages/agent/skills ./packages/agent/tools ./packages/core ./packages/provider ./packages/provider/auth ./packages/tui` — PASS.
+- `go vet ./...`; `make test` (`go test -race ./...`); `git diff --check` — PASS; no live providers or credentials were used.
+- Exact-line scan over `sdk.go:94`, `provider.go:70`, `skills.go:57,166,195`, `builtin.go:10`, and `session.go:300,608` — six lowercase `ncode` matches, two neutral historical comments, and zero case-insensitive `zot` matches; stale-phrase searches include the two removed parser phrases and produce zero matches.
+- `rg -n --glob '*.go' '(ZotHome|ZotDocsDir|ZotVersion|\bzotHome\b|\bzotVersion\b)' .` and the active-Go package-declaration scan for Zot product wording — zero matches; these remain the WU3 symbol/package gates.
+- Comprehensive inventory scanned all 350 tracked Go files and found 273 remaining Zot-bearing line comments after correction; every match is classified below, with zero remaining WU3-owned package/exported/product/parser blockers.
+- The WU3 symbol gate remains zero-match; `NcodeVersion` intentionally retains `json:"zot_version"` until WU8.
+
+### Final comprehensive-comment corrective REFACTOR
+
+- Attempt `sha256:39875b93e6f8475e355d832717e5de698aff782c10303674aaf27e5c4147cffa` (`WU3-final-comments`) received one corrective rerun. It changed comments only in the six requested Go files plus the cumulative progress artifact; tasks/checkmarks stayed byte-for-byte unchanged and WU4 did not start.
+- Strict TDD disposition: comment-only REFACTOR with existing behavior preserved; no RED was manufactured, no tests were added, and the prior green safety net remained the approval baseline.
+- WU4 command/build (15): `cmd/zot/main.go:1,15,45`; `packages/agent/botcmd.go:31,73,113,114,279,314,367`; `packages/agent/cli.go:210,216,740,1012`; `packages/tui/clipboard_text_linux.go:11`.
+- WU5 state/path (42): `examples/extensions/guard/main.go:18`; `examples/extensions/hello/main.go:9`; `examples/extensions/mcp-bridge/config.go:6,7`; `examples/extensions/mcp-bridge/main.go:8,9`; `examples/extensions/weather/main.go:13`; `packages/agent/args.go:83,89`; `packages/agent/build.go:623,675,694`; `packages/agent/cli.go:1332`; `packages/agent/config.go:123`; `packages/agent/extcmd.go:463`; `packages/agent/extupdate.go:16`; `packages/agent/extupdate_test.go:69,98`; `packages/agent/modelsync.go:37`; `packages/agent/modes/interactive.go:6716`; `packages/agent/sdk/sdk.go:38`; `packages/agent/skills/skills.go:15,16`; `packages/agent/swarm/runner.go:51,134`; `packages/agent/swarm/socketpath.go:32`; `packages/agent/systemprompt.go:49`; `packages/agent/update.go:39`; `packages/core/session_portable.go:20,25,27,67,151,571`; `packages/core/session_portable_test.go:86,100`; `packages/provider/catalog_builtin.go:9`; `packages/provider/usermodels.go:12`; `packages/tui/theme_loader.go:14,25,175,261`.
+- WU6 env (26): `packages/agent/build.go:403`; `packages/agent/build_test.go:296`; `packages/agent/config.go:36,42,154,172`; `packages/agent/modes/interactive.go:89,94`; `packages/agent/rpc.go:41`; `packages/agent/swarm/swarm.go:220`; `packages/agent/swarm_agent.go:28`; `packages/provider/anthropic.go:535`; `packages/tui/image.go:31,34,35,36,37,38,61,80,244`; `packages/tui/render.go:34,336`; `packages/tui/view.go:2219,2225,2251`.
+- WU7 RPC (7): `examples/rpc/go/main.go:1`; `packages/agent/cli.go:234`; `packages/agent/modes/json.go:38`; `packages/agent/rpc.go:177,185`; `packages/agent/sdk/sdk.go:22`; `packages/agent/sdk/types.go:13`.
+- WU8 protocol/SDK/examples (49): `examples/extensions/approve/main.go:19,21`; `examples/extensions/guard/main.go:19`; `examples/extensions/hello/main.go:1`; `examples/extensions/mcp-bridge/bridge.go:1,3,8,51,58,74,85,86,101,411,452,464,495,526`; `examples/extensions/mcp-bridge/main.go:1,5,33,50,108`; `examples/extensions/mcp-bridge/server.go:194`; `examples/extensions/secret/main.go:23,25`; `examples/extensions/weather/main.go:14`; `examples/sdk/main.go:1,2`; `packages/agent/extcmd.go:20,510,560`; `packages/agent/extcmd_test.go:13`; `packages/agent/extensions/manager.go:36,50,55,140,271,312,313,452,482,950,1026,1264`; `packages/agent/extensions/proc_unix.go:10,14,15`; `packages/agent/skills/skills_test.go:76`.
+- WU9 runtime/swarm/temp/provider (59): `packages/agent/build.go:476,485`; `packages/agent/build_test.go:133`; `packages/agent/cli.go:1113,1276`; `packages/agent/modes/swarm_dialog.go:120,123`; `packages/agent/swarm/agent.go:24,29,55`; `packages/agent/swarm/event_test.go:83`; `packages/agent/swarm/inbox.go:17,158`; `packages/agent/swarm/inbox_test.go:108`; `packages/agent/swarm/persist.go:8,52,316,340`; `packages/agent/swarm/persist_test.go:19,66,778,822`; `packages/agent/swarm/runner.go:17,19,21,34,40,61`; `packages/agent/swarm/runner_test.go:23`; `packages/agent/swarm/socketpath.go:113`; `packages/agent/swarm/swarm.go:57,62,143,258`; `packages/agent/swarm/swarm_test.go:66`; `packages/agent/swarm/testdata/cmd/stubchild/main.go:2,17`; `packages/agent/swarm_agent.go:20,78,235`; `packages/agent/swarm_agent_test.go:19`; `packages/provider/amazon_bedrock.go:610`; `packages/provider/anthropic_image.go:20`; `packages/provider/auth/oauth.go:23,81`; `packages/provider/extra_models.go:6`; `packages/provider/extra_providers.go:337`; `packages/provider/gemini.go:28,57,409`; `packages/provider/gemini_test.go:540`; `packages/provider/github_copilot.go:8,22`; `packages/provider/models.go:63`; `packages/provider/openai.go:257,342`; `packages/provider/openai_codex.go:24,78,405`.
+- WU10 release/updater (9): `packages/agent/extupdate.go:199`; `packages/agent/modes/changelog_dialog.go:11`; `packages/agent/update.go:18`; `packages/agent/updatecmd.go:19,34,110,205,329,389`.
+- WU11 UI/help/examples/prose (65): `packages/agent/args.go:78,319`; `packages/agent/build.go:380,693`; `packages/agent/config.go:50,192`; `packages/agent/modelsync.go:51,52,84`; `packages/agent/modes/file_suggest.go:66,132`; `packages/agent/modes/interactive.go:127,150,151,200,671,684,686,1044,1369,1735,2375,3794,4405,5644,5722,6224`; `packages/agent/modes/telegram/bridge.go:40,56,59,164,165,167,171,186`; `packages/agent/modes/telegram/daemon.go:14`; `packages/agent/modes/welcome.go:6,9,10`; `packages/agent/systemprompt.go:37`; `packages/core/session_portable.go:157`; `packages/provider/auth/assets/assets.go:12`; `packages/provider/auth/callback.go:126,128,182`; `packages/tui/highlight.go:123`; `packages/tui/image.go:76`; `packages/tui/render.go:65,67,448,504`; `packages/tui/theme.go:9,36,218,237,278,284`; `packages/tui/view.go:196,404,447,740,866,1757,2497,2532`.
+- Dedicated legacy rejection fixture (1): `packages/agent/legacy_zotfile_absence_test.go:9`.
+- Required verification passed exactly: `go test ./packages/agent/... ./packages/core/... ./packages/provider/... ./packages/tui/... ./packages/ignore/... -count=1`; `go vet ./...`; `make test`; `git diff --check`; and the tracked-Go `git grep` inventory above.
+- Exact cumulative attempt scope: 7 files, 43 additions + 27 deletions = **70 changed lines**, rising by 36 from the prior 34-line checkpoint and remaining below the 100-line maximum (`apply-progress.md` 29+13; `build.go` 2+2; `session.go` 3+3; `gitignore.go` 1+1; `llamacpp.go` 1+1; `reasoning.go` 6+6; `render.go` 1+1). Updated cumulative worktree scope: 51 files, 375 additions + 334 deletions = **709 changed lines**.
+
+### Scope and deviations
+
+- Prior surgical correction scope: 5 files, 22 additions + 21 deletions = **43 changed lines** relative to reset candidate `sha256:cba34272f556f3830479f8e98f2da5d22939bea1de89f35388632bedacd84539`. Final parser-comment attempt statistics and updated cumulative scope are recorded after its exact verification evidence below.
+- `NcodeVersion` intentionally preserves `json:"zot_version"`; current executable/UI and state/env/path behavior is unchanged; WU4 was not implemented.
+- `ExtensionToolSource`, SDK-to-agent direction, and `Resolve` → `Resolved.NewClient` → `Resolved.NewAgent` remain intact; no commit, push, PR, branch switch, or review occurred.
+
 ## Remaining implementation tasks (exact unchecked lines)
 
-- [ ] Characterize the mechanical symbol surface without manufacturing RED by recording focused `go test` results for `./packages/agent/... ./packages/core/... ./packages/provider/... ./packages/tui/...` and locating `ZotHome`, `ZotDocsDir`, `ZotVersion`, `zotHome`, `zotVersion`, and package/product comments in `packages/agent/{config,build,cli,extensions,ext,extproto,skills,swarm,sdk}`, `packages/{core,provider,tui}`, and `docs.go`. <!-- sdd-owner: implementation -->
-- [ ] Rename the symbol groups to `NcodeHome`, `NcodeDocsDir`, `NcodeVersion`, and ncode local identifiers at their declarations and all callers; reword active package comments and inherited-parser comments to lowercase ncode or neutral historical wording, preserving exported API shape except the intentional product-symbol rename. <!-- sdd-owner: implementation -->
-- [ ] Run post-move evidence: focused package tests, `go vet ./...`, `make test`, and forbidden-symbol searches for `ZotHome|ZotDocsDir|ZotVersion` outside exact provenance/soon-to-be-dedicated rejection fixtures; inspect imports to preserve the `ExtensionToolSource` and SDK/agent cycle seams. <!-- sdd-owner: implementation -->
 - [ ] Characterize the mechanical command/build surface without manufacturing RED: record `make build`, `go build -o /tmp/zot ./cmd/zot`, command help/version output, `Makefile` binary targets, `cmd/zot/{main.go,main_test.go}`, and `docs.go` embed references before the move. <!-- sdd-owner: implementation -->
 - [ ] Move `cmd/zot/{main.go,main_test.go}` to `cmd/ncode/`, update `Makefile` and command/test references to `./cmd/ncode` and `bin/ncode`, and rename command/product help/version/error literals to lowercase ncode; leave no `cmd/zot`, `bin/zot`, dispatch branch, or alias target. <!-- sdd-owner: implementation -->
 - [ ] Run post-move evidence: `go build -o /tmp/ncode ./cmd/ncode`, isolated-`GOBIN` `go install github.com/nlf/ncode/cmd/ncode`, `make build`, command help/version tests, `make test`, and searches proving `/tmp/zot`, `cmd/zot`, and `bin/zot` are absent from active build inputs. <!-- sdd-owner: implementation -->
@@ -448,11 +488,11 @@ Two initial REFACTOR search attempts used ineffective `rg` glob exclusions and s
 
 ## Deferred parent lifecycle actions
 
-Both parent-owned rows are checked. Clone-local bounded review remains disabled, and WU 2 apply started no review transaction. Parent still owns the independently revertible WU commits, checkpoint pushes, issue linkage, CI, one final PR from `feat/clean-break-ncode-identity-02` to `main` with exactly `type:breaking-change`, final merge, and delegation of WU 3.
+Both parent-owned rows are checked. Clone-local bounded review remains disabled, and WU 3 apply started no review transaction. Parent still owns the independently revertible WU commits, checkpoint pushes, issue linkage, CI, one final PR from `feat/clean-break-ncode-identity-02` to `main` with exactly `type:breaking-change`, final merge, and delegation of WU 4.
 
 ## Risks and next boundary
 
 - The user explicitly accepts the combined final-PR size exception; independently revertible WU commits plus focused verification and `make test` before the next WU remain the delivery controls.
 - Standalone nested-module tidy remains publication-bootstrapped until a released ncode version declares the new module path; transient local-root validation passed and tracked modules remain replace-free.
-- This worktree is on `feat/clean-break-ncode-identity-02`; WU 2 apply performed no commit, push, PR, merge, branch switch, review transaction, or WU 3 work.
-- WU 3 is next but has not started. Parent must first preserve WU 2 as its own revertible commit and complete the applicable checkpoint lifecycle without opening an intermediate PR.
+- This worktree is on `feat/clean-break-ncode-identity-02`; WU 3 apply performed no commit, push, PR, merge, branch switch, review transaction, or WU 4 work.
+- WU 4 is next but has not started. Parent must first preserve WU 3 as its own revertible commit and complete the applicable checkpoint lifecycle without opening an intermediate PR.

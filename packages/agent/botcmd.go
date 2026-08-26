@@ -76,12 +76,12 @@ func runBotCommand(rawArgs []string, version string) (handled bool, err error) {
 // log file.
 func botStart(spec *botSpec, rawTail []string) error {
 	// Refuse to start if another bot is already running.
-	if pid, alive, _ := bot.IsRunningAt(spec.pidPath(ZotHome())); alive {
+	if pid, alive, _ := bot.IsRunningAt(spec.pidPath(NcodeHome())); alive {
 		return fmt.Errorf("%s is already running (pid %d); use `zot %s stop` first", spec.name, pid, spec.subcommand)
 	}
-	_ = bot.RemovePIDFile(spec.pidPath(ZotHome())) // clear any stale pid file
+	_ = bot.RemovePIDFile(spec.pidPath(NcodeHome())) // clear any stale pid file
 
-	if ok, cerr := spec.configured(ZotHome()); cerr != nil {
+	if ok, cerr := spec.configured(NcodeHome()); cerr != nil {
 		return cerr
 	} else if !ok {
 		return fmt.Errorf("%s is not configured — run `zot %s setup` first", spec.name, spec.subcommand)
@@ -92,7 +92,7 @@ func botStart(spec *botSpec, rawTail []string) error {
 		return fmt.Errorf("locate zot binary: %w", err)
 	}
 
-	logPath := spec.logPath(ZotHome())
+	logPath := spec.logPath(NcodeHome())
 	if err := os.MkdirAll(filepath.Dir(logPath), 0o755); err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func botStart(spec *botSpec, rawTail []string) error {
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("spawn: %w", err)
 	}
-	if err := bot.WritePIDFile(spec.pidPath(ZotHome()), cmd.Process.Pid); err != nil {
+	if err := bot.WritePIDFile(spec.pidPath(NcodeHome()), cmd.Process.Pid); err != nil {
 		_ = cmd.Process.Kill()
 		return fmt.Errorf("write pid: %w", err)
 	}
@@ -140,13 +140,13 @@ func botStart(spec *botSpec, rawTail []string) error {
 // botStop sends SIGTERM to the running bot (SIGKILL if it doesn't
 // exit within 5s) and cleans up the pid file.
 func botStop(spec *botSpec) error {
-	pid, alive, err := bot.IsRunningAt(spec.pidPath(ZotHome()))
+	pid, alive, err := bot.IsRunningAt(spec.pidPath(NcodeHome()))
 	if err != nil {
 		return err
 	}
 	if !alive {
 		if pid > 0 {
-			_ = bot.RemovePIDFile(spec.pidPath(ZotHome()))
+			_ = bot.RemovePIDFile(spec.pidPath(NcodeHome()))
 			fmt.Printf("no live process; cleared stale pid %d\n", pid)
 			return nil
 		}
@@ -156,7 +156,7 @@ func botStop(spec *botSpec) error {
 	if err := bot.StopProcess(pid, 5*time.Second); err != nil {
 		return fmt.Errorf("stop pid %d: %w", pid, err)
 	}
-	_ = bot.RemovePIDFile(spec.pidPath(ZotHome()))
+	_ = bot.RemovePIDFile(spec.pidPath(NcodeHome()))
 	fmt.Printf("stopped pid %d\n", pid)
 	return nil
 }
@@ -169,7 +169,7 @@ func botLogs(spec *botSpec, rawTail []string) error {
 			follow = true
 		}
 	}
-	p := spec.logPath(ZotHome())
+	p := spec.logPath(NcodeHome())
 	f, err := os.Open(p)
 	if errors.Is(err, os.ErrNotExist) {
 		fmt.Println("no log file at", p)
@@ -219,12 +219,12 @@ func botRun(spec *botSpec, rawTail []string, version string) error {
 		return err
 	}
 
-	if ok, cerr := spec.configured(ZotHome()); cerr != nil {
+	if ok, cerr := spec.configured(NcodeHome()); cerr != nil {
 		return cerr
 	} else if !ok {
 		return fmt.Errorf("%s is not configured — run `zot %s setup` first", spec.name, spec.subcommand)
 	}
-	adapter, err := spec.newAdapter(ZotHome())
+	adapter, err := spec.newAdapter(NcodeHome())
 	if err != nil {
 		return err
 	}
@@ -255,7 +255,7 @@ func botRun(spec *botSpec, rawTail []string, version string) error {
 
 	var runner *bot.Runner
 	runner = bot.NewRunner(adapter, agent, bot.Config{
-		ZotHome:    ZotHome(),
+		NcodeHome:  NcodeHome(),
 		Provider:   resolved.Provider,
 		Model:      resolved.Model,
 		AuthMethod: resolved.AuthMethod,
@@ -278,8 +278,8 @@ func botRun(spec *botSpec, rawTail []string, version string) error {
 
 	// Record our pid so `zot <sub> status` / `zot <sub> stop` can find us,
 	// regardless of whether we were started directly or via `start`.
-	_ = bot.WritePIDFile(spec.pidPath(ZotHome()), os.Getpid())
-	defer bot.RemovePIDFile(spec.pidPath(ZotHome()))
+	_ = bot.WritePIDFile(spec.pidPath(NcodeHome()), os.Getpid())
+	defer bot.RemovePIDFile(spec.pidPath(NcodeHome()))
 
 	// Translate sigterm/sigint into a context cancel so the bot's goroutines
 	// and the currently-running turn wind down cleanly.
@@ -298,7 +298,7 @@ func botRun(spec *botSpec, rawTail []string, version string) error {
 // but never prompts (no TTY picker); falls back to latest or new.
 func openOrCreateSessionForBot(args Args, r Resolved, ag *core.Agent, version string) (*core.Session, []any, error) {
 	if args.Continue {
-		if latest := core.LatestSession(ZotHome(), args.CWD); latest != "" {
+		if latest := core.LatestSession(NcodeHome(), args.CWD); latest != "" {
 			s, msgs, err := core.OpenSession(latest)
 			if err != nil {
 				return nil, nil, err
@@ -307,7 +307,7 @@ func openOrCreateSessionForBot(args Args, r Resolved, ag *core.Agent, version st
 			return s, nil, nil
 		}
 	}
-	s, err := core.NewSession(ZotHome(), args.CWD, r.Provider, r.Model, version)
+	s, err := core.NewSession(NcodeHome(), args.CWD, r.Provider, r.Model, version)
 	return s, nil, err
 }
 
@@ -339,8 +339,8 @@ func telegramSpec() *botSpec {
 		aliases:    []string{"tg"},
 		pidPath:    telegram.PIDPath,
 		logPath:    telegram.LogPath,
-		configured: func(zotHome string) (bool, error) {
-			cfg, err := telegram.LoadConfig(zotHome)
+		configured: func(ncodeHome string) (bool, error) {
+			cfg, err := telegram.LoadConfig(ncodeHome)
 			if err != nil {
 				return false, err
 			}
@@ -350,15 +350,15 @@ func telegramSpec() *botSpec {
 		setup:     telegramBotSetup,
 		status:    telegramBotStatus,
 		reset:     telegramBotReset,
-		newAdapter: func(zotHome string) (bot.BotAdapter, error) {
-			cfg, err := telegram.LoadConfig(zotHome)
+		newAdapter: func(ncodeHome string) (bot.BotAdapter, error) {
+			cfg, err := telegram.LoadConfig(ncodeHome)
 			if err != nil {
 				return nil, err
 			}
 			return telegram.NewAdapter(
 				telegram.NewClient(cfg.BotToken),
 				&cfg,
-				func(c telegram.Config) error { return telegram.SaveConfig(zotHome, c) },
+				func(c telegram.Config) error { return telegram.SaveConfig(ncodeHome, c) },
 			), nil
 		},
 	}
@@ -420,7 +420,7 @@ func readBotToken(in *os.File, out io.Writer) (string, error) {
 // telegramBotSetup interactively reads a bot token without echoing it on a
 // terminal, verifies it via getMe, and saves it.
 func telegramBotSetup(_ []string) error {
-	cfg, err := telegram.LoadConfig(ZotHome())
+	cfg, err := telegram.LoadConfig(NcodeHome())
 	if err != nil {
 		return err
 	}
@@ -446,10 +446,10 @@ func telegramBotSetup(_ []string) error {
 	// Any stored pairing might be for a different bot; clear it.
 	cfg.AllowedUserID = 0
 	cfg.LastUpdateID = 0
-	if err := telegram.SaveConfig(ZotHome(), cfg); err != nil {
+	if err := telegram.SaveConfig(NcodeHome(), cfg); err != nil {
 		return err
 	}
-	fmt.Printf("\nsaved: @%s (id=%d) to %s\n", me.Username, me.ID, telegram.ConfigPath(ZotHome()))
+	fmt.Printf("\nsaved: @%s (id=%d) to %s\n", me.Username, me.ID, telegram.ConfigPath(NcodeHome()))
 	fmt.Println("next: run `zot telegram-bot run`, then send /start to your bot from telegram.")
 	return nil
 }
@@ -457,7 +457,7 @@ func telegramBotSetup(_ []string) error {
 // telegramBotStatus prints the current bot config without the token, plus
 // whether the background process is alive.
 func telegramBotStatus() error {
-	cfg, err := telegram.LoadConfig(ZotHome())
+	cfg, err := telegram.LoadConfig(NcodeHome())
 	if err != nil {
 		return err
 	}
@@ -474,18 +474,18 @@ func telegramBotStatus() error {
 		fmt.Printf("paired with:  telegram user id %d\n", cfg.AllowedUserID)
 	}
 	fmt.Printf("last update:  %d\n", cfg.LastUpdateID)
-	fmt.Printf("config file:  %s\n", telegram.ConfigPath(ZotHome()))
+	fmt.Printf("config file:  %s\n", telegram.ConfigPath(NcodeHome()))
 
-	pid, alive, _ := telegram.IsRunning(ZotHome())
+	pid, alive, _ := telegram.IsRunning(NcodeHome())
 	switch {
 	case alive:
 		fmt.Printf("process:      running (pid %d)\n", pid)
 	case pid > 0:
-		fmt.Printf("process:      stopped (stale pid %d in %s)\n", pid, telegram.PIDPath(ZotHome()))
+		fmt.Printf("process:      stopped (stale pid %d in %s)\n", pid, telegram.PIDPath(NcodeHome()))
 	default:
 		fmt.Println("process:      stopped")
 	}
-	logPath := telegram.LogPath(ZotHome())
+	logPath := telegram.LogPath(NcodeHome())
 	if fi, err := os.Stat(logPath); err == nil {
 		fmt.Printf("log file:     %s (%d bytes)\n", logPath, fi.Size())
 	}
@@ -494,7 +494,7 @@ func telegramBotStatus() error {
 
 // telegramBotReset wipes the on-disk bot.json entry.
 func telegramBotReset() error {
-	p := telegram.ConfigPath(ZotHome())
+	p := telegram.ConfigPath(NcodeHome())
 	if _, err := os.Stat(p); os.IsNotExist(err) {
 		fmt.Println("no bot config to reset")
 		return nil

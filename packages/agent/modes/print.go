@@ -1,4 +1,4 @@
-// Package modes implements zot's three run modes: print, json, interactive.
+// Package modes implements ncode's three run modes: print, JSON, and interactive.
 package modes
 
 import (

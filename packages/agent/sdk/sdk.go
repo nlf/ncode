@@ -1,4 +1,4 @@
-// Package sdk is the public Go SDK for embedding the zot agent
+// Package sdk is the public Go SDK for embedding the ncode agent
 // runtime in third-party programs. It is the only stable, importable
 // surface the project exposes; everything under internal/ is subject
 // to change without notice.
@@ -91,7 +91,7 @@ type Config struct {
 	Lock bool
 }
 
-// Runtime is one zot agent session. Safe for use from one goroutine
+// Runtime is one ncode agent session. Safe for use from one goroutine
 // at a time per Runtime; create separate Runtimes for parallel work.
 type Runtime struct {
 	mu       sync.Mutex

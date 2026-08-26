@@ -9,7 +9,7 @@ import (
 )
 
 func TestSessionsSlashUsesAgentSessionRoot(t *testing.T) {
-	zotHome := t.TempDir()
+	ncodeHome := t.TempDir()
 	agentRoot := t.TempDir()
 	cwd := t.TempDir()
 
@@ -28,7 +28,7 @@ func TestSessionsSlashUsesAgentSessionRoot(t *testing.T) {
 	}
 
 	i := NewInteractive(InteractiveConfig{
-		ZotHome:      zotHome,
+		NcodeHome:    ncodeHome,
 		SessionsRoot: agentRoot,
 		CWD:          cwd,
 	})
@@ -42,9 +42,9 @@ func TestSessionsSlashUsesAgentSessionRoot(t *testing.T) {
 	}
 }
 
-func TestSessionsRootDefaultsToZotHome(t *testing.T) {
-	i := &Interactive{cfg: InteractiveConfig{ZotHome: "/zot/home"}}
+func TestSessionsRootDefaultsToNcodeHome(t *testing.T) {
+	i := &Interactive{cfg: InteractiveConfig{NcodeHome: "/zot/home"}}
 	if got := i.sessionsRoot(); got != "/zot/home" {
-		t.Fatalf("sessions root = %q, want ZotHome fallback", got)
+		t.Fatalf("sessions root = %q, want NcodeHome fallback", got)
 	}
 }

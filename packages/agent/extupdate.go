@@ -38,8 +38,8 @@ import (
 // remote git URL would be a real footgun. Extension authors are
 // expected to commit a working binary (or instruct the user to
 // rebuild manually via /reload-ext + their own build).
-func updateAllExtensions(zotHome string) {
-	dir := filepath.Join(zotHome, "extensions")
+func updateAllExtensions(ncodeHome string) {
+	dir := filepath.Join(ncodeHome, "extensions")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {

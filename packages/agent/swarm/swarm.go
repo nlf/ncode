@@ -1,12 +1,12 @@
-// Package swarm implements zot's multi-agent supervisor.
+// Package swarm implements ncode's multi-agent supervisor.
 //
-// A Swarm manages a set of headless zot subprocesses ("agents")
+// A Swarm manages a set of headless ncode subprocesses ("agents")
 // that share the host's working directory. The interactive TUI
 // exposes the supervisor through the /swarm slash command and a
 // dashboard dialog; non-TUI code can drive it directly through
 // this package.
 //
-// Every agent runs with cwd == the parent zot's RepoRoot — the
+// Every agent runs with cwd == the parent ncode's RepoRoot — the
 // same files the user sees, the same files the main agent edits.
 // There is no git worktree, no per-agent branch, no isolation. If
 // you want parallel edits on a separate branch, use normal git
@@ -19,7 +19,7 @@
 //
 // The Runner abstraction means tests can swap a fake in instead of
 // really spawning a subprocess; the production Runner shells out to
-// `zot --swarm-agent ...` so we reuse zot's own model resolution
+// the current executable’s hidden swarm-agent mode so we reuse ncode’s model resolution
 // and tooling without re-implementing the agent loop.
 package swarm
 
@@ -50,7 +50,7 @@ const (
 // Config configures a Swarm.
 type Config struct {
 	// Root is the directory under which per-agent state files live.
-	// Typically <ZotHome>/swarm, but tests pass a tempdir.
+	// Typically <NcodeHome>/swarm, but tests pass a tempdir.
 	Root string
 
 	// RepoRoot is the working directory every spawned agent runs

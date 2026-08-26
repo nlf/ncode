@@ -120,11 +120,11 @@ type Config struct {
 	LastChangelogShown string `json:"last_changelog_shown,omitempty"`
 }
 
-// ZotHome returns $ZOT_HOME or the OS-default data dir.
+// NcodeHome returns $ZOT_HOME or the OS-default data dir.
 //
-// All zot state (config.json, auth.json, sessions/, logs/) lives under
+// All ncode state (config.json, auth.json, sessions/, logs/) lives under
 // this directory.
-func ZotHome() string {
+func NcodeHome() string {
 	if v := os.Getenv("ZOT_HOME"); v != "" {
 		return v
 	}
@@ -148,7 +148,7 @@ func ZotHome() string {
 }
 
 // ConfigPath returns the path to config.json.
-func ConfigPath() string { return filepath.Join(ZotHome(), "config.json") }
+func ConfigPath() string { return filepath.Join(NcodeHome(), "config.json") }
 
 // FlatToolRender reports whether tool calls should render flat (no
 // bordered panel). The ZOT_FLAT_TOOLS env var takes precedence over
@@ -186,19 +186,19 @@ func (c Config) CompactUserInput() bool {
 }
 
 // AuthPath returns the path to auth.json.
-func AuthPath() string { return filepath.Join(ZotHome(), "auth.json") }
+func AuthPath() string { return filepath.Join(NcodeHome(), "auth.json") }
 
 // KimiCLIFallbackDisabledPath returns a sentinel that disables falling
 // back to the official Kimi Code CLI token after `zot /logout kimi`.
 func KimiCLIFallbackDisabledPath() string {
-	return filepath.Join(ZotHome(), "kimi-cli-fallback-disabled")
+	return filepath.Join(NcodeHome(), "kimi-cli-fallback-disabled")
 }
 
 // SessionsPath returns the directory holding session files.
-func SessionsPath() string { return filepath.Join(ZotHome(), "sessions") }
+func SessionsPath() string { return filepath.Join(NcodeHome(), "sessions") }
 
 // LogsPath returns the directory holding log files.
-func LogsPath() string { return filepath.Join(ZotHome(), "logs") }
+func LogsPath() string { return filepath.Join(NcodeHome(), "logs") }
 
 // LoadConfig reads the config file, returning defaults if missing.
 func LoadConfig() (Config, error) {
@@ -218,7 +218,7 @@ func LoadConfig() (Config, error) {
 
 // SaveConfig writes the config file, creating parent dirs.
 func SaveConfig(c Config) error {
-	if err := os.MkdirAll(ZotHome(), 0o755); err != nil {
+	if err := os.MkdirAll(NcodeHome(), 0o755); err != nil {
 		return err
 	}
 	b, err := json.MarshalIndent(c, "", "  ")

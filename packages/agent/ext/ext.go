@@ -1,6 +1,6 @@
-// Package ext is the Go SDK for writing zot extensions.
+// Package ext is the Go SDK for writing ncode extensions.
 //
-// An extension is a subprocess that talks to zot over its stdin/stdout
+// An extension is a subprocess that talks to ncode over its stdin/stdout
 // in newline-delimited JSON. This package wraps the wire format so
 // extension authors can write straightforward Go without reimplementing
 // the protocol.
@@ -19,11 +19,11 @@
 //	    ext.Run()
 //	}
 //
-// Build it, drop the binary + an extension.json next to it under
-// `$ZOT_HOME/extensions/hello/`, and zot picks it up on next launch.
+// Build it, place the binary and extension.json in a configured extension
+// directory, and ncode picks it up on next launch.
 //
 // Use OnHello when registration or configuration depends on host metadata
-// such as HostInfo.CWD, Provider, Model, ZotVersion, ExtensionDir, or DataDir.
+// such as HostInfo.CWD, Provider, Model, NcodeVersion, ExtensionDir, or DataDir.
 // Run sends hello, waits for hello_ack, runs OnHello, announces registrations,
 // then sends ready.
 //
@@ -48,13 +48,13 @@ func base64Encode(b []byte) string { return base64.StdEncoding.EncodeToString(b)
 // CommandHandler is invoked when the user runs the extension's
 // registered slash command. args is everything the user typed after
 // the command name (already trimmed). Return a Response describing
-// what zot should do next.
+// what ncode should do next.
 type CommandHandler func(args string) Response
 
 // ToolHandler is invoked when the LLM calls a tool the extension
 // registered. args is the raw JSON object the model produced; the
 // handler is responsible for parsing/validating it. Return a
-// ToolResult describing what zot should send back to the model.
+// ToolResult describing what ncode should send back to the model.
 type ToolHandler func(args json.RawMessage) ToolResult
 
 // EventHandler is called for each lifecycle event the extension
@@ -63,7 +63,7 @@ type ToolHandler func(args json.RawMessage) ToolResult
 // worker.
 type EventHandler func(ev Event)
 
-// Event is a lifecycle notification from zot. The fields populated
+// Event is a lifecycle notification from ncode. The fields populated
 // depend on Name (the host's event_name string):
 //
 //	session_start    : (no extra fields)
@@ -191,7 +191,7 @@ func TextErrorResult(s string) ToolResult {
 	return ToolResult{Content: []ToolContent{Text(s)}, IsError: true}
 }
 
-// Response tells zot how to react to a command invocation. Construct
+// Response tells ncode how to react to a command invocation. Construct
 // one with Prompt(), Insert(), Display(), or Noop().
 type Panel struct {
 	ID     string
@@ -224,7 +224,7 @@ func Insert(text string) Response { return Response{Action: "insert", Insert: te
 func Display(text string) Response { return Response{Action: "display", Display: text} }
 
 // OpenPanel returns a Response that opens an interactive extension-owned
-// panel inside zot.
+// panel inside ncode.
 func OpenPanel(id, title string, lines []string, footer string) Response {
 	return Response{Action: "open_panel", OpenPanel: &Panel{ID: id, Title: title, Lines: lines, Footer: footer}}
 }
@@ -239,7 +239,7 @@ func Errorf(format string, args ...any) Response {
 	return Response{Action: "noop", Error: fmt.Sprintf(format, args...)}
 }
 
-// Extension is one zot extension. Construct with New, register
+// Extension is one ncode extension. Construct with New, register
 // commands, then call Run.
 type Extension struct {
 	name    string
@@ -285,11 +285,11 @@ type toolDef struct {
 	deferred    bool
 }
 
-// HostInfo is what the host (zot) tells us in HelloAck. Useful for
+// HostInfo is what the ncode host tells us in HelloAck. Useful for
 // extensions that want to behave differently per provider.
 type HostInfo struct {
 	ProtocolVersion int
-	ZotVersion      string
+	NcodeVersion    string
 	Provider        string
 	Model           string
 	CWD             string
@@ -319,9 +319,9 @@ func New(name, version string) *Extension {
 // Returns the zero value if Run hasn't started yet.
 func (e *Extension) Host() HostInfo { return e.host }
 
-// OnHello registers a callback that runs after zot acknowledges the
+// OnHello registers a callback that runs after ncode acknowledges the
 // hello frame and before commands/tools are announced. Use it when
-// registrations depend on host metadata such as CWD or ZotHome-derived
+// registrations depend on host metadata such as CWD or NcodeHome-derived
 // paths. The callback may call Command, Tool, On, and interceptor
 // registration methods.
 func (e *Extension) OnHello(fn func(HostInfo)) {
@@ -330,8 +330,8 @@ func (e *Extension) OnHello(fn func(HostInfo)) {
 	e.mu.Unlock()
 }
 
-// Logf writes a line to the extension's stderr, which zot captures to
-// $ZOT_HOME/logs/ext-<name>.log. Use this for debug output: anything
+// Logf writes a line to the extension's stderr, which ncode captures in
+// the configured extension log. Use this for debug output: anything
 // you print to stdout would corrupt the JSON wire protocol.
 func (e *Extension) Logf(format string, args ...any) {
 	fmt.Fprintf(e.stderr, "["+e.name+"] "+format+"\n", args...)
@@ -365,13 +365,13 @@ func (e *Extension) RenderPanel(panelID, title string, lines []string, footer st
 	_ = e.send(extproto.PanelRenderFromExt{Type: "panel_render", PanelID: panelID, Title: title, Lines: lines, Footer: footer})
 }
 
-// ClosePanel tells zot to close panelID.
+// ClosePanel tells ncode to close panelID.
 func (e *Extension) ClosePanel(panelID string) {
 	_ = e.send(extproto.PanelCloseFromExt{Type: "panel_close", PanelID: panelID})
 }
 
 // Command registers a slash-command handler. Call this BEFORE Run().
-// Once Run is going, when the user runs /name in zot, fn is invoked
+// Once Run is going, when the user runs /name in ncode, fn is invoked
 // with the remaining args.
 //
 // Naming conflicts with built-in commands (e.g. /help) are silently
@@ -386,7 +386,7 @@ func (e *Extension) Command(name, description string, fn CommandHandler) {
 
 // Tool registers an LLM-callable tool. schema is a JSON Schema
 // object describing the tool's args (the same shape Anthropic /
-// OpenAI accept). Call this BEFORE Run(); zot folds extension tools
+// OpenAI accept). Call this BEFORE Run(); ncode folds extension tools
 // into the agent's registry once the extension's ready frame fires.
 //
 // Naming conflicts with built-in tools (read, write, edit, bash,
@@ -469,7 +469,7 @@ func (e *Extension) InterceptAssistantMessage(fn AssistantMessageHandler) {
 	e.mu.Unlock()
 }
 
-// Notify pushes an info-level status note into zot's chat without
+// Notify pushes an info-level status note into ncode's chat without
 // requiring a slash command from the user.
 func (e *Extension) Notify(level, message string) {
 	_ = e.send(extproto.NotifyFromExt{
@@ -479,13 +479,13 @@ func (e *Extension) Notify(level, message string) {
 	})
 }
 
-// Run starts the protocol loop. Blocks until stdin closes (zot has
+// Run starts the protocol loop. Blocks until stdin closes (ncode has
 // shut us down). Returns the first fatal error, or nil on clean exit.
 func (e *Extension) Run() error {
 	scanner := bufio.NewScanner(e.in)
 	scanner.Buffer(make([]byte, 0, 64*1024), 4*1024*1024)
 
-	// Send hello first. zot answers with hello_ack immediately; read it
+	// Send hello first. ncode answers with hello_ack immediately; read it
 	// synchronously so extensions can use HostInfo while registering
 	// commands/tools before the ready frame.
 	if err := e.send(extproto.HelloFromExt{
@@ -508,7 +508,7 @@ func (e *Extension) Run() error {
 	}
 	e.host = HostInfo{
 		ProtocolVersion: ack.ProtocolVersion,
-		ZotVersion:      ack.ZotVersion,
+		NcodeVersion:    ack.NcodeVersion,
 		Provider:        ack.Provider,
 		Model:           ack.Model,
 		CWD:             ack.CWD,

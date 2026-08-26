@@ -412,7 +412,7 @@ func (r *Renderer) Draw(lines []string, cursorRow, cursorCol int) {
 	r.cursorCol = cursorCol
 }
 
-// DrawLog renders zot in the terminal's main screen as normal terminal
+// DrawLog renders ncode in the terminal's main screen as normal terminal
 // flow rather than a fixed full-screen frame. Chat lines are emitted once
 // into the host terminal scrollback; the current bottom block (dialogs,
 // slash popup, status, editor) is erased and redrawn in place at the end.

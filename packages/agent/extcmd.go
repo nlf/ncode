@@ -168,7 +168,7 @@ func extDoctor(version string) error {
 	cwd, _ := os.Getwd()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	mgr := extensions.New(ZotHome(), cwd, version, "", "", extDoctorHooks{})
+	mgr := extensions.New(NcodeHome(), cwd, version, "", "", extDoctorHooks{})
 	errs := mgr.Discover(ctx)
 	mgr.WaitForReady(3 * time.Second)
 	diags := mgr.Diagnostics()
@@ -202,7 +202,7 @@ func scanExtDoctorStatic() []extDoctorStaticRow {
 	if cwd, err := os.Getwd(); err == nil {
 		dirs = append(dirs, scanDir{scope: "project", dir: filepath.Join(cwd, ".zot", "extensions")})
 	}
-	if h := ZotHome(); h != "" {
+	if h := NcodeHome(); h != "" {
 		dirs = append(dirs, scanDir{scope: "global", dir: filepath.Join(h, "extensions")})
 	}
 
@@ -349,10 +349,10 @@ func printExtDoctorRow(w io.Writer, row extDoctorStaticRow, diag extensions.Exte
 }
 
 func extDoctorLogPath(name string) string {
-	if name == "" || ZotHome() == "" {
+	if name == "" || NcodeHome() == "" {
 		return ""
 	}
-	return filepath.Join(ZotHome(), "logs", "ext-"+name+".log")
+	return filepath.Join(NcodeHome(), "logs", "ext-"+name+".log")
 }
 
 // extLogs locates the named extension's log file and either cats or
@@ -368,7 +368,7 @@ func extLogs(args []string) error {
 			follow = true
 		}
 	}
-	logPath := filepath.Join(ZotHome(), "logs", "ext-"+name+".log")
+	logPath := filepath.Join(NcodeHome(), "logs", "ext-"+name+".log")
 	if _, err := os.Stat(logPath); err != nil {
 		return fmt.Errorf("no log for %q at %s", name, logPath)
 	}
@@ -467,7 +467,7 @@ func extInstall(args []string) error {
 		return fmt.Errorf("usage: zot ext install <path|git-url>")
 	}
 	src := args[0]
-	dest := filepath.Join(ZotHome(), "extensions")
+	dest := filepath.Join(NcodeHome(), "extensions")
 	if err := os.MkdirAll(dest, 0o755); err != nil {
 		return err
 	}
@@ -530,7 +530,7 @@ func extInstall(args []string) error {
 
 func extensionDirs() map[string]string {
 	out := map[string]string{}
-	if h := ZotHome(); h != "" {
+	if h := NcodeHome(); h != "" {
 		out["global"] = filepath.Join(h, "extensions")
 	}
 	if cwd, err := os.Getwd(); err == nil {

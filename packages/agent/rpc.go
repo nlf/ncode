@@ -53,7 +53,7 @@ func runRPCMode(ctx context.Context, args Args, version string) error {
 	// host-hooks integration. Notify/Display calls from extensions
 	// emit RPC events instead of TUI lines so any consumer can react.
 	extHooks := &rpcExtHooks{}
-	extMgr := extensions.New(ZotHome(), r.CWD, version, r.Provider, r.Model, extHooks)
+	extMgr := extensions.New(NcodeHome(), r.CWD, version, r.Provider, r.Model, extHooks)
 	for _, e := range extMgr.LoadExplicit(ctx, args.Exts) {
 		fmt.Fprintln(os.Stderr, "extension load:", e)
 	}

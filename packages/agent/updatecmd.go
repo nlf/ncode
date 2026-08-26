@@ -218,7 +218,7 @@ func runUpdate(version string) error {
 	// Best-effort: also refresh installed extensions that live in
 	// git checkouts. Failures here are advisory and never abort the
 	// overall update — the binary swap already succeeded.
-	updateAllExtensions(ZotHome())
+	updateAllExtensions(NcodeHome())
 
 	return nil
 }

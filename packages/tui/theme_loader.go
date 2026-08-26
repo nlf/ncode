@@ -176,13 +176,13 @@ func (c *TerminalColorValue) UnmarshalJSON(data []byte) error {
 // to detected. Empty/auto/default keeps the built-in detected theme.
 // If preferred is set, it may be a theme name, a basename without
 // .json, or an absolute/relative path.
-func DetectThemeWithCustom(zotHome, preferred string, timeout time.Duration) (Theme, string, error) {
+func DetectThemeWithCustom(ncodeHome, preferred string, timeout time.Duration) (Theme, string, error) {
 	detected := DetectThemeFromBackground(timeout)
-	return LoadThemeFromHome(zotHome, preferred, detected)
+	return LoadThemeFromHome(ncodeHome, preferred, detected)
 }
 
-func LoadThemeFromHome(zotHome, preferred string, detected Theme) (Theme, string, error) {
-	path, err := resolveThemePath(zotHome, preferred)
+func LoadThemeFromHome(ncodeHome, preferred string, detected Theme) (Theme, string, error) {
+	path, err := resolveThemePath(ncodeHome, preferred)
 	if err != nil || path == "" {
 		return detected, "", err
 	}
@@ -223,14 +223,14 @@ func LoadThemeFromHome(zotHome, preferred string, detected Theme) (Theme, string
 
 // AvailableThemes returns built-in and user-installed themes suitable
 // for a settings picker. Invalid JSON files are skipped.
-func AvailableThemes(zotHome string) []ThemeOption {
+func AvailableThemes(ncodeHome string) []ThemeOption {
 	out := []ThemeOption{
 		{Value: "auto", Label: "auto", Description: "detect terminal background and use zot defaults", Builtin: true},
 		{Value: "dark", Label: "dark", Description: "built-in dark theme", Builtin: true},
 		{Value: "light", Label: "light", Description: "built-in light theme", Builtin: true},
 	}
 	seen := map[string]bool{"auto": true, "dark": true, "light": true}
-	paths, _ := themeFilesIn(filepath.Join(zotHome, "themes"))
+	paths, _ := themeFilesIn(filepath.Join(ncodeHome, "themes"))
 	sort.Strings(paths)
 	for _, path := range paths {
 		b, err := os.ReadFile(path)
@@ -289,12 +289,12 @@ func ThemeOptionFromFile(path, value, source string) (ThemeOption, bool) {
 	return ThemeOption{Value: value, Label: label, Description: desc, Path: path}, true
 }
 
-func ThemeExists(zotHome, preferred string) bool {
-	path, err := resolveThemePath(zotHome, preferred)
+func ThemeExists(ncodeHome, preferred string) bool {
+	path, err := resolveThemePath(ncodeHome, preferred)
 	return err == nil && path != ""
 }
 
-func resolveThemePath(zotHome, preferred string) (string, error) {
+func resolveThemePath(ncodeHome, preferred string) (string, error) {
 	preferred = strings.TrimSpace(preferred)
 	switch strings.ToLower(preferred) {
 	case "", "auto", "default", "system":
@@ -308,11 +308,11 @@ func resolveThemePath(zotHome, preferred string) (string, error) {
 		candidates := []string{preferred}
 		if filepath.Ext(preferred) == "" {
 			candidates = append(candidates,
-				filepath.Join(zotHome, "themes", preferred+".json"),
+				filepath.Join(ncodeHome, "themes", preferred+".json"),
 			)
 		} else if !filepath.IsAbs(preferred) {
 			candidates = append(candidates,
-				filepath.Join(zotHome, "themes", preferred),
+				filepath.Join(ncodeHome, "themes", preferred),
 			)
 		}
 		for _, c := range candidates {

@@ -8,11 +8,11 @@ import (
 
 func TestBuildSystemPromptCustomOmitsBuiltInDocs(t *testing.T) {
 	got := BuildSystemPrompt(SystemPromptOpts{
-		CWD:        "/workspace",
-		Custom:     "Custom instructions",
-		Append:     []string{"Additional context"},
-		Now:        time.Date(2026, time.August, 6, 0, 0, 0, 0, time.UTC),
-		ZotDocsDir: "/zot/docs",
+		CWD:          "/workspace",
+		Custom:       "Custom instructions",
+		Append:       []string{"Additional context"},
+		Now:          time.Date(2026, time.August, 6, 0, 0, 0, 0, time.UTC),
+		NcodeDocsDir: "/zot/docs",
 	})
 
 	if strings.Contains(got, "Zot's own docs") || strings.Contains(got, "/zot/docs") {
@@ -32,9 +32,9 @@ func TestBuildSystemPromptCustomOmitsBuiltInDocs(t *testing.T) {
 
 func TestBuildSystemPromptDefaultIncludesBuiltInDocs(t *testing.T) {
 	got := BuildSystemPrompt(SystemPromptOpts{
-		CWD:        "/workspace",
-		Now:        time.Date(2026, time.August, 6, 0, 0, 0, 0, time.UTC),
-		ZotDocsDir: "/zot/docs",
+		CWD:          "/workspace",
+		Now:          time.Date(2026, time.August, 6, 0, 0, 0, 0, time.UTC),
+		NcodeDocsDir: "/zot/docs",
 	})
 
 	if !strings.Contains(got, "Zot's own docs are installed under /zot/docs") {

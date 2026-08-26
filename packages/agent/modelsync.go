@@ -13,12 +13,12 @@ import (
 
 // ModelCachePath returns the on-disk location of the merged model cache.
 func ModelCachePath() string {
-	return filepath.Join(ZotHome(), "models-cache.json")
+	return filepath.Join(NcodeHome(), "models-cache.json")
 }
 
 // UserModelsPath returns the path to the user's models.json override.
 func UserModelsPath() string {
-	return filepath.Join(ZotHome(), "models.json")
+	return filepath.Join(NcodeHome(), "models.json")
 }
 
 // LoadCachedModels loads the cache file and applies it to the provider

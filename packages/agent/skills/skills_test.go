@@ -52,7 +52,7 @@ permissions:
 func TestDiscoverProjectAndGlobalPriorityAndDedup(t *testing.T) {
 	t.Setenv("ZOT_AGENT_SKILLS", "")
 	tmp := t.TempDir()
-	zotHome := filepath.Join(tmp, "home")
+	ncodeHome := filepath.Join(tmp, "home")
 	cwd := filepath.Join(tmp, "proj")
 
 	mk := func(dir, name, desc string) {
@@ -64,11 +64,11 @@ func TestDiscoverProjectAndGlobalPriorityAndDedup(t *testing.T) {
 
 	// Same skill name in BOTH project and global; project should win.
 	mk(filepath.Join(cwd, ".zot", "skills"), "shared", "project version")
-	mk(filepath.Join(zotHome, "skills"), "shared", "global version")
+	mk(filepath.Join(ncodeHome, "skills"), "shared", "global version")
 	// Unique skill in global only.
-	mk(filepath.Join(zotHome, "skills"), "global-only", "from global")
+	mk(filepath.Join(ncodeHome, "skills"), "global-only", "from global")
 
-	skills, errs := Discover(zotHome, cwd, "", true /* includeUser */)
+	skills, errs := Discover(ncodeHome, cwd, "", true /* includeUser */)
 	if len(errs) > 0 {
 		t.Fatalf("errs: %v", errs)
 	}

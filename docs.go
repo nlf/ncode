@@ -9,7 +9,7 @@ import (
 	"sort"
 )
 
-// embeddedDocs holds zot's user-facing documentation so installed
+// embeddedDocs holds ncode's user-facing documentation so installed
 // binaries do not depend on a source checkout existing on disk.
 //
 //go:embed README.md docs/*.md
@@ -23,11 +23,11 @@ var docFiles = map[string]string{
 	"themes.md":     "docs/themes.md",
 }
 
-// EnsureInstalled writes the embedded docs into $ZOT_HOME/docs and
-// returns that directory. Existing files are left untouched when their
+// EnsureInstalled writes the embedded docs into ncode's configured docs
+// directory. Existing files are left untouched when their
 // content already matches the embedded copy.
-func EnsureInstalled(zotHome string) (string, error) {
-	dir := filepath.Join(zotHome, "docs")
+func EnsureInstalled(ncodeHome string) (string, error) {
+	dir := filepath.Join(ncodeHome, "docs")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return dir, err
 	}

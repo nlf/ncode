@@ -42,8 +42,8 @@ type Config struct {
 	MCPServers map[string]ServerConfig `json:"mcpServers"`
 }
 
-// zotHome returns the zot state directory.
-func zotHome() string {
+// ncodeHome returns the ncode state directory.
+func ncodeHome() string {
 	if h := os.Getenv("ZOT_HOME"); h != "" {
 		return h
 	}
@@ -68,7 +68,7 @@ func loadConfig(cwd string) (Config, error) {
 	cfg := Config{MCPServers: make(map[string]ServerConfig)}
 
 	// 1. Global config
-	globalPath := filepath.Join(zotHome(), "mcp.json")
+	globalPath := filepath.Join(ncodeHome(), "mcp.json")
 	if err := mergeConfig(&cfg, globalPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return cfg, fmt.Errorf("global config %s: %w", globalPath, err)
 	}

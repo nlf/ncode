@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"strings"
 
-	zotdocs "github.com/nlf/ncode"
+	ncodedocs "github.com/nlf/ncode"
 	"github.com/nlf/ncode/packages/agent/skills"
 	"github.com/nlf/ncode/packages/agent/tools"
 	"github.com/nlf/ncode/packages/core"
@@ -100,12 +100,12 @@ func (r *Resolved) MergeExtensionTools(mgr ExtensionToolSource) {
 	// addendum is preserved by walking the existing append slice.
 	append_ := r.systemAppend
 	r.SystemPrompt = BuildSystemPrompt(SystemPromptOpts{
-		CWD:        r.CWD,
-		Tools:      toolSummariesFromRegistry(r.ToolRegistry, r.toolDescriptions),
-		Custom:     r.systemCustom,
-		CustomSet:  r.systemCustomSet,
-		Append:     append_,
-		ZotDocsDir: filepath.Join(ZotHome(), "docs"),
+		CWD:          r.CWD,
+		Tools:        toolSummariesFromRegistry(r.ToolRegistry, r.toolDescriptions),
+		Custom:       r.systemCustom,
+		CustomSet:    r.systemCustomSet,
+		Append:       append_,
+		NcodeDocsDir: filepath.Join(NcodeHome(), "docs"),
 	})
 }
 
@@ -147,7 +147,7 @@ func toolSummariesFromRegistry(reg core.Registry, cached map[string]string) []To
 	return out
 }
 
-// defaultModelForProvider returns the model id zot prefers when the
+// defaultModelForProvider returns the model id ncode prefers when the
 // caller didn't pick one. Mirrors the per-provider switch used at
 // multiple points in Resolve; centralised so the unknown-model
 // recovery path and the no-model-configured path can't drift.
@@ -221,7 +221,7 @@ func defaultModelForProvider(prov string) string {
 	}
 }
 
-// knownProviders is the set of provider ids zot recognises. Used by
+// knownProviders is the set of provider ids ncode recognises. Used by
 // Resolve to validate args.Provider, by extension-callers, and by the
 // auto-fallback logic that picks any logged-in provider when the user's
 // preferred one has no credentials.
@@ -575,7 +575,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 	}
 	reg := buildToolRegistry(args, args.CWD, sandbox)
 
-	docsDir, _ := zotdocs.EnsureInstalled(ZotHome())
+	docsDir, _ := ncodedocs.EnsureInstalled(NcodeHome())
 
 	// Skill discovery: scan project + global locations + built-in
 	// skills shipped with the binary. If any are found, register
@@ -592,7 +592,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 	)
 	if !args.NoSkill {
 		homeDir, _ := os.UserHomeDir()
-		discovered, _ = skills.Discover(ZotHome(), args.CWD, homeDir, args.WithSkills)
+		discovered, _ = skills.Discover(NcodeHome(), args.CWD, homeDir, args.WithSkills)
 		if len(discovered) > 0 {
 			skillTool = skills.NewTool(discovered)
 			reg[skillTool.Name()] = skillTool
@@ -605,7 +605,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 
 	var contextFiles []ContextFile
 	if !args.NoContextFiles {
-		contextFiles = loadAgentsContext(args.CWD, ZotHome())
+		contextFiles = loadAgentsContext(args.CWD, NcodeHome())
 	}
 	append_ := append([]string(nil), args.AppendSystemPrompt...)
 	if agentsAddendum := formatAgentsContext(contextFiles); agentsAddendum != "" {
@@ -625,17 +625,17 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 	custom := args.SystemPrompt
 	customSet := args.SystemPromptSet || custom != ""
 	if !customSet {
-		custom = readUserSystemPrompt(ZotHome())
+		custom = readUserSystemPrompt(NcodeHome())
 		customSet = custom != ""
 	}
 
 	sys := BuildSystemPrompt(SystemPromptOpts{
-		CWD:        args.CWD,
-		Tools:      summaries,
-		Custom:     custom,
-		CustomSet:  customSet,
-		Append:     append_,
-		ZotDocsDir: docsDir,
+		CWD:          args.CWD,
+		Tools:        summaries,
+		Custom:       custom,
+		CustomSet:    customSet,
+		Append:       append_,
+		NcodeDocsDir: docsDir,
 	})
 
 	reasoning := provider.NormalizeReasoning(firstNonEmpty(args.Reasoning, cfg.Reasoning))
@@ -677,11 +677,11 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 // empty. Errors are intentionally swallowed: the file is optional,
 // and any failure to read it should fall back to the built-in
 // default system prompt rather than crash the run.
-func readUserSystemPrompt(zotHome string) string {
-	if zotHome == "" {
+func readUserSystemPrompt(ncodeHome string) string {
+	if ncodeHome == "" {
 		return ""
 	}
-	path := filepath.Join(zotHome, "SYSTEM.md")
+	path := filepath.Join(ncodeHome, "SYSTEM.md")
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return ""
@@ -693,7 +693,7 @@ func readUserSystemPrompt(zotHome string) string {
 // default file is created or required: zot only includes files that
 // already exist. Global instructions ($ZOT_HOME/AGENTS.md) come first,
 // followed by project instructions from the filesystem root down to cwd.
-func loadAgentsContext(cwd, zotHome string) []ContextFile {
+func loadAgentsContext(cwd, ncodeHome string) []ContextFile {
 	var files []ContextFile
 	seen := map[string]bool{}
 	add := func(path string) {
@@ -731,7 +731,7 @@ func loadAgentsContext(cwd, zotHome string) []ContextFile {
 		}
 	}
 
-	addFirstFromDir(zotHome)
+	addFirstFromDir(ncodeHome)
 
 	if cwd != "" {
 		abs, err := filepath.Abs(cwd)

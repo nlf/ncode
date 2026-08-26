@@ -40,8 +40,8 @@ Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
 | Change | `clean-break-ncode-identity` |
 | Strategy | WU 2–WU 12 remain on `feat/clean-break-ncode-identity-02`; checkpoint pushes are allowed, but no intermediate PRs |
 | Final PR | One PR from `feat/clean-break-ncode-identity-02` to `main`, linked to issue #1 with exactly `type:breaking-change` |
-| Order | WU 1 merged → WU 2 complete → WU 3 → WU 4 → WU 5 → WU 6 → WU 7 → WU 8 → WU 9 → WU 10 → WU 11 → WU 12 |
-| Current boundary | WU 2 is complete; WU 3 is next and has not started |
+| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 next → WU 5 → WU 6 → WU 7 → WU 8 → WU 9 → WU 10 → WU 11 → WU 12 |
+| Current boundary | WU 3 is complete; WU 4 is next and has not started |
 | Review budget | The user explicitly accepts the combined final-PR size exception; no intermediate PR review budget applies |
 | Verification | Preserve each WU as an independently revertible commit; run focused verification and `make test` before beginning the next WU |
 | Gates | Clone-local bounded review remains disabled; strict TDD, native SDD attempt authority, issue linkage, verification, CI, and final merge gates remain |
@@ -51,7 +51,8 @@ Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
 main: WU 1 merged
  └── feat/clean-break-ncode-identity-02
       ├── WU 2 complete
-      └── 📍 WU 3 next → WU 4 … WU 12 → one final PR to main
+      ├── WU 3 complete
+      └── 📍 WU 4 next → WU 5 … WU 12 → one final PR to main
 ```
 
 ## Constraints and common evidence
@@ -82,9 +83,9 @@ main: WU 1 merged
 
 **Boundary:** Start from the ncode module graph; finish with renamed public product symbols but no state-root behavior redesign. **Commit:** `refactor(identity): rename product symbols`. **Verification/rollback:** focused package builds and tests remain green; revert independently while retaining WU 2 imports.
 
-- [ ] Characterize the mechanical symbol surface without manufacturing RED by recording focused `go test` results for `./packages/agent/... ./packages/core/... ./packages/provider/... ./packages/tui/...` and locating `ZotHome`, `ZotDocsDir`, `ZotVersion`, `zotHome`, `zotVersion`, and package/product comments in `packages/agent/{config,build,cli,extensions,ext,extproto,skills,swarm,sdk}`, `packages/{core,provider,tui}`, and `docs.go`. <!-- sdd-owner: implementation -->
-- [ ] Rename the symbol groups to `NcodeHome`, `NcodeDocsDir`, `NcodeVersion`, and ncode local identifiers at their declarations and all callers; reword active package comments and inherited-parser comments to lowercase ncode or neutral historical wording, preserving exported API shape except the intentional product-symbol rename. <!-- sdd-owner: implementation -->
-- [ ] Run post-move evidence: focused package tests, `go vet ./...`, `make test`, and forbidden-symbol searches for `ZotHome|ZotDocsDir|ZotVersion` outside exact provenance/soon-to-be-dedicated rejection fixtures; inspect imports to preserve the `ExtensionToolSource` and SDK/agent cycle seams. <!-- sdd-owner: implementation -->
+- [x] Characterize the mechanical symbol surface without manufacturing RED by recording focused `go test` results for `./packages/agent/... ./packages/core/... ./packages/provider/... ./packages/tui/...` and locating `ZotHome`, `ZotDocsDir`, `ZotVersion`, `zotHome`, `zotVersion`, and package/product comments in `packages/agent/{config,build,cli,extensions,ext,extproto,skills,swarm,sdk}`, `packages/{core,provider,tui}`, and `docs.go`. <!-- sdd-owner: implementation -->
+- [x] Rename the symbol groups to `NcodeHome`, `NcodeDocsDir`, `NcodeVersion`, and ncode local identifiers at their declarations and all callers; reword active package comments and inherited-parser comments to lowercase ncode or neutral historical wording, preserving exported API shape except the intentional product-symbol rename. <!-- sdd-owner: implementation -->
+- [x] Run post-move evidence: focused package tests, `go vet ./...`, `make test`, and forbidden-symbol searches for `ZotHome|ZotDocsDir|ZotVersion` outside exact provenance/soon-to-be-dedicated rejection fixtures; inspect imports to preserve the `ExtensionToolSource` and SDK/agent cycle seams. <!-- sdd-owner: implementation -->
 
 ## WU 4 — Move command and local build identity
 

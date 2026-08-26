@@ -53,13 +53,13 @@ type updateCache struct {
 // Always returns a usable UpdateInfo (zero-value on error). The
 // banner renderer skips the display when Available is false, so a
 // network failure silently no-ops; we never block startup on this.
-func CheckForUpdate(ctx context.Context, zotHome, currentVersion string) UpdateInfo {
+func CheckForUpdate(ctx context.Context, ncodeHome, currentVersion string) UpdateInfo {
 	// Dev builds ("0.0.0") never have an update to offer. Skip.
 	if currentVersion == "" || currentVersion == "dev" || currentVersion == "0.0.0" {
 		return UpdateInfo{}
 	}
 
-	cachePath := filepath.Join(zotHome, updateCheckFile)
+	cachePath := filepath.Join(ncodeHome, updateCheckFile)
 	if c, ok := readUpdateCache(cachePath); ok {
 		// Cache is fresh and tracks the same binary version.
 		// Additional guard: only trust the cache when it already
@@ -100,13 +100,13 @@ func CheckForUpdate(ctx context.Context, zotHome, currentVersion string) UpdateI
 // CheckForUpdateAsync runs CheckForUpdate in a goroutine, delivers the
 // result to the returned channel, and never blocks startup. The
 // channel is always closed; receivers should `ok`-check.
-func CheckForUpdateAsync(zotHome, currentVersion string) <-chan UpdateInfo {
+func CheckForUpdateAsync(ncodeHome, currentVersion string) <-chan UpdateInfo {
 	ch := make(chan UpdateInfo, 1)
 	go func() {
 		defer close(ch)
 		ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 		defer cancel()
-		ch <- CheckForUpdate(ctx, zotHome, currentVersion)
+		ch <- CheckForUpdate(ctx, ncodeHome, currentVersion)
 	}()
 	return ch
 }

@@ -1,12 +1,12 @@
-// Package extensions implements the host side of zot's subprocess
+// Package extensions implements the host side of ncode's subprocess
 // extension protocol. The Manager discovers extensions in well-known
 // directories, spawns each one, completes the hello handshake, and
 // routes slash commands to the right extension.
 //
-// Each extension is its own process, communicating with zot over its
+// Each extension is its own process, communicating with ncode over its
 // stdin/stdout in newline-delimited JSON. Stderr is redirected to a
-// per-extension log file under $ZOT_HOME/logs/. Crashing one
-// extension does not affect the others or the host.
+// per-extension log file under the configured ncode logs directory.
+// Crashing one extension does not affect the others or the host.
 //
 // See docs/extensions.md for the user-facing reference and
 // packages/agent/extproto for the wire format.
@@ -139,12 +139,12 @@ type commandRegistration struct {
 
 // Manager owns every extension subprocess for the lifetime of zot.
 type Manager struct {
-	zotHome    string
-	cwd        string
-	zotVersion string
-	provider   string
-	model      string
-	hooks      HostHooks
+	ncodeHome    string
+	cwd          string
+	ncodeVersion string
+	provider     string
+	model        string
+	hooks        HostHooks
 
 	mu  sync.RWMutex
 	ext map[string]*Extension // keyed by manifest name
@@ -170,11 +170,11 @@ type Manager struct {
 
 // New constructs an empty Manager. Call Discover to populate it from
 // the on-disk extension directories.
-func New(zotHome, cwd, zotVersion, provider, model string, hooks HostHooks) *Manager {
+func New(ncodeHome, cwd, ncodeVersion, provider, model string, hooks HostHooks) *Manager {
 	return &Manager{
-		zotHome:      zotHome,
+		ncodeHome:    ncodeHome,
 		cwd:          cwd,
-		zotVersion:   zotVersion,
+		ncodeVersion: ncodeVersion,
 		provider:     provider,
 		model:        model,
 		hooks:        hooks,
@@ -242,8 +242,8 @@ func (m *Manager) searchDirs() []string {
 	if m.cwd != "" {
 		dirs = append(dirs, filepath.Join(m.cwd, ".zot", "extensions"))
 	}
-	if m.zotHome != "" {
-		dirs = append(dirs, filepath.Join(m.zotHome, "extensions"))
+	if m.ncodeHome != "" {
+		dirs = append(dirs, filepath.Join(m.ncodeHome, "extensions"))
 	}
 	return dirs
 }
@@ -520,7 +520,7 @@ const extensionExitGrace = time.Second
 // runs the synchronous portion of the hello handshake. Asynchronous
 // frames are processed in a goroutine started here.
 func (m *Manager) spawn(ctx context.Context, ext *Extension) error {
-	logsDir := filepath.Join(m.zotHome, "logs")
+	logsDir := filepath.Join(m.ncodeHome, "logs")
 	_ = os.MkdirAll(logsDir, 0o755)
 	logPath := filepath.Join(logsDir, "ext-"+ext.Manifest.Name+".log")
 	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
@@ -623,7 +623,7 @@ func (m *Manager) spawn(ctx context.Context, ext *Extension) error {
 	ack, _ := extproto.Encode(extproto.HelloAckFromHost{
 		Type:            "hello_ack",
 		ProtocolVersion: extproto.ProtocolVersion,
-		ZotVersion:      m.zotVersion,
+		NcodeVersion:    m.ncodeVersion,
 		Provider:        m.provider,
 		Model:           m.model,
 		CWD:             m.cwd,

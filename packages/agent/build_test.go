@@ -15,16 +15,16 @@ import (
 
 func TestReadAgentsContextLoadsGlobalAndAncestors(t *testing.T) {
 	root := t.TempDir()
-	zotHome := filepath.Join(root, "zot-home")
+	ncodeHome := filepath.Join(root, "zot-home")
 	project := filepath.Join(root, "repo")
 	nested := filepath.Join(project, "packages", "app")
-	if err := os.MkdirAll(zotHome, 0o755); err != nil {
+	if err := os.MkdirAll(ncodeHome, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.MkdirAll(nested, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(zotHome, "AGENTS.md"), []byte("global rule"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(ncodeHome, "AGENTS.md"), []byte("global rule"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(project, "AGENTS.md"), []byte("repo rule"), 0o644); err != nil {
@@ -34,12 +34,12 @@ func TestReadAgentsContextLoadsGlobalAndAncestors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	files := loadAgentsContext(nested, zotHome)
+	files := loadAgentsContext(nested, ncodeHome)
 	if len(files) != 3 {
 		t.Fatalf("loaded %d context files, want 3: %#v", len(files), files)
 	}
 	wantPaths := []string{
-		filepath.Join(zotHome, "AGENTS.md"),
+		filepath.Join(ncodeHome, "AGENTS.md"),
 		filepath.Join(project, "AGENTS.md"),
 		filepath.Join(nested, "AGENTS.md"),
 	}
@@ -71,11 +71,11 @@ func TestReadAgentsContextMissingFilesIsEmpty(t *testing.T) {
 }
 
 func TestResolveNoContextFilesSkipsAgentsInstructions(t *testing.T) {
-	zotHome := t.TempDir()
+	ncodeHome := t.TempDir()
 	cwd := t.TempDir()
-	t.Setenv("ZOT_HOME", zotHome)
+	t.Setenv("ZOT_HOME", ncodeHome)
 	t.Setenv("OPENAI_API_KEY", "test-key")
-	if err := os.WriteFile(filepath.Join(zotHome, "AGENTS.md"), []byte("global rule"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(ncodeHome, "AGENTS.md"), []byte("global rule"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(cwd, "AGENTS.md"), []byte("project rule"), 0o644); err != nil {
@@ -100,11 +100,11 @@ func TestResolveNoContextFilesSkipsAgentsInstructions(t *testing.T) {
 }
 
 func TestResolveExplicitEmptySystemPromptOverridesPersistentPrompt(t *testing.T) {
-	zotHome := t.TempDir()
+	ncodeHome := t.TempDir()
 	cwd := t.TempDir()
-	t.Setenv("ZOT_HOME", zotHome)
+	t.Setenv("ZOT_HOME", ncodeHome)
 	t.Setenv("OPENAI_API_KEY", "test-key")
-	if err := os.WriteFile(filepath.Join(zotHome, "SYSTEM.md"), []byte("persistent instructions"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(ncodeHome, "SYSTEM.md"), []byte("persistent instructions"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 

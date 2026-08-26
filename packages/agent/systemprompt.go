@@ -19,13 +19,13 @@ type ToolSummary struct {
 
 // SystemPromptOpts configures BuildSystemPrompt.
 type SystemPromptOpts struct {
-	CWD        string
-	Tools      []ToolSummary
-	Custom     string   // when CustomSet, replaces the built-in identity and docs guidance
-	CustomSet  bool     // preserves an intentionally empty custom prompt
-	Append     []string // extra text appended at the end
-	Now        time.Time
-	ZotDocsDir string
+	CWD          string
+	Tools        []ToolSummary
+	Custom       string   // when CustomSet, replaces the built-in identity and docs guidance
+	CustomSet    bool     // preserves an intentionally empty custom prompt
+	Append       []string // extra text appended at the end
+	Now          time.Time
+	NcodeDocsDir string
 }
 
 // BuildSystemPrompt constructs the system prompt.
@@ -63,9 +63,9 @@ func BuildSystemPrompt(o SystemPromptOpts) string {
 		sb.WriteString(o.Custom)
 	} else {
 		sb.WriteString(defaultIdentity)
-		if strings.TrimSpace(o.ZotDocsDir) != "" {
+		if strings.TrimSpace(o.NcodeDocsDir) != "" {
 			sb.WriteString("\n\nZot's own docs are installed under ")
-			sb.WriteString(o.ZotDocsDir)
+			sb.WriteString(o.NcodeDocsDir)
 			sb.WriteString("; use the read tool there when you need details about zot RPC, extensions, skills, or built-in behaviour.")
 		}
 	}

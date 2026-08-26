@@ -132,7 +132,7 @@ func handleSetup(args []string, cwd string) (string, error) {
 		}
 	}
 
-	path := filepath.Join(zotHome(), "mcp.json")
+	path := filepath.Join(ncodeHome(), "mcp.json")
 	if target == "project" {
 		if cwd == "" {
 			return "", fmt.Errorf("--project requires a working directory, but none is known")

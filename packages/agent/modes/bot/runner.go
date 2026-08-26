@@ -17,7 +17,7 @@ var stderr = func() io.Writer { return os.Stderr }
 
 // Config holds runner-level settings that are protocol-independent.
 type Config struct {
-	ZotHome      string
+	NcodeHome    string
 	Provider     string
 	Model        string
 	AuthMethod   string
