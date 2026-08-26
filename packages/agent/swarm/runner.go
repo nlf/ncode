@@ -48,7 +48,7 @@ type execRunner struct {
 	// with <swarm-root>/agents/<id>/session.json. Tests that
 	// hand-build an Agent without going through Spawn must set
 	// one of the two; the runner refuses to invent a fallback
-	// because the only plausible one (<Dir>/.zot/session.json)
+	// because the only plausible one (<Dir>/.ncode/session.json)
 	// would litter the user's repo — every agent's Dir points
 	// at it directly.
 	SessionPath string
@@ -131,7 +131,7 @@ func (r *execRunner) Run(ctx context.Context, sink Sink) error {
 	//      <swarm-root>/agents/<id>/session.json so the per-
 	//      agent state is entirely outside the working tree.
 	//      Crucial because Agent.Dir points at the user's repo;
-	//      any .zot/ scratch directory under Dir would litter
+	//      any .ncode/ scratch directory under Dir would litter
 	//      their source tree.
 	//
 	// There is no third fallback. If neither path is set we

@@ -240,7 +240,7 @@ func (m *Manager) Discover(ctx context.Context) []error {
 func (m *Manager) searchDirs() []string {
 	var dirs []string
 	if m.cwd != "" {
-		dirs = append(dirs, filepath.Join(m.cwd, ".zot", "extensions"))
+		dirs = append(dirs, filepath.Join(m.cwd, ".ncode", "extensions"))
 	}
 	if m.ncodeHome != "" {
 		dirs = append(dirs, filepath.Join(m.ncodeHome, "extensions"))

@@ -36,7 +36,7 @@ type UpdateInfo struct {
 	URL       string // release page url for the changelog link
 }
 
-// updateCache is the on-disk structure written to $ZOT_HOME.
+// updateCache is the on-disk structure written to $NCODE_HOME.
 type updateCache struct {
 	CheckedAt time.Time `json:"checked_at"`
 	// The version that was current when we last checked. Invalidates

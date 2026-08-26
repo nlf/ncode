@@ -49,6 +49,35 @@ permissions:
 	}
 }
 
+func TestDiscoverUsesNcodeProjectAndGlobalPaths(t *testing.T) {
+	t.Setenv("ZOT_AGENT_SKILLS", "")
+	root := t.TempDir()
+	ncodeHome := filepath.Join(root, "home")
+	cwd := filepath.Join(root, "project")
+	writeSkill := func(dir, name string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Join(dir, name), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		body := "---\nname: " + name + "\ndescription: path test\n---\nbody\n"
+		if err := os.WriteFile(filepath.Join(dir, name, "SKILL.md"), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeSkill(filepath.Join(cwd, ".ncode", "skills"), "project-ncode")
+	writeSkill(filepath.Join(ncodeHome, "skills"), "global-ncode")
+
+	got, errs := Discover(ncodeHome, cwd, "", true)
+	if len(errs) != 0 {
+		t.Fatalf("Discover errors: %v", errs)
+	}
+	for _, name := range []string{"project-ncode", "global-ncode"} {
+		if FindByName(got, name) == nil {
+			t.Fatalf("skill %q was not discovered from ncode path", name)
+		}
+	}
+}
+
 func TestDiscoverProjectAndGlobalPriorityAndDedup(t *testing.T) {
 	t.Setenv("ZOT_AGENT_SKILLS", "")
 	tmp := t.TempDir()
@@ -63,7 +92,7 @@ func TestDiscoverProjectAndGlobalPriorityAndDedup(t *testing.T) {
 	}
 
 	// Same skill name in BOTH project and global; project should win.
-	mk(filepath.Join(cwd, ".zot", "skills"), "shared", "project version")
+	mk(filepath.Join(cwd, ".ncode", "skills"), "shared", "project version")
 	mk(filepath.Join(ncodeHome, "skills"), "shared", "global version")
 	// Unique skill in global only.
 	mk(filepath.Join(ncodeHome, "skills"), "global-only", "from global")

@@ -63,11 +63,11 @@ usage:
   ncode ext enable <name>           re-enable a disabled extension
   ncode ext disable <name>          disable without removing
   ncode ext remove <name>           delete an extension directory
-  ncode ext install <path|git-url>  copy / clone an extension into $ZOT_HOME/extensions/
+  ncode ext install <path|git-url>  copy / clone an extension into $NCODE_HOME/extensions/
 
 extensions live under:
-  $ZOT_HOME/extensions/<name>/extension.json   (global)
-  ./.zot/extensions/<name>/extension.json      (project-local)`)
+  $NCODE_HOME/extensions/<name>/extension.json   (global)
+  ./.ncode/extensions/<name>/extension.json      (project-local)`)
 }
 
 // extList walks both the global and project-local extension dirs and
@@ -200,7 +200,7 @@ func scanExtDoctorStatic() []extDoctorStaticRow {
 	}
 	var dirs []scanDir
 	if cwd, err := os.Getwd(); err == nil {
-		dirs = append(dirs, scanDir{scope: "project", dir: filepath.Join(cwd, ".zot", "extensions")})
+		dirs = append(dirs, scanDir{scope: "project", dir: filepath.Join(cwd, ".ncode", "extensions")})
 	}
 	if h := NcodeHome(); h != "" {
 		dirs = append(dirs, scanDir{scope: "global", dir: filepath.Join(h, "extensions")})
@@ -460,7 +460,7 @@ func extRemove(args []string) error {
 }
 
 // extInstall copies a local directory or shallow-clones a git URL
-// into $ZOT_HOME/extensions/. Validates the destination contains an
+// into $NCODE_HOME/extensions/. Validates the destination contains an
 // extension.json before reporting success.
 func extInstall(args []string) error {
 	if len(args) == 0 {
@@ -534,7 +534,7 @@ func extensionDirs() map[string]string {
 		out["global"] = filepath.Join(h, "extensions")
 	}
 	if cwd, err := os.Getwd(); err == nil {
-		out["project"] = filepath.Join(cwd, ".zot", "extensions")
+		out["project"] = filepath.Join(cwd, ".ncode", "extensions")
 	}
 	return out
 }

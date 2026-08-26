@@ -34,7 +34,7 @@ func LoadCachedModels() {
 	}
 }
 
-// LoadUserModels reads $ZOT_HOME/models.json and merges any user-defined
+// LoadUserModels reads $NCODE_HOME/models.json and merges any user-defined
 // models into the active catalog. User models take highest precedence.
 // Any validation issues (bad provider id, empty model id, malformed
 // JSON, negative widths) are surfaced as one warning per line on stderr;

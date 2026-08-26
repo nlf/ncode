@@ -6,7 +6,7 @@
 //	go build -o hello .
 //
 // Then drop it next to its extension.json under
-// $ZOT_HOME/extensions/hello/, or run `zot ext install ./hello`
+// $NCODE_HOME/extensions/hello/, or run `zot ext install ./hello`
 // from this directory.
 package main
 

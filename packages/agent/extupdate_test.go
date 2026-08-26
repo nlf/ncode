@@ -66,7 +66,7 @@ func mustRun(t *testing.T, dir, name string, args ...string) {
 	}
 }
 
-// makeFakeNcodeHome scaffolds $ZOT_HOME/extensions/ and returns the path.
+// makeFakeNcodeHome scaffolds $NCODE_HOME/extensions/ and returns the path.
 func makeFakeNcodeHome(t *testing.T) string {
 	t.Helper()
 	home := t.TempDir()
@@ -95,7 +95,7 @@ func extWithManifest(t *testing.T, root, name, content string) string {
 // ----- tests -----
 
 func TestUpdateAllExtensions_NoExtensionsDirectory(t *testing.T) {
-	// Brand new $ZOT_HOME with no extensions/ directory at all.
+	// Brand new $NCODE_HOME with no extensions/ directory at all.
 	// Must not panic and must print nothing alarming.
 	home := t.TempDir()
 	updateAllExtensions(home) // no-op

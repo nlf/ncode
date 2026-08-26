@@ -32,7 +32,7 @@ func TestAgentAPIKeyCommandHelperProcess(t *testing.T) {
 
 func TestCommandCredentialIsLazy(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	t.Setenv("LAZY_PROVIDER_API_KEY", "")
 	t.Setenv("ZOT_AGENT_API_KEY_COMMAND_HELPER", "1")
 	marker := filepath.Join(home, "command-ran")

@@ -12,8 +12,8 @@
 //
 // Discovery layout (priority order — first match wins per name):
 //
-//	./.zot/skills/<name>/SKILL.md            — project (native)
-//	$ZOT_HOME/skills/<name>/SKILL.md         — global (native)
+//	./.ncode/skills/<name>/SKILL.md            — project (native)
+//	$NCODE_HOME/skills/<name>/SKILL.md         — global (native)
 //	./.claude/skills/<name>/SKILL.md         — project (claude-compat)
 //	~/.claude/skills/<name>/SKILL.md         — global (claude-compat)
 //	./.agents/skills/<name>/SKILL.md         — project (agent-compat)
@@ -243,7 +243,7 @@ func searchDirs(ncodeHome, cwd, userHome string) []location {
 		}
 	}
 	if cwd != "" {
-		add(filepath.Join(cwd, ".zot", "skills"), "project")
+		add(filepath.Join(cwd, ".ncode", "skills"), "project")
 	}
 	if ncodeHome != "" {
 		add(filepath.Join(ncodeHome, "skills"), "global")

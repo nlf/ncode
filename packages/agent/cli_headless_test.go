@@ -67,7 +67,7 @@ func TestRunPrintModeComposesResolvedProviderCoreToolsAndSession(t *testing.T) {
 
 	ncodeHome := t.TempDir()
 	cwd := t.TempDir()
-	t.Setenv("ZOT_HOME", ncodeHome)
+	t.Setenv("NCODE_HOME", ncodeHome)
 	t.Setenv("OPENAI_API_KEY", "")
 	if err := os.WriteFile(filepath.Join(ncodeHome, "SYSTEM.md"), []byte(inheritedSystem), 0o644); err != nil {
 		t.Fatal(err)

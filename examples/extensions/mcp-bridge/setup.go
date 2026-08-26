@@ -88,7 +88,7 @@ func setupHelp() string {
 	b.WriteString("  /mcp setup add grep\n")
 	b.WriteString("  /mcp setup add filesystem --project\n")
 	b.WriteString("  /mcp setup add context7 --global --name docs\n")
-	b.WriteString("\nDefault target is global: $ZOT_HOME/mcp.json. Run /reload-ext after changes.\n")
+	b.WriteString("\nDefault target is global: $NCODE_HOME/mcp.json. Run /reload-ext after changes.\n")
 	return b.String()
 }
 
@@ -137,7 +137,7 @@ func handleSetup(args []string, cwd string) (string, error) {
 		if cwd == "" {
 			return "", fmt.Errorf("--project requires a working directory, but none is known")
 		}
-		path = filepath.Join(cwd, ".zot", "mcp.json")
+		path = filepath.Join(cwd, ".ncode", "mcp.json")
 	}
 
 	cfg, err := readConfigFile(path)

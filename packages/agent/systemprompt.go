@@ -46,7 +46,7 @@ type SystemPromptOpts struct {
 //
 // Users who want extra biasing can use --system-prompt (replace),
 // --append-system-prompt (additive, repeatable), or drop a
-// SYSTEM.md in $ZOT_HOME that overrides the default identity.
+// SYSTEM.md in $NCODE_HOME that overrides the default identity.
 func BuildSystemPrompt(o SystemPromptOpts) string {
 	if o.Now.IsZero() {
 		o.Now = time.Now()

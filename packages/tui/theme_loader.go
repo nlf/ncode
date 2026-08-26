@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// ThemeOption is one selectable theme discovered under $ZOT_HOME/themes.
+// ThemeOption is one selectable theme discovered under $NCODE_HOME/themes.
 // Value is stored in config.json.
 type ThemeOption struct {
 	Value       string
@@ -22,7 +22,7 @@ type ThemeOption struct {
 }
 
 // ThemeFile is the user-editable JSON shape loaded from
-// $ZOT_HOME/themes/*.json. It carries metadata plus separate overrides
+// $NCODE_HOME/themes/*.json. It carries metadata plus separate overrides
 // for dark and light terminals.
 type ThemeFile struct {
 	Name        string              `json:"name"`
@@ -172,7 +172,7 @@ func (c *TerminalColorValue) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// LoadThemeFromHome applies a custom theme from $ZOT_HOME/themes/*.json
+// LoadThemeFromHome applies a custom theme from $NCODE_HOME/themes/*.json
 // to detected. Empty/auto/default keeps the built-in detected theme.
 // If preferred is set, it may be a theme name, a basename without
 // .json, or an absolute/relative path.
@@ -258,7 +258,7 @@ func AvailableThemes(ncodeHome string) []ThemeOption {
 // ThemeOptionFromFile parses one theme JSON file for picker display.
 // value is what will be stored in config; pass an absolute path for
 // extension-owned themes so they can be loaded without copying into
-// $ZOT_HOME/themes.
+// $NCODE_HOME/themes.
 func ThemeOptionFromFile(path, value, source string) (ThemeOption, bool) {
 	b, err := os.ReadFile(path)
 	if err != nil {

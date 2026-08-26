@@ -400,7 +400,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 		// env-based credential is discovered, e.g. an env-only
 		// amazon-bedrock setup (AWS_BEARER_TOKEN_BEDROCK / AWS_PROFILE /
 		// IAM keys) when no config.json pins the provider, such as after
-		// pointing ZOT_HOME at a fresh home dir. Iteration order of
+		// pointing NCODE_HOME at a fresh home dir. Iteration order of
 		// knownProviders defines fallback priority. Local providers without a
 		// default model are skipped because selecting either one here would
 		// fail before the user can choose a model.
@@ -620,7 +620,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 
 	// Custom system prompt resolution order:
 	//   1. --system-prompt flag (highest priority; ad-hoc per run)
-	//   2. $ZOT_HOME/SYSTEM.md (persistent user override)
+	//   2. $NCODE_HOME/SYSTEM.md (persistent user override)
 	//   3. built-in default (defaultIdentity + defaultGuidelines)
 	custom := args.SystemPrompt
 	customSet := args.SystemPromptSet || custom != ""
@@ -672,7 +672,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 	}, nil
 }
 
-// readUserSystemPrompt looks for $ZOT_HOME/SYSTEM.md and returns its
+// readUserSystemPrompt looks for $NCODE_HOME/SYSTEM.md and returns its
 // trimmed contents, or "" when the file is missing / unreadable /
 // empty. Errors are intentionally swallowed: the file is optional,
 // and any failure to read it should fall back to the built-in
@@ -691,7 +691,7 @@ func readUserSystemPrompt(ncodeHome string) string {
 
 // loadAgentsContext loads optional AGENTS.md instruction files. No
 // default file is created or required: zot only includes files that
-// already exist. Global instructions ($ZOT_HOME/AGENTS.md) come first,
+// already exist. Global instructions ($NCODE_HOME/AGENTS.md) come first,
 // followed by project instructions from the filesystem root down to cwd.
 func loadAgentsContext(cwd, ncodeHome string) []ContextFile {
 	var files []ContextFile

@@ -60,8 +60,8 @@ var slashCatalog = []slashCommand{
 
 var sessionSlashCommands = []slashCommand{
 	{Name: "/session timeline", Desc: "inspect context, messages, and tool calls"},
-	{Name: "/session export", Desc: "write the current session to a .zotsession file"},
-	{Name: "/session import", Desc: "load a .zotsession file into this directory"},
+	{Name: "/session export", Desc: "write the current session to a .ncodesession file"},
+	{Name: "/session import", Desc: "load a .ncodesession file into this directory"},
 	{Name: "/session fork", Desc: "branch from a past user message"},
 	{Name: "/session tree", Desc: "switch between session branches"},
 }

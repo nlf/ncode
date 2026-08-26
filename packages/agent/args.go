@@ -80,13 +80,13 @@ type Args struct {
 	NoSkill bool
 
 	// WithSkills controls loading user-installed skills from
-	// $ZOT_HOME/skills/, .zot/skills/, .claude/skills/, and
+	// $NCODE_HOME/skills/, .ncode/skills/, .claude/skills/, and
 	// .agents/skills/. It defaults to true; --no-skill disables all
 	// skill discovery, including built-ins.
 	WithSkills bool
 
 	// NoContextFiles disables discovery and loading of AGENTS.md files
-	// from $ZOT_HOME and the cwd's ancestor directories.
+	// from $NCODE_HOME and the cwd's ancestor directories.
 	NoContextFiles bool
 
 	// InsecureTLS skips TLS verification for custom inference endpoints.
@@ -394,7 +394,7 @@ func printHelp(out *os.File, version string) {
 	)
 	section("extensions",
 		row{"ncode ext list", "list installed extensions"},
-		row{"ncode ext install <path|url>", "install into $ZOT_HOME/extensions/"},
+		row{"ncode ext install <path|url>", "install into $NCODE_HOME/extensions/"},
 		row{"ncode --ext ./path/to/ext", "load an extension for this run only"},
 		row{"ncode ext help", "show all extension subcommands"},
 	)

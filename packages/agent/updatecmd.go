@@ -73,7 +73,7 @@ notes:
     release binary.
   * Honours $GITHUB_TOKEN if set, so private-repo releases work.
   * After the binary is installed, every extension under
-    $ZOT_HOME/extensions/ that is a git checkout is fast-forward
+    $NCODE_HOME/extensions/ that is a git checkout is fast-forward
     pulled (no merge, no rebase). Dirty worktrees are stashed and
     restored. Extensions without a .git directory, disabled
     extensions, and pulls that fail (offline, diverged, etc.) are

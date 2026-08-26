@@ -217,7 +217,7 @@ func (f *Swarm) SpawnReq(ctx context.Context, req SpawnRequest) (*Agent, error) 
 	logPath := filepath.Join(stateDir, "events.jsonl")
 	sessionPath := filepath.Join(stateDir, "session.json")
 	// Keep the transient unix socket outside the durable state root.
-	// ZOT_HOME may live on a shared or network filesystem that supports
+	// NCODE_HOME may live on a shared or network filesystem that supports
 	// regular state files but cannot host unix socket nodes.
 	inboxPath, err := inboxSocketPath(f.cfg.Root, id)
 	if err != nil {

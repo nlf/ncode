@@ -3,7 +3,7 @@ package agent
 import "testing"
 
 func TestConfigSettingsStorePersistsShowInstructionsAtStartup(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	if err := SaveConfig(Config{Theme: "dark"}); err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestConfigSettingsStorePersistsShowInstructionsAtStartup(t *testing.T) {
 }
 
 func TestConfigSettingsStorePersistsJailByDefault(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	if err := SaveConfig(Config{Theme: "dark"}); err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +45,7 @@ func TestConfigSettingsStorePersistsJailByDefault(t *testing.T) {
 }
 
 func TestConfigSettingsStorePersistsAutoCompactThreshold(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	if err := SaveConfig(Config{Theme: "dark"}); err != nil {
 		t.Fatal(err)
 	}

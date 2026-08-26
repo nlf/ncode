@@ -84,7 +84,7 @@ func TestParseSessionAge(t *testing.T) {
 
 func TestSessionsPruneDryRunPreservesSessions(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	missing := filepath.Join(home, "missing-project")
 	existing := t.TempDir()
 	missingPath := createPruneTestSession(t, home, missing)
@@ -109,7 +109,7 @@ func TestSessionsPruneDryRunPreservesSessions(t *testing.T) {
 
 func TestSessionsPruneDisplaysHumanReadableGroupSizes(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	missing := filepath.Join(home, "missing-project")
 	createPruneTestSessionWithText(t, home, missing, strings.Repeat("a", 2048))
 
@@ -127,7 +127,7 @@ func TestSessionsPruneDisplaysHumanReadableGroupSizes(t *testing.T) {
 
 func TestSessionsPruneInteractiveDeletesSelectedGroup(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	firstCWD := filepath.Join(home, "gone-a")
 	secondCWD := filepath.Join(home, "gone-b")
 	first := createPruneTestSession(t, home, firstCWD)
@@ -150,7 +150,7 @@ func TestSessionsPruneInteractiveDeletesSelectedGroup(t *testing.T) {
 
 func TestSessionsPrunePreservesGroupWhenDirectoryCheckIsInconclusive(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	cwd := filepath.Join(home, "unavailable-mount")
 	path := createPruneTestSession(t, home, cwd)
 	stat := func(string) (fs.FileInfo, error) { return nil, fs.ErrPermission }
@@ -200,7 +200,7 @@ func TestSessionAgeClampsCalendarBoundaries(t *testing.T) {
 
 func TestSessionsPruneOlderThanFiltersByLastActivity(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	cwd := t.TempDir()
 	oldPath := createPruneTestSession(t, home, cwd)
 	newPath := createPruneTestSession(t, home, cwd)
@@ -230,7 +230,7 @@ func TestSessionsPruneOlderThanFiltersByLastActivity(t *testing.T) {
 
 func TestSessionsPruneOlderThanLimitsDeletionToCWD(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	firstCWD := t.TempDir()
 	secondCWD := t.TempDir()
 	first := createPruneTestSession(t, home, firstCWD)
@@ -261,7 +261,7 @@ func TestSessionsPruneOlderThanLimitsDeletionToCWD(t *testing.T) {
 
 func TestSessionsPruneRechecksDirectoryBeforeDeleting(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	cwd := filepath.Join(home, "temporarily-missing")
 	path := createPruneTestSession(t, home, cwd)
 	calls := 0

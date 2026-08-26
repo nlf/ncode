@@ -10,12 +10,38 @@ import (
 	"github.com/nlf/ncode/packages/agent/extensions"
 )
 
+func TestExtensionDirsUseNcodeProjectPath(t *testing.T) {
+	home := t.TempDir()
+	cwd := t.TempDir()
+	t.Setenv("NCODE_HOME", home)
+	oldCWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(oldCWD) })
+	if err := os.Chdir(cwd); err != nil {
+		t.Fatal(err)
+	}
+	resolvedCWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := extensionDirs()
+	if want := filepath.Join(home, "extensions"); got["global"] != want {
+		t.Fatalf("global extension dir = %q, want %q", got["global"], want)
+	}
+	if want := filepath.Join(resolvedCWD, ".ncode", "extensions"); got["project"] != want {
+		t.Fatalf("project extension dir = %q, want %q", got["project"], want)
+	}
+}
+
 // TestExtInstallDotSource verifies that `zot ext install .` derives the
 // extension name from the resolved directory name rather than collapsing
 // to the extensions/ parent directory (the false "already exists" bug).
 func TestExtInstallDotSource(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 
 	// Pre-create extensions/ to mimic a normal first run.
 	if err := os.MkdirAll(filepath.Join(home, "extensions"), 0o755); err != nil {
@@ -56,7 +82,7 @@ func TestExtInstallDotSource(t *testing.T) {
 // guard logic does not crash for well-formed input.
 func TestExtInstallNamedDir(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 
 	src := filepath.Join(t.TempDir(), "myext")
 	if err := os.MkdirAll(src, 0o755); err != nil {
@@ -131,7 +157,7 @@ func TestGitignoreNegation(t *testing.T) {
 
 func TestExtDoctorStaticScanAndRender(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("ZOT_HOME", home)
+	t.Setenv("NCODE_HOME", home)
 	cwd := t.TempDir()
 	oldCWD, err := os.Getwd()
 	if err != nil {
@@ -152,11 +178,11 @@ func TestExtDoctorStaticScanAndRender(t *testing.T) {
 		}
 	}
 
-	mustWrite(filepath.Join(cwd, ".zot", "extensions", "disabled", "extension.json"), `{"name":"disabled","exec":"./run.sh","enabled":false}`)
-	mustWrite(filepath.Join(cwd, ".zot", "extensions", "theme", "extension.json"), `{"name":"theme"}`)
-	mustWrite(filepath.Join(cwd, ".zot", "extensions", "theme", "theme.json"), `{"name":"Theme"}`)
-	mustWrite(filepath.Join(cwd, ".zot", "extensions", "bad", "extension.json"), `{bad json`)
-	mustWrite(filepath.Join(cwd, ".zot", "extensions", "dup", "extension.json"), `{"name":"dup","exec":"./project.sh"}`)
+	mustWrite(filepath.Join(cwd, ".ncode", "extensions", "disabled", "extension.json"), `{"name":"disabled","exec":"./run.sh","enabled":false}`)
+	mustWrite(filepath.Join(cwd, ".ncode", "extensions", "theme", "extension.json"), `{"name":"theme"}`)
+	mustWrite(filepath.Join(cwd, ".ncode", "extensions", "theme", "theme.json"), `{"name":"Theme"}`)
+	mustWrite(filepath.Join(cwd, ".ncode", "extensions", "bad", "extension.json"), `{bad json`)
+	mustWrite(filepath.Join(cwd, ".ncode", "extensions", "dup", "extension.json"), `{"name":"dup","exec":"./project.sh"}`)
 	mustWrite(filepath.Join(home, "extensions", "dup", "extension.json"), `{"name":"dup","exec":"./global.sh"}`)
 
 	rows := scanExtDoctorStatic()

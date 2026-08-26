@@ -3475,7 +3475,7 @@ func (i *Interactive) openSettingsDialog() {
 		{
 			key:     "theme",
 			label:   "color theme",
-			desc:    "choose a theme from $ZOT_HOME/themes or a loaded extension",
+			desc:    "choose a theme from $NCODE_HOME/themes or a loaded extension",
 			options: themeOptions,
 			choice:  themeChoice,
 		},
@@ -6619,8 +6619,8 @@ func (h *telegramHost) Notify(level, message string) {
 func (i *Interactive) openSessionOpsDialog() {
 	items := []sessionOpsItem{
 		{label: "timeline", action: "timeline", hint: "inspect context, messages, and tool calls"},
-		{label: "export", action: "export", hint: "write the current session to a .zotsession file"},
-		{label: "import", action: "import", hint: "load a .zotsession file into this directory"},
+		{label: "export", action: "export", hint: "write the current session to a .ncodesession file"},
+		{label: "import", action: "import", hint: "load a .ncodesession file into this directory"},
 		{label: "fork", action: "fork", hint: "branch from a past user message into a new session"},
 		{label: "tree", action: "tree", hint: "switch between branches in this directory"},
 	}
@@ -6713,7 +6713,7 @@ func (i *Interactive) doSessionExport(dst string) {
 	i.invalidate()
 }
 
-// doSessionImport copies the .zotsession file at src into the
+// doSessionImport copies the .ncodesession file at src into the
 // running cwd's sessions directory and loads it as the active
 // session, same as `/sessions` -> pick. When src is empty we ask
 // the user to pass a path (no usable default here).
@@ -6721,7 +6721,7 @@ func (i *Interactive) doSessionImport(src string) {
 	src = unquotePath(src)
 	if src == "" {
 		i.mu.Lock()
-		i.statusErr = "import: pass a path — e.g. /session import ~/Downloads/work.zotsession"
+		i.statusErr = "import: pass a path — e.g. /session import ~/Downloads/work.ncodesession"
 		i.mu.Unlock()
 		i.invalidate()
 		return

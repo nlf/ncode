@@ -17,14 +17,14 @@ import (
 )
 
 // PortableExt is the filesystem extension used for exported sessions.
-// A ".zotsession" is just a zot JSONL session file with the meta
+// A ".ncodesession" is a portable JSONL session file with the meta
 // header rewritten so the importing user gets fresh ownership.
-const PortableExt = ".zotsession"
+const PortableExt = ".ncodesession"
 
 // ExportSession writes the session at srcPath to dstPath as a
-// portable .zotsession file. If dstPath is an existing directory the
+// portable .ncodesession file. If dstPath is an existing directory the
 // file is created inside it with a name derived from the session's
-// meta ("YYYYMMDD-HHMMSS-<first-prompt-excerpt>.zotsession"). The
+// meta ("YYYYMMDD-HHMMSS-<first-prompt-excerpt>.ncodesession"). The
 // destination's directory is created if needed. Returns the final
 // resolved path so the caller can tell the user where it landed.
 //
@@ -64,7 +64,7 @@ func ExportSession(srcPath, dstPath string) (string, error) {
 
 	// Scan the rest of the file for the first user message so we can
 	// build a humane filename. Only reads if dstPath doesn't already
-	// end in .zotsession.
+	// end in .ncodesession.
 	firstPrompt := ""
 	if !strings.HasSuffix(strings.ToLower(dstPath), PortableExt) {
 		if fi, _ := os.Stat(dstPath); fi == nil || fi.IsDir() {
@@ -148,7 +148,7 @@ func ExportSession(srcPath, dstPath string) (string, error) {
 	return outPath, nil
 }
 
-// ImportSession copies the .zotsession file at srcPath into the
+// ImportSession copies the .ncodesession file at srcPath into the
 // running user's session store under the given root+cwd, rewriting
 // the meta's id / cwd / started fields so the imported session is
 // owned by the current user / directory / clock. Returns the path
@@ -160,6 +160,9 @@ func ExportSession(srcPath, dstPath string) (string, error) {
 func ImportSession(srcPath, root, cwd, version string) (string, error) {
 	if srcPath == "" {
 		return "", errors.New("import: source path is empty")
+	}
+	if !strings.HasSuffix(strings.ToLower(srcPath), PortableExt) {
+		return "", fmt.Errorf("import: source must end in %s", PortableExt)
 	}
 	src, err := os.Open(srcPath)
 	if err != nil {
@@ -568,7 +571,7 @@ func firstUserPrompt(src io.Reader) (string, error) {
 	}
 }
 
-// filenameFor builds a descriptive .zotsession filename from the
+// filenameFor builds a descriptive .ncodesession filename from the
 // session's start time and, when available, an excerpt of the
 // first user prompt.
 func filenameFor(started time.Time, id, firstPrompt string) string {

@@ -3,8 +3,8 @@
 // Reads standard MCP config files (same format as Claude Desktop, Cursor, etc.)
 // from two locations:
 //
-//  1. Global:  $ZOT_HOME/mcp.json
-//  2. Project: .zot/mcp.json       (in the current working directory)
+//  1. Global:  $NCODE_HOME/mcp.json
+//  2. Project: .ncode/mcp.json       (in the current working directory)
 //
 // Project config overrides global config per-server (shallow merge).
 package main
@@ -42,24 +42,32 @@ type Config struct {
 	MCPServers map[string]ServerConfig `json:"mcpServers"`
 }
 
-// ncodeHome returns the ncode state directory.
+// ncodeHome returns the ncode state directory without creating it.
 func ncodeHome() string {
-	if h := os.Getenv("ZOT_HOME"); h != "" {
+	return resolveNcodeHome(runtime.GOOS, os.Getenv, os.UserHomeDir)
+}
+
+func resolveNcodeHome(goos string, getenv func(string) string, userHome func() (string, error)) string {
+	if h := getenv("NCODE_HOME"); h != "" {
 		return h
 	}
-	if xdg := os.Getenv("XDG_STATE_HOME"); xdg != "" {
-		return filepath.Join(xdg, "zot")
+	if xdg := getenv("XDG_STATE_HOME"); xdg != "" {
+		return filepath.Join(xdg, "ncode")
 	}
-	switch runtime.GOOS {
-	case "darwin":
-		home, _ := os.UserHomeDir()
-		return filepath.Join(home, "Library", "Application Support", "zot")
-	case "windows":
-		return filepath.Join(os.Getenv("APPDATA"), "zot")
-	default: // linux, freebsd, etc.
-		home, _ := os.UserHomeDir()
-		return filepath.Join(home, ".local", "state", "zot")
+	if goos == "darwin" {
+		if home, err := userHome(); err == nil && home != "" {
+			return filepath.Join(home, "Library", "Application Support", "ncode")
+		}
 	}
+	if goos == "windows" {
+		if localAppData := getenv("LOCALAPPDATA"); localAppData != "" {
+			return filepath.Join(localAppData, "ncode")
+		}
+	}
+	if home, err := userHome(); err == nil && home != "" {
+		return filepath.Join(home, ".local", "state", "ncode")
+	}
+	return ".ncode"
 }
 
 // loadConfig reads and merges global + project MCP configs.
@@ -75,7 +83,7 @@ func loadConfig(cwd string) (Config, error) {
 
 	// 2. Project config (overrides global per-server)
 	if cwd != "" {
-		projectPath := filepath.Join(cwd, ".zot", "mcp.json")
+		projectPath := filepath.Join(cwd, ".ncode", "mcp.json")
 		if err := mergeConfig(&cfg, projectPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return cfg, fmt.Errorf("project config %s: %w", projectPath, err)
 		}

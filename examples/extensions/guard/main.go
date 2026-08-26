@@ -15,7 +15,7 @@
 //	cd examples/extensions/guard
 //	go build -o guard .
 //
-// Drop it next to its extension.json under $ZOT_HOME/extensions/guard/
+// Drop it next to its extension.json under $NCODE_HOME/extensions/guard/
 // (or `zot ext install ./guard` from this directory) and the next zot
 // session will load it automatically.
 package main

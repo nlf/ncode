@@ -35,7 +35,7 @@ import (
 )
 
 // Config configures a Runtime. All fields are optional; sensible
-// defaults are read from $ZOT_HOME/config.json, env vars, and the
+// defaults are read from $NCODE_HOME/config.json, env vars, and the
 // resolver chain (the same one the cli uses).
 type Config struct {
 	// Provider is "anthropic" or "openai". Empty = use the user's

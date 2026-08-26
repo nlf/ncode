@@ -5,8 +5,8 @@
 // into zot so the LLM can call them.
 //
 // Config locations:
-//   - Global:  $ZOT_HOME/mcp.json
-//   - Project: .zot/mcp.json
+//   - Global:  $NCODE_HOME/mcp.json
+//   - Project: .ncode/mcp.json
 //
 // Smart lazy: servers are spawned on startup to discover tools, then
 // killed after 5 minutes of idle time. On the next tool call, they're
@@ -216,8 +216,8 @@ func mcpHelp(b *bridge) string {
 	sb.WriteString("  /mcp setup templates                  List setup templates\n")
 	sb.WriteString("  /mcp setup add <template> [options]   Add a server template\n")
 	sb.WriteString("\nSetup options\n")
-	sb.WriteString("  --global                              Write to $ZOT_HOME/mcp.json (default)\n")
-	sb.WriteString("  --project                             Write to .zot/mcp.json\n")
+	sb.WriteString("  --global                              Write to $NCODE_HOME/mcp.json (default)\n")
+	sb.WriteString("  --project                             Write to .ncode/mcp.json\n")
 	sb.WriteString("  --name <server-name>                  Use a custom configured server name\n")
 	return strings.TrimRight(sb.String(), "\n")
 }

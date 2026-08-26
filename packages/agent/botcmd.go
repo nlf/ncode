@@ -389,9 +389,9 @@ to the agent the same way it would be from the tui. image attachments
 telegram commands the bot handles directly: /help, /status, /stop.
 
 config & state:
-  $ZOT_HOME/bot.json       # bot token + paired user (mode 0600)
-  $ZOT_HOME/bot.pid        # pid of the running bot (written by run/start)
-  $ZOT_HOME/logs/bot.log   # stdout+stderr from "ncode telegram-bot start"
+  $NCODE_HOME/bot.json       # bot token + paired user (mode 0600)
+  $NCODE_HOME/bot.pid        # pid of the running bot (written by run/start)
+  $NCODE_HOME/logs/bot.log   # stdout+stderr from "ncode telegram-bot start"
 `)
 }
 

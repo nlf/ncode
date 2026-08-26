@@ -40,8 +40,8 @@ Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
 | Change | `clean-break-ncode-identity` |
 | Strategy | WU 2–WU 12 remain on `feat/clean-break-ncode-identity-02`; checkpoint pushes are allowed, but no intermediate PRs |
 | Final PR | One PR from `feat/clean-break-ncode-identity-02` to `main`, linked to issue #1 with exactly `type:breaking-change` |
-| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 next/unstarted → WU 6 → WU 7 → WU 8 → WU 9 → WU 10 → WU 11 → WU 12 |
-| Current boundary | WU 4 is complete; WU 5 is next and unstarted |
+| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 next/unstarted → WU 7 → WU 8 → WU 9 → WU 10 → WU 11 → WU 12 |
+| Current boundary | WU 5 is complete; WU 6 is next and unstarted |
 | Review budget | The user explicitly accepts the combined final-PR size exception; no intermediate PR review budget applies |
 | Verification | Preserve each WU as an independently revertible commit; run focused verification and `make test` before beginning the next WU |
 | Gates | Clone-local bounded review remains disabled; strict TDD, native SDD attempt authority, issue linkage, verification, CI, and final merge gates remain |
@@ -53,7 +53,8 @@ main: WU 1 merged
       ├── WU 2 complete
       ├── WU 3 complete
       ├── WU 4 complete
-      └── 📍 WU 5 next (unstarted) → WU 6 … WU 12 → one final PR to main
+      ├── WU 5 complete
+     └── 📍 WU 6 next (unstarted) → WU 7 … WU 12 → one final PR to main
 ```
 
 ## Constraints and common evidence
@@ -100,10 +101,10 @@ main: WU 1 merged
 
 **Boundary:** This unit owns home resolution, `.ncode` project discovery, MCP bridge parity, and `.ncodesession` only; WU 9 owns branded temp/log/socket names. **Commit:** `feat(state): isolate ncode paths`. **Verification/rollback:** state timing and no-legacy-read behavior travel with this unit; revert it whole before release.
 
-- [ ] RED — add failing table-driven tests in `packages/agent/config_home_test.go`, `packages/agent/build_test.go`, `packages/agent/extcmd_test.go`, `packages/agent/extensions/manager_test.go`, `packages/agent/skills/skills_test.go`, `packages/core/session_portable_test.go`, and `examples/extensions/mcp-bridge/*_test.go` for the exact `NCODE_HOME`/XDG/macOS/Windows `%LOCALAPPDATA%`/fallback `.ncode` order, `.ncode/{extensions,skills,mcp.json}`, `.ncodesession`, no `.zot` scan, and host/MCP equivalence; run focused tests and `make test` expecting the new assertions to fail. <!-- sdd-owner: implementation -->
-- [ ] GREEN — implement the exact `NcodeHome` order in `packages/agent/config.go`; update `packages/agent/{extcmd.go,extensions/manager.go,skills/skills.go}`, `packages/core/session_portable.go`, relevant `packages/agent/modes/*` session help/import UI, and `examples/extensions/mcp-bridge/config.go` to use only ncode roots/project paths and `.ncodesession`; preserve non-branded basenames and make the MCP bridge use `%LOCALAPPDATA%`, not `%APPDATA%`; run focused tests and `make test`. <!-- sdd-owner: implementation -->
-- [ ] TRIANGULATE — add `legacy_zot_home_test.go`, `legacy_zot_project_path_test.go`, and `legacy_zot_portable_session_test.go` at the owning package locations with coexistence sentinels/snapshots proving `$ZOT_HOME`, OS Zot defaults, `.zot`, and `.zotsession` are ignored and unchanged; add filesystem timing coverage for path resolution, eager ignored-error docs installation in `Resolve`, and existing lazy triggers, then run focused tests and `make test`. <!-- sdd-owner: implementation -->
-- [ ] REFACTOR — consolidate only duplicated test fixtures/path helpers while retaining independent host and MCP assertions; rerun state/project/portable focused tests, `go test ./examples/extensions/mcp-bridge/...`, the no-legacy-path search, and `make test`. <!-- sdd-owner: implementation -->
+- [x] RED — add failing table-driven tests in `packages/agent/config_home_test.go`, `packages/agent/build_test.go`, `packages/agent/extcmd_test.go`, `packages/agent/extensions/manager_test.go`, `packages/agent/skills/skills_test.go`, `packages/core/session_portable_test.go`, and `examples/extensions/mcp-bridge/*_test.go` for the exact `NCODE_HOME`/XDG/macOS/Windows `%LOCALAPPDATA%`/fallback `.ncode` order, `.ncode/{extensions,skills,mcp.json}`, `.ncodesession`, no `.zot` scan, and host/MCP equivalence; run focused tests and `make test` expecting the new assertions to fail. <!-- sdd-owner: implementation -->
+- [x] GREEN — implement the exact `NcodeHome` order in `packages/agent/config.go`; update `packages/agent/{extcmd.go,extensions/manager.go,skills/skills.go}`, `packages/core/session_portable.go`, relevant `packages/agent/modes/*` session help/import UI, and `examples/extensions/mcp-bridge/config.go` to use only ncode roots/project paths and `.ncodesession`; preserve non-branded basenames and make the MCP bridge use `%LOCALAPPDATA%`, not `%APPDATA%`; run focused tests and `make test`. <!-- sdd-owner: implementation -->
+- [x] TRIANGULATE — add `legacy_zot_home_test.go`, `legacy_zot_project_path_test.go`, and `legacy_zot_portable_session_test.go` at the owning package locations with coexistence sentinels/snapshots proving `$ZOT_HOME`, OS Zot defaults, `.zot`, and `.zotsession` are ignored and unchanged; add filesystem timing coverage for path resolution, eager ignored-error docs installation in `Resolve`, and existing lazy triggers, then run focused tests and `make test`. <!-- sdd-owner: implementation -->
+- [x] REFACTOR — consolidate only duplicated test fixtures/path helpers while retaining independent host and MCP assertions; rerun state/project/portable focused tests, `go test ./examples/extensions/mcp-bridge/...`, the no-legacy-path search, and `make test`. <!-- sdd-owner: implementation -->
 
 ## WU 6 — Establish the coherent NCODE environment namespace
 

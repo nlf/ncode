@@ -61,6 +61,25 @@ func (s *stubHooks) OpenPanel(extName string, spec extproto.PanelSpec) {
 func (s *stubHooks) UpdatePanel(string, string, string, []string, string) {}
 func (s *stubHooks) ClosePanel(string, string)                            {}
 
+func TestManagerSearchDirsUseNcodeProjectPath(t *testing.T) {
+	home := t.TempDir()
+	cwd := t.TempDir()
+	mgr := New(home, cwd, "0.0.0-test", "", "", nil)
+	got := mgr.searchDirs()
+	want := []string{
+		filepath.Join(cwd, ".ncode", "extensions"),
+		filepath.Join(home, "extensions"),
+	}
+	if len(got) != len(want) {
+		t.Fatalf("searchDirs() = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("searchDirs()[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
 // writeMockExtension creates a minimal extension on disk that uses a
 // shell script (or batch file on windows) to drive the protocol. The
 // script reads commands from stdin and emits hard-coded responses,

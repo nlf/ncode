@@ -70,10 +70,59 @@ func TestReadAgentsContextMissingFilesIsEmpty(t *testing.T) {
 	}
 }
 
+func TestResolveIgnoresDocsInstallError(t *testing.T) {
+	home := t.TempDir()
+	docsPath := filepath.Join(home, "docs")
+	if err := os.WriteFile(docsPath, []byte("blocks docs directory"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("NCODE_HOME", home)
+
+	_, err := Resolve(Args{
+		Provider:       "openai",
+		Model:          "gpt-5",
+		APIKey:         "test-key",
+		CWD:            t.TempDir(),
+		NoSkill:        true,
+		NoContextFiles: true,
+	}, false)
+	if err != nil {
+		t.Fatalf("Resolve must ignore eager docs installation failure: %v", err)
+	}
+	info, err := os.Stat(docsPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !info.Mode().IsRegular() {
+		t.Fatalf("failed docs path changed unexpectedly: %v", info.Mode())
+	}
+}
+
+func TestResolveInstallsDocsEagerlyUnderNcodeHome(t *testing.T) {
+	home := filepath.Join(t.TempDir(), "ncode-home")
+	t.Setenv("NCODE_HOME", home)
+	t.Setenv("XDG_STATE_HOME", filepath.Join(t.TempDir(), "other-state"))
+
+	_, err := Resolve(Args{
+		Provider:       "openai",
+		Model:          "gpt-5",
+		APIKey:         "test-key",
+		CWD:            t.TempDir(),
+		NoSkill:        true,
+		NoContextFiles: true,
+	}, false)
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+	if info, err := os.Stat(filepath.Join(home, "docs")); err != nil || !info.IsDir() {
+		t.Fatalf("Resolve did not eagerly install docs under NCODE_HOME: info=%v err=%v", info, err)
+	}
+}
+
 func TestResolveNoContextFilesSkipsAgentsInstructions(t *testing.T) {
 	ncodeHome := t.TempDir()
 	cwd := t.TempDir()
-	t.Setenv("ZOT_HOME", ncodeHome)
+	t.Setenv("NCODE_HOME", ncodeHome)
 	t.Setenv("OPENAI_API_KEY", "test-key")
 	if err := os.WriteFile(filepath.Join(ncodeHome, "AGENTS.md"), []byte("global rule"), 0o644); err != nil {
 		t.Fatal(err)
@@ -102,7 +151,7 @@ func TestResolveNoContextFilesSkipsAgentsInstructions(t *testing.T) {
 func TestResolveExplicitEmptySystemPromptOverridesPersistentPrompt(t *testing.T) {
 	ncodeHome := t.TempDir()
 	cwd := t.TempDir()
-	t.Setenv("ZOT_HOME", ncodeHome)
+	t.Setenv("NCODE_HOME", ncodeHome)
 	t.Setenv("OPENAI_API_KEY", "test-key")
 	if err := os.WriteFile(filepath.Join(ncodeHome, "SYSTEM.md"), []byte("persistent instructions"), 0o644); err != nil {
 		t.Fatal(err)
@@ -135,7 +184,7 @@ func TestResolveExplicitEmptySystemPromptOverridesPersistentPrompt(t *testing.T)
 // with no way to fix it from the TUI — and should repair the config
 // so the next launch is silent.
 func TestResolveFallsBackWhenConfiguredModelIsGone(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("OPENAI_API_KEY", "test-key")
 	// Persist a stale model id.
 	stale := "gpt-5.5-pro-not-real"
@@ -175,7 +224,7 @@ func TestResolveAppliesJailByDefault(t *testing.T) {
 		{name: "enabled starts locked", config: Config{Provider: "openai", Model: "gpt-5", JailByDefault: boolPtr(true)}, want: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Setenv("ZOT_HOME", t.TempDir())
+			t.Setenv("NCODE_HOME", t.TempDir())
 			t.Setenv("OPENAI_API_KEY", "test-key")
 			if err := SaveConfig(tc.config); err != nil {
 				t.Fatal(err)
@@ -193,7 +242,7 @@ func TestResolveAppliesJailByDefault(t *testing.T) {
 }
 
 func TestResolveAppliesArgsPermissionSetToSandbox(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	cwd := t.TempDir()
 	allowed := filepath.Join(cwd, "allowed")
 	permissionSet := &tools.PermissionSet{}
@@ -229,7 +278,7 @@ func boolPtr(v bool) *bool { return &v }
 // persisted config. If the user passed --model X explicitly and X is
 // unknown, we still fall back, but we don't touch their config.
 func TestResolveExplicitFlagStaleDoesNotRepairConfig(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("OPENAI_API_KEY", "test-key")
 	good := "gpt-5"
 	if err := SaveConfig(Config{Provider: "openai", Model: good}); err != nil {
@@ -250,7 +299,7 @@ func TestResolveExplicitFlagStaleDoesNotRepairConfig(t *testing.T) {
 }
 
 func TestResolveOpenRouterPreservesSavedRoutedModelID(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("OPENROUTER_API_KEY", "test-key")
 	want := "deepseek/deepseek-v4-flash"
 	if err := SaveConfig(Config{Provider: "openrouter", Model: want}); err != nil {
@@ -273,7 +322,7 @@ func TestResolveOpenRouterPreservesSavedRoutedModelID(t *testing.T) {
 }
 
 func TestResolveGatewayPlainUnknownModelFallsBack(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("OPENROUTER_API_KEY", "test-key")
 	stale := "not-a-routed-model"
 	if err := SaveConfig(Config{Provider: "openrouter", Model: stale}); err != nil {
@@ -293,12 +342,12 @@ func TestResolveGatewayPlainUnknownModelFallsBack(t *testing.T) {
 }
 
 // TestResolveEnvOnlyBedrockDiscoveredWithoutConfig reproduces issue
-// #15: pointing ZOT_HOME at a fresh dir drops the persisted
+// #15: pointing NCODE_HOME at a fresh dir drops the persisted
 // config.json (which pinned provider=amazon-bedrock). Resolve must
 // still discover bedrock from the AWS env vars instead of falling back
 // to anthropic and reporting "not logged in".
 func TestResolveEnvOnlyBedrockDiscoveredWithoutConfig(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir()) // fresh home: no config.json
+	t.Setenv("NCODE_HOME", t.TempDir()) // fresh home: no config.json
 	// Disable the Kimi CLI token fallback so a developer machine with a
 	// real Kimi CLI login doesn't pre-empt bedrock in the scan.
 	if err := SetKimiCLIFallbackDisabled(true); err != nil {
@@ -324,7 +373,7 @@ func TestResolveEnvOnlyBedrockDiscoveredWithoutConfig(t *testing.T) {
 }
 
 func TestResolveOllamaUsesModelBaseURLBeforeDefault(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	provider.SetLiveModels(nil)
 	defer provider.SetLiveModels(nil)
 	provider.SetUserModels([]provider.Model{{
@@ -346,7 +395,7 @@ func TestResolveOllamaUsesModelBaseURLBeforeDefault(t *testing.T) {
 }
 
 func TestResolveUsesInheritedSwarmCredential(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("OPENAI_API_KEY", "")
 
 	r, err := Resolve(Args{
@@ -365,7 +414,7 @@ func TestResolveUsesInheritedSwarmCredential(t *testing.T) {
 }
 
 func TestResolveLlamaCPPUsesRouterInferenceURL(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("LLAMA_BASE_URL", "http://127.0.0.1:8080/v1/")
 	t.Setenv("LLAMA_API_KEY", "")
 	provider.SetManagedModels(nil)
@@ -387,7 +436,7 @@ func TestResolveLlamaCPPUsesRouterInferenceURL(t *testing.T) {
 }
 
 func TestResolveLlamaCPPUsesStoredLogin(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("LLAMA_BASE_URL", "")
 	t.Setenv("LLAMA_API_KEY", "")
 	if err := AuthStoreFor().SetEndpointCredential("llama.cpp", "http://localhost:9090", "stored-key"); err != nil {
@@ -404,7 +453,7 @@ func TestResolveLlamaCPPUsesStoredLogin(t *testing.T) {
 }
 
 func TestResolveCustomProviderModelBaseURLBeatsProviderBaseURL(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("MY_COMPANY_API_KEY", "test-key")
 	path := filepath.Join(t.TempDir(), "models.json")
 	if err := os.WriteFile(path, []byte(`{
@@ -486,7 +535,7 @@ func TestCustomProviderUsesOpenAIResponsesAPI(t *testing.T) {
 }
 
 func TestResolveCustomProviderInsecureFromModelsJSONBaseURL(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("LOCAL_PROXY_API_KEY", "test-key")
 	path := filepath.Join(t.TempDir(), "models.json")
 	if err := os.WriteFile(path, []byte(`{
@@ -518,7 +567,7 @@ func TestResolveCustomProviderInsecureFromModelsJSONBaseURL(t *testing.T) {
 }
 
 func TestResolveOllamaFallsBackToDefaultBaseURL(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	provider.SetLiveModels(nil)
 	defer provider.SetLiveModels(nil)
 
@@ -569,7 +618,7 @@ func TestResolveInsecureOnlyWithExplicitBaseURL(t *testing.T) {
 	orig := http.DefaultTransport
 	t.Cleanup(func() { http.DefaultTransport = orig })
 
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("OPENAI_API_KEY", "test-key")
 
 	resolved, err := Resolve(Args{Provider: "moonshotai", InsecureTLS: true}, false)
@@ -595,7 +644,7 @@ func TestResolveInsecureFromConfigRequiresExplicitBaseURL(t *testing.T) {
 	orig := http.DefaultTransport
 	t.Cleanup(func() { http.DefaultTransport = orig })
 
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	t.Setenv("OPENAI_API_KEY", "test-key")
 	if err := SaveConfig(Config{Provider: "openai", Insecure: true}); err != nil {
 		t.Fatal(err)

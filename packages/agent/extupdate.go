@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// updateAllExtensions iterates $ZOT_HOME/extensions/* and tries to
+// updateAllExtensions iterates $NCODE_HOME/extensions/* and tries to
 // update each one in place via `git pull --ff-only`. Failures are
 // per-extension and never abort the loop; the caller can treat any
 // error here as advisory only.

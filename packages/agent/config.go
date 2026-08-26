@@ -120,31 +120,35 @@ type Config struct {
 	LastChangelogShown string `json:"last_changelog_shown,omitempty"`
 }
 
-// NcodeHome returns $ZOT_HOME or the OS-default data dir.
+// NcodeHome returns $NCODE_HOME or the OS-default state directory.
 //
 // All ncode state (config.json, auth.json, sessions/, logs/) lives under
-// this directory.
+// this directory. Resolving the path does not create it.
 func NcodeHome() string {
-	if v := os.Getenv("ZOT_HOME"); v != "" {
+	return resolveNcodeHome(runtime.GOOS, os.Getenv, os.UserHomeDir)
+}
+
+func resolveNcodeHome(goos string, getenv func(string) string, userHome func() (string, error)) string {
+	if v := getenv("NCODE_HOME"); v != "" {
 		return v
 	}
-	if v := os.Getenv("XDG_STATE_HOME"); v != "" {
-		return filepath.Join(v, "zot")
+	if v := getenv("XDG_STATE_HOME"); v != "" {
+		return filepath.Join(v, "ncode")
 	}
-	switch runtime.GOOS {
-	case "darwin":
-		if home, err := os.UserHomeDir(); err == nil {
-			return filepath.Join(home, "Library", "Application Support", "zot")
-		}
-	case "windows":
-		if v := os.Getenv("LOCALAPPDATA"); v != "" {
-			return filepath.Join(v, "zot")
+	if goos == "darwin" {
+		if home, err := userHome(); err == nil && home != "" {
+			return filepath.Join(home, "Library", "Application Support", "ncode")
 		}
 	}
-	if home, err := os.UserHomeDir(); err == nil {
-		return filepath.Join(home, ".local", "state", "zot")
+	if goos == "windows" {
+		if v := getenv("LOCALAPPDATA"); v != "" {
+			return filepath.Join(v, "ncode")
+		}
 	}
-	return ".zot"
+	if home, err := userHome(); err == nil && home != "" {
+		return filepath.Join(home, ".local", "state", "ncode")
+	}
+	return ".ncode"
 }
 
 // ConfigPath returns the path to config.json.
