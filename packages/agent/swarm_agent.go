@@ -51,15 +51,14 @@ func runSwarmAgentMode(ctx context.Context, args Args, version string) error {
 		args.inheritedAccountID = inherited.AccountID
 	}
 
-	r, err := Resolve(args, true)
+	composition, err := composeHeadlessAgent(ctx, args, version)
 	if err != nil {
 		return err
 	}
-	extMgr, stopExt := setupNonInteractiveExtensions(ctx, args, &r, version)
-	defer stopExt()
+	defer composition.Close()
 
-	ag := r.NewAgent()
-	wireNonInteractiveAgentExtHooks(ctx, ag, extMgr)
+	r := composition.resolved
+	ag := composition.agent
 	sess, _ := openOrCreateSession(args, r, ag, version)
 	defer sess.Close()
 
