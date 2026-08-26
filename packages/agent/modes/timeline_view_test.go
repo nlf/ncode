@@ -20,7 +20,7 @@ func timelineTestData() timelineData {
 	started := time.Date(2026, 8, 17, 12, 0, 0, 0, time.UTC)
 	finished := started.Add(1250 * time.Millisecond)
 	return timelineData{
-		System: "You are zot.",
+		System: "You are ncode.",
 		Tools: []provider.Tool{{
 			Name: "bash", Schema: json.RawMessage(`{"type":"object","properties":{"command":{"type":"string"}}}`),
 		}},

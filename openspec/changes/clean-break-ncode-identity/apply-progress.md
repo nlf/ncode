@@ -1322,3 +1322,110 @@ The active change, branch, and WU10 slice were explicit and unambiguous. Every e
 ### Parent lifecycle and next boundary
 
 Parent owns independent gate, native attempt settlement, the independently revertible `feat(release): distribute ncode only` commit, any checkpoint push, and later WU11 delegation. WU11 is the exact next implementation boundary; WU11 was not started.
+
+## WU 11 apply evidence
+
+Updated: 2026-08-26T21:57:51Z
+
+### Characterization checkpoint
+
+- **Assigned boundary:** exactly WU11 communication/branding on `feat/clean-break-ncode-identity-02`; WU12, commits, pushes, PRs, reviews, branch changes, and native settlement remain out of scope.
+- **Native authority:** parent supplied live token `sha256:b03048b515c530b060c18a8e016b4d6d0640c613c9f98490dde7398db44de23d`; `gentle-ai` is unavailable locally, so no duplicate acquire or settlement was attempted.
+- **Structured readiness:** authoritative OpenSpec state was reconstructed from the installed status contract. Before WU11, 37/44 implementation rows were complete, 7 remained, both parent rows were checked, ownership markers were valid, `applyState` was `ready`, and the only allowed edit root was `/Users/nlf/Projects/nlf/ncode`.
+- **Workload boundary:** the recorded one-final-PR size exception resolves the High 400-line risk; this attempt remains one independently revertible WU11 slice and is capped by the delegated 2,200-line limit.
+- **Characterization-first strict TDD:** this is an approved mechanical communication rewrite, so no RED was manufactured. Existing tests and contract scans are the approval safety net.
+
+### Characterization and safety-net evidence
+
+- `make test` (`go test -race ./...`) — PASS before edits.
+- Focused active help/error/log packages (`agent`, `modes`, Telegram, swarm, provider/auth, TUI, and core) — PASS before edits.
+- Root examples and shell/Python/Node syntax — PASS before edits.
+- Both nested modules were copied completely to an external temporary directory, validated with a temporary local-root module replacement using `go mod tidy`, `go test ./...`, and `go build ./...`, then cleaned — PASS.
+- Local Markdown links across the assigned root/subsystem/example docs: 12 checked, zero broken.
+- Baseline command/path scan found 627 active old-identity lines and 960 ncode command/path lines across communication, examples, and active source/tests; the exact text inventory found 101 non-provenance files after excluding dedicated `legacy_zot_*` rejection files, including the cumulative apply-progress artifact.
+- Exact reviewed provenance manifest: `docs/ncode-architecture.md`, `docs/inherited-capabilities.md`, the two exact historical `docs/superpowers/...` records, `openspec/project.md`, `openspec/config.yaml`, and the proposal/spec/design/identity-inventory/tasks files for this change. These were classified separately and not mechanically rewritten.
+- The characterization checkbox is persisted as `[x]` in `tasks.md`; the communication rewrite and post-edit verification rows remain unchecked.
+
+### TDD Cycle Evidence
+
+| Task | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|---|
+| WU11 characterize | Approval/structural | Full race suite, focused packages, examples, nested external copies, syntax, links, and command/path inventory passed. | Not manufactured: task explicitly requires characterization-first mechanical work. | N/A | Active communication and exact provenance/rejection classes were distinguished. | No production edits occurred during characterization. |
+| WU11 rewrite | Approval/communication integration | Characterization above plus focused active owner packages. | Not manufactured: the approved mechanical rewrite used the characterized output and active-identity scan as its change oracle. | Active docs, examples, help/errors/logs, manifests, tests, installers, issue templates, auth pages, themes, SDK/RPC/swarm prose, and source comments use ncode; focused packages passed. | Root examples, both complete-copy nested modules, installer mock/static checks, help/version snippets, Markdown links, and five forbidden identity classes passed. | Corrected Go identifier capitalization, removed an inherited name-expansion claim, fixed the provider-doc URL owner, improved article grammar, and reran focused/full checks. |
+
+### Completed implementation tasks and persisted checkboxes
+
+- [x] WU11 characterization — persisted in OpenSpec and Engram tasks.
+- [x] WU11 communication rewrite — persisted in OpenSpec and Engram tasks.
+- [x] WU11 post-edit verification — persisted in OpenSpec and Engram tasks.
+
+### Communication rewrite outcome
+
+- Root and contributor communication: `README.md`, `CONTRIBUTING.md`, and `AGENTS.md` now use lowercase ncode commands, paths, state, SDK/RPC/swarm terminology, and repository links.
+- README Install and First run/authentication lead with clean-break callouts: no predecessor credentials, settings, sessions, caches, extensions, SDK/RPC clients, swarm metadata, or other state is reused; no importer, conversion prompt, or compatibility fallback is offered.
+- Installer output and the GoReleaser release header carry the same clean-break categories. README one-liners use the existing `nlf/ncode` raw GitHub sources rather than inventing an unverified product domain.
+- Active subsystem docs were characterized together. `docs/providers.md`, `docs/skills.md`, and `docs/themes.md` required rewriting; `docs/extensions.md` and `docs/rpc.md` were already ncode-only from WU7/WU8 and remained unchanged.
+- Both issue templates, every stale example README/source/manifest/theme description, MCP bridge Makefile/API identifiers, SDK example prose, and active command/help/error/log/auth/TUI/test expectations now identify ncode.
+- `packages/agent/skills/builtin/write-zot-themes/` moved to `write-ncode-themes/`; its frontmatter name, paths, examples, and product prose moved together. The unchanged PNG bytes moved from `zot-logo.png` to `ncode-logo.png`, and the embed reference/description moved with them.
+- The WU1 rejection file was renamed from the non-conforming `legacy_zotfile_absence_test.go` to `legacy_zot_zotfile_absence_test.go` without changing rejection behavior, so its retained literals now satisfy the exact `legacy_zot_*` basename rule.
+- The active default system prompt now identifies ncode without claiming that the new name expands to the inherited product's phrase.
+
+### Exact provenance and active scan
+
+The exact reviewed provenance files remained byte-for-byte outside task checkbox/progress persistence: `docs/ncode-architecture.md`, `docs/inherited-capabilities.md`, the two exact `docs/superpowers/...` historical records, `openspec/project.md`, `openspec/config.yaml`, and this change's proposal/spec/design/identity-inventory/tasks artifacts. Dedicated rejection evidence is limited to basenames beginning `legacy_zot_*` in the working tree.
+
+A working-tree-complete scan used `git ls-files -co --exclude-standard`, ignored deleted index paths, included untracked rename destinations, excluded only the eleven exact provenance files, dedicated `legacy_zot_*` files, and this cumulative apply-progress artifact, then required zero matches in five classes. Results:
+
+| Forbidden active class | Matches |
+|---|---:|
+| Case-insensitive old product identity | 0 |
+| Old canonical module | 0 |
+| Old product environment namespace | 0 |
+| Old dot state/session paths | 0 |
+| Old composed-name patterns | 0 |
+| Existing non-legacy identity-bearing worktree paths | 0 |
+
+The cumulative `apply-progress.md` itself contains 146 historical old-identity lines from prior WU evidence and therefore cannot be counted as active product communication or rewritten without violating the cumulative-progress contract. It is not currently in the inventory's eleven-file provenance manifest; WU12's final manifest/mandatory-line audit must reconcile that planning-artifact classification before using the index-only final command. No product source, active documentation, example, test outside dedicated rejection files, or existing worktree path relies on this carve-out.
+
+### Verification commands and outcomes
+
+- Pre-edit `make test` and post-edit final `make test` (`go test -race ./...`) — PASS.
+- Focused owner packages: `go test ./packages/agent ./packages/agent/modes ./packages/agent/modes/telegram ./packages/agent/swarm ./packages/provider ./packages/provider/auth ./packages/tui ./packages/core -count=1` — PASS.
+- Focused help/system-prompt/distribution and auth tests — PASS.
+- `go test ./examples/... -count=1` — PASS.
+- Both nested modules: complete external copies, temporary local-root replacement only in each copy, `go mod tidy`, `go test ./... -count=1`, `go build ./...`, trap cleanup — PASS.
+- `bash -n install.sh` and every example RPC shell script — PASS.
+- Python example parsing via `ast.parse` and Node example checks via `node --check` — PASS with no generated cache.
+- PowerShell static delimiter/required-anchor checks — PASS; no PowerShell runtime was available or downloaded.
+- Local Markdown links: 12 checked, zero broken; active Markdown command scan — PASS.
+- Direct `go build -o /tmp/ncode-wu11 ./cmd/ncode`, help/version snippet assertions, and cleanup — PASS.
+- README/installer/release clean-break phrase and category checks — PASS.
+- Working-tree-complete five-class forbidden scan and path scan — PASS as tabulated above.
+- `git diff --check` — PASS.
+- No live network, provider, release service, credentials, generated tracked binaries, or Python bytecode was used.
+
+### Files and statistics
+
+- **Logical scope:** 106 rename-aware files: 104 implementation/communication files plus `tasks.md` and cumulative `apply-progress.md`.
+- **Implementation changed lines:** 1,244 rename-aware text lines (`627` additions, `617` deletions), plus the byte-identical binary logo path move. This is below the delegated 2,200-line maximum; the accepted one-final-PR size exception covers the High forecast.
+- **SDD artifact delta:** 113 lines (`110` additions, `3` deletions).
+- **Total rename-aware text scope:** 1,357 lines (`737` additions, `620` deletions).
+- **Primary file groups:** root communication and issue templates; release/install notices; provider/skills/themes docs; extension/SDK/theme examples; active agent/core/provider/TUI help/error/log/comments/tests; theme skill and logo moves; SDD tasks/progress.
+
+### Deviations, boundaries, and remaining tasks
+
+- No runtime contract, state behavior, provider wire shape, RPC frame, extension acknowledgement, or swarm control shape was redesigned. Changes are communication literals/comments, active expectations, example identifiers, the provider-doc URL correction, and two identity-bearing path moves.
+- The invalid predecessor product-domain substitution was not published; README install links point to the established raw GitHub repository URLs.
+- WU12 was not started. It owns retained-capability audit coverage, final provenance/rejection line review, exact index-based allowlist gates after the WU11 commit boundary, and final reproduction/build checks.
+- No commit, stage, push, PR, branch switch, review actor, native settlement, WU12 edit, or live network/provider action occurred. Parent owns the independently revertible `docs(identity): publish ncode clean break` commit and settlement.
+
+### Remaining implementation tasks (exact unchecked lines)
+
+- [ ] Add or complete focused no-live-provider retained-capability coverage for provider/auth resolution, print/stream/JSON/RPC v1, sessions, direct permissions/tools, swarm, extensions including idle auto-ready v2 ack, skills, themes, updater via `httptest`, and retained Telegram tests; run the affected packages, `go vet ./...`, and `make test`. <!-- sdd-owner: implementation -->
+- [ ] Update `openspec/changes/clean-break-ncode-identity/identity-inventory.md` before the final search to add this exact `tasks.md` path to the reviewed provenance manifest only if it contains legacy terms solely as historical planning/rejection context; then verify every provenance line and every `legacy_zot_*` line is factual or asserts rejection/non-use, not active support. <!-- sdd-owner: implementation -->
+- [ ] Run the exact final allowlist gates from `identity-inventory.md`: construct `audit_pathspecs` with each exact provenance file plus `openspec/changes/clean-break-ncode-identity/tasks.md` when admitted and only `:(exclude,glob)**/legacy_zot_*`; require zero output from `git grep -nI -i -e zot -- "${audit_pathspecs[@]}"`, old-module, `ZOTCORE_|ZOT_[A-Z0-9_]+`, `.zot(session)?`, and `zot[-_][[:alnum:]_-]+` searches, and from `git ls-files | grep -i zot | grep -vE '(^|/)legacy_zot_[^/]*$'`. <!-- sdd-owner: implementation -->
+- [ ] Run the exact workable-file and mandatory-line reviews from `identity-inventory.md`: build `/tmp/ncode-zot-provenance-files.txt`, `/tmp/ncode-zot-rejection-files.txt`, and `/tmp/ncode-zot-allowed-files.txt`; require `comm -23` against `git grep -Il -i -e zot -- .` to emit no paths; emit and review every line into `/tmp/ncode-zot-provenance-lines.txt` and `/tmp/ncode-zot-rejection-lines.txt`; then run `go mod tidy`, `go list ./...`, `go vet ./...`, `make build`, `make test`, nested example builds, installer/package checks, and the inventory reproduction commands against planning SHA `18325b75cc89c75b5f4842924cb377aa5bef5c4b`. <!-- sdd-owner: implementation -->
+
+### Parent lifecycle and next boundary
+
+WU11 is complete. Parent owns independent lifecycle checks, native attempt settlement, the WU11 commit, and any checkpoint push. WU12 is the exact next implementation boundary and was not started.

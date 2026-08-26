@@ -1,4 +1,4 @@
-// clock — a ncode extension written in plain Node (no dependencies).
+// clock — an ncode extension written in plain Node (no dependencies).
 //
 // Registers two slash commands:
 //   /now            — pushes the current local time into the chat as

@@ -47,7 +47,7 @@ type Config struct {
 	// Ctrl+1..9. Cmd+1..9 may also work on terminals that forward Super.
 	QuickModelShortcuts []QuickModelShortcut `json:"quick_model_shortcuts,omitempty"`
 
-	// InlineImagesEnabled controls whether zot draws screenshots inline
+	// InlineImagesEnabled controls whether ncode draws screenshots inline
 	// when the terminal supports an image protocol. nil/missing means
 	// auto (enabled when supported); false disables; true forces the
 	// detected protocol when available.
@@ -193,7 +193,7 @@ func (c Config) CompactUserInput() bool {
 func AuthPath() string { return filepath.Join(NcodeHome(), "auth.json") }
 
 // KimiCLIFallbackDisabledPath returns a sentinel that disables falling
-// back to the official Kimi Code CLI token after `zot /logout kimi`.
+// back to the official Kimi Code CLI token after `ncode /logout kimi`.
 func KimiCLIFallbackDisabledPath() string {
 	return filepath.Join(NcodeHome(), "kimi-cli-fallback-disabled")
 }

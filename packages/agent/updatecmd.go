@@ -197,7 +197,7 @@ func runUpdate(version string) error {
 		newBin = filepath.Join(extractDir, "ncode.exe")
 	}
 	if st, err := os.Stat(newBin); err != nil || st.IsDir() {
-		return fmt.Errorf("extracted archive does not contain a ncode binary at %s", newBin)
+		return fmt.Errorf("extracted archive does not contain an ncode binary at %s", newBin)
 	}
 
 	curBin, err := os.Executable()

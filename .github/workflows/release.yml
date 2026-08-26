@@ -98,7 +98,7 @@ jobs:
           set -euo pipefail
           test "$(go list -m)" = "github.com/nlf/ncode"
           test -f cmd/ncode/main.go
-          test ! -e cmd/zot
+          test ! -e cmd/ncode
           grep -q '^project_name: ncode$' .goreleaser.yaml
           grep -q '^    main: ./cmd/ncode$' .goreleaser.yaml
 

@@ -62,9 +62,9 @@ type Renderer struct {
 	// \x1b[3J just drops scrollback rows without moving the
 	// viewport, which is what we actually want.
 	//
-	// The trade-off when keepScrollback is true: stale zot frames
+	// The trade-off when keepScrollback is true: stale ncode frames
 	// remain in scrollback above the live view, so scrolling up
-	// in VS Code's terminal shows old (already-superseded) zot
+	// in VS Code's terminal shows old (already-superseded) ncode
 	// output. That is strictly less disruptive than the
 	// scrollbar yanking to top on every Ctrl+L, and it is a
 	// limitation specific to VS Code's terminal that we have no
@@ -445,7 +445,7 @@ func (r *Renderer) DrawLog(chat, bottom []string, cursorBottomRow, cursorCol int
 	for range bottomMarginRows {
 		lines = append(lines, paintBackgroundRow("", r.cols, r.theme))
 	}
-	// In main-screen flow mode zot normally emits only its logical
+	// In main-screen flow mode ncode normally emits only its logical
 	// content rows and leaves the rest of the terminal viewport alone.
 	// When a theme background is configured, fill that otherwise-idle
 	// space with painted blank rows so the full window is tinted while
@@ -501,7 +501,7 @@ func (r *Renderer) DrawLog(chat, bottom []string, cursorBottomRow, cursorCol int
 			} else {
 				w.WriteString(SeqClearScreenNoHome)
 				// Purging scrollback invalidates native terminal selections.
-				// It is safe on the first paint because no zot output can be
+				// It is safe on the first paint because no ncode output can be
 				// selected yet, but implicit recovery repaints happen while an
 				// agent is streaming and must preserve the user's selection.
 				if purgeScrollback {

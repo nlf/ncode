@@ -193,7 +193,7 @@ type msgCacheKey struct {
 	expandAll bool
 	// turnOpen is true when the previous rendered message belongs to
 	// the same agent turn (assistant tool_use, or tool result). The
-	// header ("▍ zot") is suppressed in that case so a single turn
+	// header ("▍ ncode") is suppressed in that case so a single turn
 	// — even one that spans many assistant/tool message round-trips
 	// in the underlying API — renders under one header instead of a
 	// new one per assistant message.
@@ -401,7 +401,7 @@ func (v *View) BuildWithAnchors(width int) ([]string, []MessageAnchor) {
 		// to the most recent user prompt. Walk back over consecutive
 		// assistant/tool messages: if any non-user message precedes
 		// this one without a user message in between, we're inside
-		// the same turn and should not draw a new "▍ zot" header.
+		// the same turn and should not draw a new "▍ ncode" header.
 		turnOpen := false
 		if m.Role == provider.RoleAssistant {
 			for j := idx - 1; j >= 0; j-- {
@@ -444,7 +444,7 @@ func (v *View) BuildWithAnchors(width int) ([]string, []MessageAnchor) {
 	// text to show. An empty streaming block (streamOn=true,
 	// Streaming="") appears when a turn starts with a tool_use
 	// block instead of text — in that case the live tool-call
-	// overlay below is the real content and a naked "zot" bar
+	// overlay below is the real content and a naked "ncode" bar
 	// above it reads as a stray empty message.
 	if v.StreamingActive && strings.TrimSpace(v.Streaming) != "" {
 		// Stream the partial assistant text through the same markdown
@@ -737,7 +737,7 @@ func (v *View) renderMessage(m provider.Message, width int, turnOpen bool) []str
 	case provider.RoleAssistant:
 		// Assistant rows: no speaker label either. Prose still gets a
 		// small left indent so it visually aligns with tool box body
-		// content, but no "zot" header.
+		// content, but no "ncode" header.
 		_ = turnOpen
 		const indent = "  "
 		inner := assistantBodyWidth(width - len(indent))
@@ -863,7 +863,7 @@ func (v *View) renderToolCall(tc ToolCallView, width int) []string {
 
 	// Live body (write/edit): keep the streamed preview visible until
 	// a proposed or real tool result arrives. The provider can finish the
-	// tool_use JSON before zot has executed the tool, so keying this on
+	// tool_use JSON before ncode has executed the tool, so keying this on
 	// tc.Streaming makes write/edit boxes collapse for a moment between
 	// EvToolUseEnd and confirmation or EvToolResult.
 	if tc.Preview == "" && tc.Result == "" {
@@ -1754,7 +1754,7 @@ func wrapCodeLine(line string, width int) []string {
 
 // renderImageBlock returns the lines for one image, inline if possible.
 //
-// Inline image escapes paint into multiple terminal rows but the zot
+// Inline image escapes paint into multiple terminal rows but the ncode
 // renderer treats each slice entry as a single row. To prevent chat
 // content from being drawn on top of the image, we pad with blank rows
 // so the image's real footprint is reflected in the frame height.
@@ -2494,7 +2494,7 @@ func StatusBar(p StatusBarParams) []string {
 	}
 
 	// Layout uses exactly 2 spaces of horizontal padding everywhere:
-	//   2 spaces  (openai) gpt-5.4  $0.000 (sub) 0.0%/400k  ~/Sites/zot
+	//   2 spaces  (openai) gpt-5.4  $0.000 (sub) 0.0%/400k  ~/Sites/ncode
 	// matches the editor prompt's left inset so the bar lines up
 	// vertically with the conversation column.
 	const pad = "  " // 2 spaces
@@ -2529,7 +2529,7 @@ func StatusBar(p StatusBarParams) []string {
 	} else {
 		// Idle path: a single pad of left inset so the line
 		// aligns with the conversation column on its left edge
-		// ("  you" / "  zot" message markers). Without the busy
+		// ("  you" / "  ncode" message markers). Without the busy
 		// prefix there's no trailing separator to double-pad.
 		leftBuilder.WriteString(pad)
 	}

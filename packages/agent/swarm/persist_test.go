@@ -16,7 +16,7 @@ import (
 
 // TestSpawnWritesMetaJSON asserts the durability contract: every
 // successful Spawn leaves a meta.json on disk with the agent's
-// identity bits. Without this, Reload on the next zot launch can't
+// identity bits. Without this, Reload on the next ncode launch can't
 // find the agent and the user loses access to the worktree.
 func TestSpawnWritesMetaJSON(t *testing.T) {
 	root := t.TempDir()
@@ -63,7 +63,7 @@ func TestSpawnWritesMetaJSON(t *testing.T) {
 	}
 }
 
-// TestReloadRebuildsDetachedAgents simulates a zot restart by spawning
+// TestReloadRebuildsDetachedAgents simulates an ncode restart by spawning
 // in one Swarm, throwing it away, then opening a fresh Swarm against
 // the same root and calling Reload. The user-visible state — id,
 // task, branch, dir — must come back, and status must be Detached so
@@ -590,7 +590,7 @@ func TestSpawnReqPersistsModel(t *testing.T) {
 // updating this assertion is the failure mode this catches.
 func TestSwarmAgentArgsIncludesModelFlags(t *testing.T) {
 	args := swarmAgentArgs(swarmAgentArgsOpts{
-		Exe: "/zot", Dir: "/wt", SessionPath: "/s.json", InboxPath: "/in.sock",
+		Exe: "/ncode", Dir: "/wt", SessionPath: "/s.json", InboxPath: "/in.sock",
 		Task: "do x", Model: "gpt-5", Provider: "openai",
 	})
 	want := []string{"--model", "gpt-5", "--provider", "openai"}
@@ -775,7 +775,7 @@ func TestActiveSessionScopesSnapshotAll(t *testing.T) {
 // Swarm instance is still SessionID="sess-A" after a fresh New +
 // Reload reads it back from meta.json. Without persistence, the
 // scope filter would forget which session owned each agent after
-// a zot restart and the dashboard would leak everything again.
+// an ncode restart and the dashboard would leak everything again.
 func TestSessionIDPersistsAcrossReload(t *testing.T) {
 	root := t.TempDir()
 	mkSwarm := func() *Swarm {
@@ -819,7 +819,7 @@ func TestSessionIDPersistsAcrossReload(t *testing.T) {
 // were spawned without an active session, e.g. via a test rig or
 // scripted caller) carry SessionID == "" and remain visible from
 // every scope. Otherwise the schema bump would orphan every
-// pre-existing agent the moment a user upgraded zot.
+// pre-existing agent the moment a user upgraded ncode.
 func TestEmptySessionIDIsVisibleFromAnyScope(t *testing.T) {
 	root := t.TempDir()
 	f := New(Config{

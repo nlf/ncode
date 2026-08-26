@@ -377,7 +377,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 	// If the user did NOT explicitly pick a provider (neither via --provider
 	// nor by saving one in config.json) and the default one has no
 	// credentials, auto-fall-back to whichever provider is actually logged
-	// in. That way running plain `zot` after `/login` (any provider) never
+	// in. That way running plain `ncode` after `/login` (any provider) never
 	// shows a "not logged in" banner.
 	//
 	// Critical: when the user HAS saved a provider in config.json (e.g.
@@ -473,7 +473,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 	if err != nil {
 		// The model the user (or persisted config) asked for is no
 		// longer in the active catalogue — they probably removed it
-		// from their models.json or upgraded zot and the id changed.
+		// from their models.json or upgraded ncode and the id changed.
 		// Refusing to launch is the wrong move: it strands the user
 		// with no way to even open the TUI and pick a new model.
 		// Fall back to the provider's default, warn on stderr, and,
@@ -482,7 +482,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 		// doesn't repeat on every launch.
 
 		// Gateway providers can accept route-qualified ids that are not in
-		// zot's local catalog yet, for example OpenRouter's
+		// ncode's local catalog yet, for example OpenRouter's
 		// "deepseek/deepseek-v4-flash". Preserve only route-qualified ids;
 		// plain unknown values are likely typos and should still fall back.
 		if isGatewayProvider(provName) && isGatewayRoutedModelID(model) {
@@ -690,7 +690,7 @@ func readUserSystemPrompt(ncodeHome string) string {
 }
 
 // loadAgentsContext loads optional AGENTS.md instruction files. No
-// default file is created or required: zot only includes files that
+// default file is created or required: ncode only includes files that
 // already exist. Global instructions ($NCODE_HOME/AGENTS.md) come first,
 // followed by project instructions from the filesystem root down to cwd.
 func loadAgentsContext(cwd, ncodeHome string) []ContextFile {

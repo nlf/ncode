@@ -4,10 +4,10 @@ package assets
 
 import _ "embed"
 
-// LogoPNG is the pixel-art ncode `z` logo as PNG bytes.
+// LogoPNG is the pixel-art ncode logo as PNG bytes.
 // Used by the interactive welcome banner; decoded once and rasterized
 // to Unicode half-blocks so it renders on any terminal without needing
 // inline image support.
 //
-//go:embed zot-logo.png
+//go:embed ncode-logo.png
 var LogoPNG []byte

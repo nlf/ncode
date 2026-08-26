@@ -3,13 +3,13 @@
 BIN := $(notdir $(CURDIR))
 # Must match "name" in extension.json (slash command/logical extension name).
 EXT := mcp
-ZOT_HOME ?= $(shell \
+NCODE_HOME ?= $(shell \
 	if [ -n "$$XDG_STATE_HOME" ]; then \
-		printf '%s/zot' "$$XDG_STATE_HOME"; \
+		printf '%s/ncode' "$$XDG_STATE_HOME"; \
 	elif [ "$$(uname -s)" = "Darwin" ]; then \
-		printf '%s/Library/Application Support/zot' "$$HOME"; \
+		printf '%s/Library/Application Support/ncode' "$$HOME"; \
 	else \
-		printf '%s/.local/state/zot' "$$HOME"; \
+		printf '%s/.local/state/ncode' "$$HOME"; \
 	fi)
 
 default: install
@@ -18,11 +18,11 @@ build:
 	go build -o $(BIN) .
 
 install:
-	-zot ext remove $(EXT) --yes
-	rm -rf "$(ZOT_HOME)/extensions/$(BIN)"
-	mkdir -p "$(ZOT_HOME)/extensions/$(EXT)"
-	cp extension.json "$(ZOT_HOME)/extensions/$(EXT)/extension.json"
-	go build -o "$(ZOT_HOME)/extensions/$(EXT)/$(BIN)" .
+	-ncode ext remove $(EXT) --yes
+	rm -rf "$(NCODE_HOME)/extensions/$(BIN)"
+	mkdir -p "$(NCODE_HOME)/extensions/$(EXT)"
+	cp extension.json "$(NCODE_HOME)/extensions/$(EXT)/extension.json"
+	go build -o "$(NCODE_HOME)/extensions/$(EXT)/$(BIN)" .
 
 uninstall:
-	-zot ext remove $(EXT) --yes
+	-ncode ext remove $(EXT) --yes

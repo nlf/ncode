@@ -10,8 +10,8 @@
 //	go build -o weather .
 //
 // Then drop it next to its extension.json under
-// $NCODE_HOME/extensions/weather/, or run `zot ext install ./weather`
-// from this directory. After that, asking zot anything like
+// $NCODE_HOME/extensions/weather/, or run `ncode ext install ./weather`
+// from this directory. After that, asking ncode anything like
 // "what's the weather in Berlin?" makes the model call the tool.
 package main
 

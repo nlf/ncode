@@ -12,10 +12,10 @@ func TestBuildSystemPromptCustomOmitsBuiltInDocs(t *testing.T) {
 		Custom:       "Custom instructions",
 		Append:       []string{"Additional context"},
 		Now:          time.Date(2026, time.August, 6, 0, 0, 0, 0, time.UTC),
-		NcodeDocsDir: "/zot/docs",
+		NcodeDocsDir: "/ncode/docs",
 	})
 
-	if strings.Contains(got, "Zot's own docs") || strings.Contains(got, "/zot/docs") {
+	if strings.Contains(got, "ncode's own docs") || strings.Contains(got, "/ncode/docs") {
 		t.Fatalf("custom prompt includes built-in docs guidance:\n%s", got)
 	}
 	for _, want := range []string{
@@ -34,10 +34,10 @@ func TestBuildSystemPromptDefaultIncludesBuiltInDocs(t *testing.T) {
 	got := BuildSystemPrompt(SystemPromptOpts{
 		CWD:          "/workspace",
 		Now:          time.Date(2026, time.August, 6, 0, 0, 0, 0, time.UTC),
-		NcodeDocsDir: "/zot/docs",
+		NcodeDocsDir: "/ncode/docs",
 	})
 
-	if !strings.Contains(got, "Zot's own docs are installed under /zot/docs") {
+	if !strings.Contains(got, "ncode's own docs are installed under /ncode/docs") {
 		t.Fatalf("default prompt missing built-in docs guidance:\n%s", got)
 	}
 }

@@ -26,7 +26,7 @@ func TestKimiCodeHeadersUseNcodeFallbackDeviceID(t *testing.T) {
 
 func TestReadAgentsContextLoadsGlobalAndAncestors(t *testing.T) {
 	root := t.TempDir()
-	ncodeHome := filepath.Join(root, "zot-home")
+	ncodeHome := filepath.Join(root, "ncode-home")
 	project := filepath.Join(root, "repo")
 	nested := filepath.Join(project, "packages", "app")
 	if err := os.MkdirAll(ncodeHome, 0o755); err != nil {
@@ -180,7 +180,7 @@ func TestResolveExplicitEmptySystemPromptOverridesPersistentPrompt(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, unwanted := range []string{"persistent instructions", defaultIdentity, "Zot's own docs are installed under"} {
+	for _, unwanted := range []string{"persistent instructions", defaultIdentity, "ncode's own docs are installed under"} {
 		if strings.Contains(r.SystemPrompt, unwanted) {
 			t.Fatalf("explicit empty system prompt unexpectedly contains %q:\n%s", unwanted, r.SystemPrompt)
 		}
@@ -190,7 +190,7 @@ func TestResolveExplicitEmptySystemPromptOverridesPersistentPrompt(t *testing.T)
 // TestResolveFallsBackWhenConfiguredModelIsGone reproduces the
 // startup failure caught by the user's screenshot: the persisted
 // config.json points at a model id that's no longer in the active
-// catalogue (because they edited models.json or zot's bundled
+// catalogue (because they edited models.json or ncode's bundled
 // catalogue changed). Resolve must NOT error — strands the user
 // with no way to fix it from the TUI — and should repair the config
 // so the next launch is silent.

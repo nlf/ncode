@@ -108,7 +108,7 @@ $checksumUrl = "$baseUrl/checksums.txt"
 $tmp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP ("ncode-install-" + [System.Guid]::NewGuid().ToString("N").Substring(0,8)))
 
 try {
-  Msg "ncode is a clean break from Zot: Zot credentials, settings, sessions, caches, extensions, SDK/RPC/swarm integrations, and other Zot state are not reused. Configure ncode fresh; no migration or compatibility fallback is provided."
+  Msg "ncode is a clean break: predecessor credentials, settings, sessions, caches, extensions, SDK/RPC/swarm integrations, and other state are not reused. Configure ncode fresh; no importer, conversion prompt, or compatibility fallback is provided."
   Msg "downloading $archive"
   Invoke-WebRequest -UseBasicParsing -Headers $headers -Uri $archiveUrl -OutFile (Join-Path $tmp $archive)
 

@@ -34,8 +34,8 @@ type SystemPromptOpts struct {
 // the cached prefix on every request, so bloat is cumulatively
 // expensive. We ship only:
 //
-//   - A one-paragraph identity (who zot is, what the name means,
-//     what the TUI expects for output format).
+//   - A one-paragraph identity (who ncode is and what the TUI expects
+//     for output format).
 //   - The date + cwd footer so the model has current-context.
 //
 // Everything else (tool listing, operating guidelines, "don't run
@@ -64,9 +64,9 @@ func BuildSystemPrompt(o SystemPromptOpts) string {
 	} else {
 		sb.WriteString(defaultIdentity)
 		if strings.TrimSpace(o.NcodeDocsDir) != "" {
-			sb.WriteString("\n\nZot's own docs are installed under ")
+			sb.WriteString("\n\nncode's own docs are installed under ")
 			sb.WriteString(o.NcodeDocsDir)
-			sb.WriteString("; use the read tool there when you need details about zot RPC, extensions, skills, or built-in behaviour.")
+			sb.WriteString("; use the read tool there when you need details about ncode RPC, extensions, skills, or built-in behaviour.")
 		}
 	}
 
@@ -82,7 +82,7 @@ func BuildSystemPrompt(o SystemPromptOpts) string {
 	return sb.String()
 }
 
-const defaultIdentity = `You are an expert coding assistant operating inside zot, a coding agent harness. The name "zot" stands for "zero-overhead-tool"; if the user asks what zot means, answer exactly that.
+const defaultIdentity = `You are an expert coding assistant operating inside ncode, a coding agent harness.
 
 Your output renders in a TUI that understands markdown for prose and plain text for tool output. Use markdown freely, keep answers concise, and let tool calls speak for themselves rather than narrating them in prose before you invoke them. Act first, then summarise what you did.
 

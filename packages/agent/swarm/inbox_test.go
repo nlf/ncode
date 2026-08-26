@@ -105,7 +105,7 @@ func TestIsNoListenerErrMatchesECONNREFUSED(t *testing.T) {
 
 // TestInboxNewSupervisorPreemptsOld documents that only one
 // supervisor connection at a time is honoured. The swarm design
-// assumes a single parent zot owns each agent; if a second
+// assumes a single parent ncode owns each agent; if a second
 // parent dials, the listener boots the first one. The first
 // supervisor's already-delivered messages still land in the
 // channel — what we're guarding against is silent dual ownership,

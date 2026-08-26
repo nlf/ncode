@@ -16,7 +16,7 @@
 //	go build -o guard .
 //
 // Drop it next to its extension.json under $NCODE_HOME/extensions/guard/
-// (or `zot ext install ./guard` from this directory) and the next zot
+// (or `ncode ext install ./guard` from this directory) and the next ncode
 // session will load it automatically.
 package main
 
@@ -44,7 +44,7 @@ var dangerPatterns = []*regexp.Regexp{
 func main() {
 	e := ext.New("guard", "1.0.0")
 
-	auditPath := filepath.Join(os.TempDir(), "zot-guard-audit.log")
+	auditPath := filepath.Join(os.TempDir(), "ncode-guard-audit.log")
 	auditFile, _ := os.OpenFile(auditPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if auditFile != nil {
 		defer auditFile.Close()

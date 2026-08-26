@@ -48,8 +48,8 @@ func LoadUserModels() {
 }
 
 // isGatewayProvider returns true for providers whose OpenAI-compatible
-// endpoint can accept routed model IDs that are not present in zot's local
-// catalog. Vercel AI Gateway is intentionally not listed here: zot currently
+// endpoint can accept routed model IDs that are not present in ncode's local
+// catalog. Vercel AI Gateway is intentionally not listed here: ncode currently
 // talks to it through the Anthropic-compatible client, which still requires
 // catalog metadata for request shaping.
 func isGatewayProvider(prov string) bool {
@@ -81,7 +81,7 @@ func isGatewayRoutedModelID(model string) bool {
 //     half-applied switch) -> reset model to the provider's default.
 //
 // Gateway providers are exempt from the cross-provider model check for routed
-// model IDs because those IDs can be valid even when absent from zot's catalog.
+// model IDs because those IDs can be valid even when absent from ncode's catalog.
 //
 // Silent on success; one stderr line per repair. Errors loading or
 // saving the file are non-fatal — the caller continues with defaults.

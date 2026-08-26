@@ -72,7 +72,7 @@ func renderHelpBlock(th tui.Theme, width int, llamaConfigured bool) []string {
 	}
 
 	var out []string
-	out = append(out, frameHeader(th, "zot help", width), "")
+	out = append(out, frameHeader(th, "ncode help", width), "")
 
 	// commands section
 	out = append(out, tui.Bold("slash commands:"))

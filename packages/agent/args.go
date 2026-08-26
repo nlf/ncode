@@ -75,7 +75,7 @@ type Args struct {
 	// NoSkill disables ALL skill discovery for this run, including
 	// the built-in skills compiled into the binary. The system
 	// prompt loses its "Available skills" manifest and the `skill`
-	// tool isn't registered. Useful for running zot without any
+	// tool isn't registered. Useful for running ncode without any
 	// extra context biasing the model.
 	NoSkill bool
 

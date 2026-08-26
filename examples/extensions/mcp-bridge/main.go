@@ -1,8 +1,8 @@
-// mcp-bridge — Connect zot to MCP (Model Context Protocol) servers.
+// mcp-bridge — Connect ncode to MCP (Model Context Protocol) servers.
 //
 // This extension reads MCP server configurations from standard locations
 // (same format as Claude Desktop, Cursor, etc.) and bridges their tools
-// into zot so the LLM can call them.
+// into ncode so the LLM can call them.
 //
 // Config locations:
 //   - Global:  $NCODE_HOME/mcp.json
@@ -30,7 +30,7 @@
 //
 // Install:
 //
-//	zot ext install .
+//	ncode ext install .
 package main
 
 import (
@@ -47,7 +47,7 @@ import (
 func main() {
 	e := ext.New("mcp", "1.1.0")
 
-	// Logger writes to stderr (captured by zot into ext logs)
+	// Logger writes to stderr (captured by ncode into ext logs)
 	logger := log.New(os.Stderr, "[mcp-bridge] ", log.LstdFlags)
 
 	var b *bridge
@@ -105,7 +105,7 @@ func main() {
 }
 
 func startBackgroundToolRefresh(e *ext.Extension, b *bridge, logger *log.Logger, cachePath string, cachedToolCount int) {
-	// Refresh discovery in the background so zot startup is not blocked. Only ask
+	// Refresh discovery in the background so ncode startup is not blocked. Only ask
 	// for /reload-ext if the discovered tool cache actually changed; otherwise a
 	// reload would just repeat this cycle without adding anything.
 	go func() {

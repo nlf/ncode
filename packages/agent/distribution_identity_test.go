@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const cleanBreakNotice = "clean break from Zot"
+const cleanBreakNotice = "ncode is a clean break"
 
 func distributionFile(t *testing.T, name string) string {
 	t.Helper()

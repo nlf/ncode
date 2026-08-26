@@ -1,8 +1,8 @@
-# zot skills
+# ncode skills
 
 A skill is a reusable instruction set written as a single
 `SKILL.md` file with a YAML frontmatter header. Unless a skill disables
-model invocation, zot discovers it at startup and surfaces it to the model
+model invocation, ncode discovers it at startup and surfaces it to the model
 in two ways:
 
 1. The system prompt gains a short manifest:
@@ -49,30 +49,30 @@ There's no template engine; the model sees what you write.
 
 ## Discovery
 
-zot looks in these directories, in priority order, and registers the
+ncode looks in these directories, in priority order, and registers the
 first `SKILL.md` it finds for each unique name:
 
 | location | scope |
 |---|---|
-| `./.zot/skills/<name>/SKILL.md` | project (native) |
-| `$ZOT_HOME/skills/<name>/SKILL.md` | global (native) |
+| `./.ncode/skills/<name>/SKILL.md` | project (native) |
+| `$NCODE_HOME/skills/<name>/SKILL.md` | global (native) |
 | `./.claude/skills/<name>/SKILL.md` | project (claude-compat) |
 | `~/.claude/skills/<name>/SKILL.md` | global (claude-compat) |
 | `./.agents/skills/<name>/SKILL.md` | project (agent-compat) |
 | `~/.agents/skills/<name>/SKILL.md` | global (agent-compat) |
 
 The compat paths are deliberate: a `SKILL.md` written for an existing
-skill ecosystem works in zot unchanged. Drop your existing
+skill ecosystem works in ncode unchanged. Drop your existing
 `.claude/skills/` or `.agents/skills/` directories into a project and
-zot will pick them up.
+ncode will pick them up.
 
-When `XDG_STATE_HOME` is set on any platform, `$ZOT_HOME` defaults to
-`$XDG_STATE_HOME/zot`. Otherwise it defaults to `~/Library/Application Support/zot/`
-on macOS, `~/.local/state/zot` on Linux, or `%LOCALAPPDATA%\zot` on Windows.
+When `XDG_STATE_HOME` is set on any platform, `$NCODE_HOME` defaults to
+`$XDG_STATE_HOME/ncode`. Otherwise it defaults to `~/Library/Application Support/ncode/`
+on macOS, `~/.local/state/ncode` on Linux, or `%LOCALAPPDATA%\ncode` on Windows.
 
 ## Inspecting installed skills
 
-In zot, run `/skills`. A picker lists every discovered skill with its
+In ncode, run `/skills`. A picker lists every discovered skill with its
 description and source path. Press enter on a row to view the full
 body inline. Press esc to go back.
 
@@ -89,7 +89,7 @@ To force a specific skill, invoke it as a slash command. Typing `/skill:` opens 
 /skill:code-review focus on security issues
 ```
 
-zot expands the command into a user message containing the complete skill
+ncode expands the command into a user message containing the complete skill
 body, its directory for resolving relative references, and any text following
 the command as the request. This bypasses model-side skill selection.
 
@@ -120,11 +120,11 @@ See `examples/skills/` for two starter skills:
 
 ## Comparison to other discovery layouts
 
-| ecosystem | path | zot reads it? |
+| ecosystem | path | ncode reads it? |
 |---|---|---|
-| (native) | `.zot/skills/<name>/SKILL.md` | yes |
+| (native) | `.ncode/skills/<name>/SKILL.md` | yes |
 | (claude-style) | `.claude/skills/<name>/SKILL.md` | yes |
 | (agent-style) | `.agents/skills/<name>/SKILL.md` | yes |
 
 Cross-pollination is intentional: pick whichever convention you're
-already using and zot tags along.
+already using and ncode tags along.

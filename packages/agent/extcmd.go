@@ -507,7 +507,7 @@ func extInstall(args []string) error {
 	// Resolve to an absolute, cleaned path before deriving the install
 	// name. Otherwise relative sources like "." or "./" collapse to a
 	// basename of ".", and the destination wrongly resolves to the
-	// extensions/ parent directory (which zot creates on first run),
+	// extensions/ parent directory (which ncode creates on first run),
 	// triggering a false "already exists" failure.
 	absSrc, err := filepath.Abs(src)
 	if err != nil {

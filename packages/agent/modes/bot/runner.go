@@ -107,7 +107,7 @@ func (r *Runner) handleCommand(cmd Command, msg InboundMessage) {
 	switch cmd {
 	case CmdStart, CmdHelp:
 		_ = r.adapter.Send(context.Background(), msg.ChannelID,
-			"send me any message and i'll forward it to zot. attach an image and i'll pass it to the model. commands: /status, /stop, or plain stop.",
+			"send me any message and i'll forward it to ncode. attach an image and i'll pass it to the model. commands: /status, /stop, or plain stop.",
 			SendOptions{ReplyToMessageID: msg.MessageID})
 	case CmdStatus:
 		r.sendStatus(msg.ChannelID, msg.MessageID)

@@ -117,11 +117,15 @@ func TestHelpOutputStreams(t *testing.T) {
 	if err != nil {
 		t.Fatalf("--help returned %v; stderr:\n%s", err, stderr)
 	}
-	if !strings.Contains(stdout, "ncode. yet another coding agent harness.") {
-		t.Fatalf("stdout does not contain ncode help text:\n%s", stdout)
-	}
-	if strings.Contains(stdout, "  zot") || strings.Contains(stdout, "zot. yet another") {
-		t.Fatalf("stdout still advertises a zot command:\n%s", stdout)
+	for _, want := range []string{
+		"ncode. yet another coding agent harness.",
+		"  ncode\n    interactive tui",
+		"  ncode rpc\n    json-rpc loop on stdin/stdout",
+		"  ncode update\n    download and install the latest release",
+	} {
+		if !strings.Contains(stdout, want) {
+			t.Fatalf("stdout does not contain ncode help text %q:\n%s", want, stdout)
+		}
 	}
 	if stderr != "" {
 		t.Fatalf("stderr = %q, want empty", stderr)
@@ -137,11 +141,13 @@ func TestHelpOutputStreams(t *testing.T) {
 	if stdout != "" {
 		t.Fatalf("stdout = %q, want empty for an argument error", stdout)
 	}
-	if !strings.Contains(stderr, "ncode. yet another coding agent harness.") {
-		t.Fatalf("stderr does not contain ncode help text:\n%s", stderr)
-	}
-	if strings.Contains(stderr, "  zot") || strings.Contains(stderr, "zot. yet another") {
-		t.Fatalf("stderr still advertises a zot command:\n%s", stderr)
+	for _, want := range []string{
+		"ncode. yet another coding agent harness.",
+		"  ncode\n    interactive tui",
+	} {
+		if !strings.Contains(stderr, want) {
+			t.Fatalf("stderr does not contain ncode help text %q:\n%s", want, stderr)
+		}
 	}
 
 	stdout, stderr, err = run("--version")

@@ -37,7 +37,7 @@ type Host interface {
 // Host's running agent, then mirrors the agent's final assistant
 // text back to the paired Telegram user. One bridge per Interactive
 // instance; created on /telegram connect, stopped on /telegram
-// disconnect or zot exit.
+// disconnect or ncode exit.
 type Bridge struct {
 	Client *Client
 	Config Config
@@ -53,10 +53,10 @@ type Bridge struct {
 	workingCancel context.CancelFunc
 
 	// nextReplyFromTelegram is set when the next assistant reply
-	// should be sent bare (no "zot: " prefix) because the turn was
+	// should be sent bare (no "ncode: " prefix) because the turn was
 	// initiated by a Telegram DM. The flag clears as soon as the
 	// reply is flushed. TUI-originated turns leave the flag false
-	// so the reply is tagged "zot: " for clarity on the two-sided
+	// so the reply is tagged "ncode: " for clarity on the two-sided
 	// transcript.
 	nextReplyFromTelegram bool
 }
@@ -64,7 +64,7 @@ type Bridge struct {
 // State is the snapshot /telegram status reports.
 type State struct {
 	Running  bool
-	Username string // bot username, e.g. "zotbot"
+	Username string // bot username, e.g. "ncodebot"
 	PairedID int64  // 0 when no user has claimed the bot yet
 }
 
@@ -104,7 +104,7 @@ func (b *Bridge) Start(parent context.Context) error {
 	}
 	if b.Config.BotToken == "" {
 		b.mu.Unlock()
-		return fmt.Errorf("no bot token configured; run `zot telegram-bot setup` first")
+		return fmt.Errorf("no bot token configured; run `ncode telegram-bot setup` first")
 	}
 	b.mu.Unlock()
 
@@ -161,14 +161,14 @@ func (b *Bridge) Stop() {
 // OnAssistantText should be called by the TUI with the assistant's
 // final visible text for each turn. The bridge forwards it to the
 // paired chat in message-sized chunks. Prefix depends on which
-// side initiated the turn: TUI-originated turns get "zot: " so the
-// two-sided transcript reads naturally ("you: ..." / "zot: ..."),
+// side initiated the turn: TUI-originated turns get "ncode: " so the
+// two-sided transcript reads naturally ("you: ..." / "ncode: ..."),
 // while Telegram-originated turns send bare text (the user's own
-// bubble is already on-screen, a "zot: " prefix would just add
+// bubble is already on-screen, a "ncode: " prefix would just add
 // visual noise to a plain back-and-forth).
 func (b *Bridge) OnAssistantText(text string) {
 	b.mu.Lock()
-	// prefix := "zot: "
+	// prefix := "ncode: "
 	prefix := ""
 	workingCancel := b.workingCancel
 	b.workingCancel = nil
@@ -183,7 +183,7 @@ func (b *Bridge) OnAssistantText(text string) {
 	b.sendToPaired(text, prefix)
 }
 
-// OnUserTyped mirrors a message the user typed in the zot TUI into
+// OnUserTyped mirrors a message the user typed in the ncode TUI into
 // the paired Telegram chat, tagged "you:" so the Telegram thread
 // stays a complete record of the conversation (both TUI-originated
 // and Telegram-originated turns). Messages sent from Telegram
@@ -363,7 +363,7 @@ func (b *Bridge) handleUpdate(ctx context.Context, u Update) {
 			_ = b.Save(b.Config)
 			b.mu.Unlock()
 			_ = b.Client.SendMessage(ctx, msg.Chat.ID,
-				fmt.Sprintf("paired with @%s. messages you send here now mirror into the zot tui.", msg.From.Username),
+				fmt.Sprintf("paired with @%s. messages you send here now mirror into the ncode tui.", msg.From.Username),
 				msg.MessageID)
 			b.Host.Notify("success", fmt.Sprintf("telegram paired with user %d (@%s)", msg.From.ID, msg.From.Username))
 			return
@@ -392,7 +392,7 @@ func (b *Bridge) handleUpdate(ctx context.Context, u Update) {
 		switch command {
 		case bot.CmdStart, bot.CmdHelp:
 			_ = b.Client.SendMessage(ctx, msg.Chat.ID,
-				"mirror is active. send me a message and it'll be forwarded to the zot tui. commands: /status, /stop, or plain stop.",
+				"mirror is active. send me a message and it'll be forwarded to the ncode tui. commands: /status, /stop, or plain stop.",
 				msg.MessageID)
 		case bot.CmdStatus:
 			_ = b.Client.SendMessage(ctx, msg.Chat.ID, b.Host.Status(), msg.MessageID)

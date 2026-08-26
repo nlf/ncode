@@ -124,7 +124,7 @@ type InteractiveConfig struct {
 	AutoSwarmSystemAddendum string
 	SettingsStore           SettingsStore
 
-	// Agent is optional. If nil, zot opens without credentials; the
+	// Agent is optional. If nil, ncode opens without credentials; the
 	// user must /login before they can prompt.
 	Agent *core.Agent
 
@@ -147,8 +147,8 @@ type InteractiveConfig struct {
 	// the concrete provider/model in use.
 	BuildAgent func() (*core.Agent, string, string, error)
 
-	// SetKimiCLIFallbackDisabled controls whether zot may fall back to
-	// the official Kimi Code CLI token when zot has no stored Kimi token.
+	// SetKimiCLIFallbackDisabled controls whether ncode may fall back to
+	// the official Kimi Code CLI token when ncode has no stored Kimi token.
 	SetKimiCLIFallbackDisabled func(disabled bool) error
 
 	// BuildAgentFor rebuilds the agent with an explicit provider/model
@@ -197,7 +197,7 @@ type InteractiveConfig struct {
 	// callback returns the new agent message slice so the TUI can invalidate.
 	LoadSession func(path string) error
 
-	// ChangeCWD switches the running zot session's working directory
+	// ChangeCWD switches the running ncode session's working directory
 	// to path. The host closes the current session, rebuilds the
 	// agent so tools / AGENTS.md / sandbox bind to the new cwd, and
 	// opens a fresh session there. Returns an error if path doesn't
@@ -668,7 +668,7 @@ func (i *Interactive) Run(ctx context.Context) error {
 	// selection over the wheel-speed boost, so we no longer turn it
 	// on automatically. Wheel events fall through to the terminal's
 	// own scrollback handler.
-	// Keep zot on the terminal's main screen. We intentionally do not
+	// Keep ncode on the terminal's main screen. We intentionally do not
 	// enter the alternate-screen buffer (CSI ?1049h). The renderer emits
 	// chat as normal terminal flow/scrollback and redraws only the live
 	// input/status block on normal typing.
@@ -681,9 +681,9 @@ func (i *Interactive) Run(ctx context.Context) error {
 		_, _ = term.Write([]byte(seq))
 	}
 	// Erase the live frame on exit without moving the cursor. The shell can
-	// then draw its prompt on the row where zot ended instead of leaving the
+	// then draw its prompt on the row where ncode ended instead of leaving the
 	// inactive TUI visible above it. Do not erase scrollback: users should
-	// still be able to review the session after closing zot.
+	// still be able to review the session after closing ncode.
 	defer term.Write([]byte(tui.SeqResetScrollRegion + tui.SeqDeleteKittyImages + tui.SeqEnhancedKeyboardOff + tui.SeqBracketedPasteOff + tui.ResetCursorColor() + tui.ResetCursorShape() + tui.SeqClearScreenNoHome + tui.SeqShowCursor))
 	i.applyInputCursorColor()
 
@@ -1041,7 +1041,7 @@ func (i *Interactive) buildChatLocked(cols int) []string {
 	}
 
 	// Update-available banner: prepended above everything else so it's
-	// the first thing the user sees when opening a new zot session.
+	// the first thing the user sees when opening a new ncode session.
 	// Once rendered, it stays until the user updates to a newer
 	// version — we don't persist a "dismissed" flag because this is
 	// cheap and re-showing it is how most users remember to update.
@@ -1366,7 +1366,7 @@ func (i *Interactive) redraw() {
 	}
 
 	// Busy prefix shown at the far left of the status bar. The
-	// spinner glyph and its funny-line message share the `zot`
+	// spinner glyph and its funny-line message share the `ncode`
 	// label colour (Theme.Assistant) so the whole "who's working"
 	// band reads at a glance. Elapsed time stays muted because it
 	// drifts every second and shouldn't grab focus.
@@ -1732,7 +1732,7 @@ func hasImageEscape(line string) bool {
 
 // snapViewportStartToImageBlock treats inline images as atomic blocks for
 // scrolling. Terminal image protocols draw from a single escape row into a
-// separate graphics layer; the following blank rows are only zot's reserved
+// separate graphics layer; the following blank rows are only ncode's reserved
 // footprint. If the viewport starts on one of those blank rows, there is no
 // correct partial-image state to render. Snap back to the escape row instead
 // so the image is either shown from its beginning or skipped entirely.
@@ -2372,7 +2372,7 @@ func (i *Interactive) handleKey(ctx context.Context, k tui.Key) (done bool) {
 		// ("be quiet" in a shell) rather than a deliberate
 		// decision to kill a multi-minute model call that's
 		// already cost tokens. Use esc to interrupt a turn; use
-		// a deliberate double-ctrl+c to exit zot entirely. First
+		// a deliberate double-ctrl+c to exit ncode entirely. First
 		// press arms the exit hint, second press within
 		// ctrlCExitWindow quits.
 		if i.busy {
@@ -3409,7 +3409,7 @@ func (i *Interactive) openSettingsDialog() {
 		{
 			key:     "auto_compact_threshold",
 			label:   "auto-compact threshold",
-			desc:    "choose how full the model context can get before zot condenses conversation history",
+			desc:    "choose how full the model context can get before ncode condenses conversation history",
 			options: autoCompactOptions,
 			choice:  autoCompactChoice,
 		},
@@ -3791,7 +3791,7 @@ func (i *Interactive) applySettingToggle(key string, value bool) {
 			}
 		}
 		// Flip the live picker so the next @ reflects the new mode
-		// without restarting zot. SetRecursive drops its cache.
+		// without restarting ncode. SetRecursive drops its cache.
 		i.fileSuggest.SetRecursive(value)
 		i.mu.Lock()
 		i.statusOK = "recursive @-file search " + onOff(value)
@@ -4402,7 +4402,7 @@ func (i *Interactive) runSlash(ctx context.Context, cmd string) (done bool) {
 		// Hidden command: switch the running session's cwd. Not in
 		// slash_suggest, not in /help. Used by the workspaces
 		// extension's panel-key Enter handler so picking a row
-		// jumps zot into that directory without relaunching.
+		// jumps ncode into that directory without relaunching.
 		//
 		// Recovers the raw argument (path) from the original cmd
 		// string rather than parts, so paths with spaces survive.
@@ -4695,11 +4695,11 @@ func (i *Interactive) doLogout(target string) {
 }
 
 func providerSetupInfo(provider string) (string, []string, bool) {
-	const docsURL = "https://raw.githubusercontent.com/patriceckhart/zot/main/docs/providers.md"
+	const docsURL = "https://raw.githubusercontent.com/nlf/ncode/main/docs/providers.md"
 	switch provider {
 	case "amazon-bedrock":
 		return "Amazon Bedrock setup", []string{
-			"Amazon Bedrock uses AWS credentials instead of a generic zot API-key entry.",
+			"Amazon Bedrock uses AWS credentials instead of a generic ncode API-key entry.",
 			"Configure an AWS profile, IAM keys, bearer token, or role-based credentials.",
 			"",
 			"For Bedrock API keys, set:",
@@ -5641,7 +5641,7 @@ func (i *Interactive) startTurnRequest(parent context.Context, prompt string, im
 	// "last frame had the previous turn's tool overlay" and
 	// "this frame had it cleared above". Without this, the guard
 	// reads delta = -(rows in cleared overlay) and decrements
-	// scrollOffset, which on terminals that mirror zot's pane
+	// scrollOffset, which on terminals that mirror ncode's pane
 	// scroll into the host scrollbar visibly yanks the viewport.
 	// See autofollow_shrink_test.go for the exact arithmetic.
 	i.prevChatLen = 0
@@ -5719,7 +5719,7 @@ func (i *Interactive) startTurnRequest(parent context.Context, prompt string, im
 		}
 		// Persist the assistant's reply (and every tool row before
 		// it) to the session file while the turn memory is hot.
-		// Without this, WriteNewTranscript only fires at zot exit,
+		// Without this, WriteNewTranscript only fires at ncode exit,
 		// meaning a crash or ungraceful kill drops the whole
 		// conversation. FlushSession is idempotent (it advances the
 		// baseline so subsequent flushes only write new rows).
@@ -6136,7 +6136,7 @@ func (i *Interactive) openTelegramDialog() {
 	items := i.telegramMenuItems()
 	if len(items) == 0 {
 		i.mu.Lock()
-		i.statusErr = "telegram not configured. run `zot telegram-bot setup` first."
+		i.statusErr = "telegram not configured. run `ncode telegram-bot setup` first."
 		i.mu.Unlock()
 		i.invalidate()
 		return
@@ -6213,7 +6213,7 @@ func (i *Interactive) telegramConnect() {
 	}
 	if cfg.BotToken == "" {
 		i.mu.Lock()
-		i.statusErr = "telegram: no bot token configured. run `zot telegram-bot setup` first."
+		i.statusErr = "telegram: no bot token configured. run `ncode telegram-bot setup` first."
 		i.mu.Unlock()
 		i.invalidate()
 		return
@@ -6221,10 +6221,10 @@ func (i *Interactive) telegramConnect() {
 	// Refuse to start when a background daemon is already polling
 	// the same bot. Two concurrent long-poll consumers race each
 	// update and one always loses, so DMs get half-delivered. The
-	// user can `zot telegram-bot stop` first, then /telegram connect.
+	// user can `ncode telegram-bot stop` first, then /telegram connect.
 	if pid, alive, _ := telegram.IsRunning(i.cfg.NcodeHome); alive && pid > 0 {
 		i.mu.Lock()
-		i.statusErr = fmt.Sprintf("telegram: bot daemon already running (pid %d). stop it with `zot telegram-bot stop` first.", pid)
+		i.statusErr = fmt.Sprintf("telegram: bot daemon already running (pid %d). stop it with `ncode telegram-bot stop` first.", pid)
 		i.mu.Unlock()
 		i.invalidate()
 		return
@@ -6544,7 +6544,7 @@ func (i *Interactive) telegramStatus() {
 	} else {
 		cfg, _ := telegram.LoadConfig(i.cfg.NcodeHome)
 		if cfg.BotToken == "" {
-			msg = "telegram: not configured. run `zot telegram-bot setup` first."
+			msg = "telegram: not configured. run `ncode telegram-bot setup` first."
 		} else {
 			msg = "telegram: disconnected"
 			if cfg.BotUsername != "" {

@@ -85,10 +85,10 @@ release:
   header: |
     ## ncode {{ .Tag }}
 
-    **ncode is a clean break from Zot.** It does not reuse Zot credentials,
+    **ncode is a clean break.** It does not reuse predecessor credentials,
     settings, sessions, caches, extensions, SDK/RPC/swarm integrations, or
-    other Zot state. Configure ncode fresh; no migration or compatibility
-    fallback is provided.
+    other state. Configure ncode fresh; no importer, conversion prompt, or
+    compatibility fallback is provided.
 
     one-liner install:
 

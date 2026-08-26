@@ -133,7 +133,7 @@ CHECKSUMS_URL="${BASE_URL}/checksums.txt"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-msg "ncode is a clean break from Zot: Zot credentials, settings, sessions, caches, extensions, SDK/RPC/swarm integrations, and other Zot state are not reused. Configure ncode fresh; no migration or compatibility fallback is provided."
+msg "ncode is a clean break: predecessor credentials, settings, sessions, caches, extensions, SDK/RPC/swarm integrations, and other state are not reused. Configure ncode fresh; no importer, conversion prompt, or compatibility fallback is provided."
 msg "downloading ${ARCHIVE}"
 curl -A "ncode-installer" -fsSL "${CURL_AUTH[@]+"${CURL_AUTH[@]}"}" -o "$TMP/$ARCHIVE" "$ARCHIVE_URL" \
   || die "download failed: $ARCHIVE_URL (set GITHUB_TOKEN if the repo is private)"

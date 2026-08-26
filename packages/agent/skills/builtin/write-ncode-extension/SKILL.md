@@ -3,16 +3,16 @@ name: write-ncode-extension
 description: Help the user create a new ncode extension (slash command, LLM tool, or guard) in any language.
 ---
 
-# Writing a ncode extension
+# Writing an ncode extension
 
-Use this skill when the user asks for help building a ncode extension —
+Use this skill when the user asks for help building an ncode extension —
 a new slash command, a new tool the LLM can call, an audit hook, or
 a permission gate. Skim this whole skill first, then collaborate
 with the user on the specific extension they want.
 
 ## What an extension is
 
-A ncode extension is **an external executable** that ncode launches as a
+An ncode extension is **an external executable** that ncode launches as a
 subprocess and talks to over its stdin/stdout in newline-delimited
 JSON. It can be written in any language that can read/write JSON
 lines from stdio: Go, TypeScript (via tsx), Python, Rust, shell with

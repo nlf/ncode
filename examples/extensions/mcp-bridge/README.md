@@ -1,8 +1,8 @@
 # mcp-bridge
 
-Connect zot to [MCP (Model Context Protocol)](https://modelcontextprotocol.io) servers.
+Connect ncode to [MCP (Model Context Protocol)](https://modelcontextprotocol.io) servers.
 
-This extension reads MCP server configurations from standard locations (same format as Claude Desktop, Cursor, Cline, etc.) and bridges their tools into zot so the LLM can call them directly.
+This extension reads MCP server configurations from standard locations (same format as Claude Desktop, Cursor, Cline, etc.) and bridges their tools into ncode so the LLM can call them directly.
 
 ## Features
 
@@ -31,8 +31,8 @@ This extension reads MCP server configurations from standard locations (same for
 2. **Create a project config file:**
 
    ```bash
-   mkdir -p .zot
-   cat > .zot/mcp.json << 'EOF'
+   mkdir -p .ncode
+   cat > .ncode/mcp.json << 'EOF'
    {
      "mcpServers": {
        "filesystem": {
@@ -51,10 +51,10 @@ This extension reads MCP server configurations from standard locations (same for
 3. **Install the extension:**
 
    ```bash
-   zot ext install .
+   ncode ext install .
    ```
 
-4. **Restart zot.** On first run the extension refreshes its tool cache in the background. When zot shows `MCP tool cache changed`, run `/reload-ext` once. Future launches register the cached MCP tools immediately as deferred definitions.
+4. **Restart ncode.** On first run the extension refreshes its tool cache in the background. When ncode shows `MCP tool cache changed`, run `/reload-ext` once. Future launches register the cached MCP tools immediately as deferred definitions.
 
 The model initially sees one small loader tool, `mcp__search_tools`. It searches cached MCP tool names and descriptions locally, activates up to eight relevant definitions by default, and then calls the selected MCP tool normally. This keeps large MCP installations compatible with providers that limit request or tool-schema size.
 
@@ -123,12 +123,12 @@ Config files are loaded from two locations (project overrides global per-server)
 
 | Location | Scope |
 |---|---|
-| `$ZOT_HOME/mcp.json` | Global (`$XDG_STATE_HOME/zot/mcp.json` when `XDG_STATE_HOME` is set) |
-| `.zot/mcp.json` | Project-level (in your project root) |
+| `$NCODE_HOME/mcp.json` | Global (`$XDG_STATE_HOME/ncode/mcp.json` when `XDG_STATE_HOME` is set) |
+| `.ncode/mcp.json` | Project-level (in your project root) |
 
 ### Config Format
 
-Standard MCP config — same as Claude Desktop, with zot-specific extensions:
+Standard MCP config — same as Claude Desktop, with ncode-specific extensions:
 
 ```jsonc
 {
@@ -220,7 +220,7 @@ Standard MCP config — same as Claude Desktop, with zot-specific extensions:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  zot agent                                                    │
+│  ncode agent                                                    │
 │                                                               │
 │  ┌──────────┐    tool_call    ┌──────────────┐               │
 │  │   LLM    │───────────────▶│  mcp-bridge  │               │
@@ -239,7 +239,7 @@ Standard MCP config — same as Claude Desktop, with zot-specific extensions:
 
 1. **Startup**: mcp-bridge reads config and registers tools from `mcp-tools-cache.json`
 2. **Background refresh**: starts configured MCP servers, calls `tools/list`, and updates the cache when definitions change
-3. **Reload**: if the cache changed, run `/reload-ext` once so zot rebuilds the tool registry with the new definitions
+3. **Reload**: if the cache changed, run `/reload-ext` once so ncode rebuilds the tool registry with the new definitions
 4. **Naming**: tools appear as `mcp__<server>__<tool>` (e.g., `mcp__filesystem__read_file`)
 5. **Idle timeout**: servers not used for 5 minutes are automatically stopped
 6. **Auto-respawn**: calling a tool on a stopped server wakes it up
@@ -262,7 +262,7 @@ Standard MCP config — same as Claude Desktop, with zot-specific extensions:
 
 ## Tool Naming
 
-Tools are namespaced to avoid collisions with zot's built-in tools:
+Tools are namespaced to avoid collisions with ncode's built-in tools:
 
 ```
 mcp__<server>__<tool>
@@ -280,7 +280,7 @@ Server and tool names are sanitized (non-alphanumeric characters become `_`).
 
 The bridge uses a "smart lazy" strategy:
 
-1. **On startup**: cached tool definitions are registered without blocking zot startup
+1. **On startup**: cached tool definitions are registered without blocking ncode startup
 2. **In the background**: servers start long enough to refresh the tool cache
 3. **During use**: servers stay running for fast tool calls
 4. **After 5 min idle**: unused servers are automatically stopped (saves memory/CPU)
@@ -301,7 +301,7 @@ This gives you:
 
 **View extension logs:**
 ```bash
-zot ext logs mcp -f
+ncode ext logs mcp -f
 ```
 
 **Common issues:**
@@ -327,11 +327,11 @@ go build -o mcp-bridge .
 go test ./...
 go vet ./...
 
-# Run without installing (for one zot session)
-zot --ext .
+# Run without installing (for one ncode session)
+ncode --ext .
 
 # View logs
-zot ext logs mcp -f
+ncode ext logs mcp -f
 ```
 
 ## License

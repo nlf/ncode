@@ -11,7 +11,7 @@ func TestFormatStatusIncludesModelUsageContextAndCWD(t *testing.T) {
 	got := FormatStatus(StatusSnapshot{
 		Provider:     "openai",
 		Model:        "gpt-5.5",
-		CWD:          "/tmp/zot",
+		CWD:          "/tmp/ncode",
 		Usage:        provider.Usage{InputTokens: 961_000, OutputTokens: 10_000, CacheReadTokens: 770_000, CostUSD: 2.749},
 		Subscription: true,
 		ContextUsed:  44_800,
@@ -29,7 +29,7 @@ func TestFormatStatusIncludesModelUsageContextAndCWD(t *testing.T) {
 		"11.2%/400k",
 		"state: working",
 		"queued: 2",
-		"cwd: /tmp/zot",
+		"cwd: /tmp/ncode",
 	}
 	for _, want := range wants {
 		if !strings.Contains(got, want) {

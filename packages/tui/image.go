@@ -73,7 +73,7 @@ func detectImageProtocolAuto() ImageProtocol {
 		return ImageProtocolITerm2
 	}
 	// iTerm2's OSC 1337 inline image rendering is incompatible with
-	// zot's full-screen per-row redraw: subsequent row clears erase
+	// ncode's full-screen per-row redraw: subsequent row clears erase
 	// all but the first rendered image row, and doNotMoveCursor=1 is
 	// not reliable across iTerm versions. Leave ghostty/kitty untouched
 	// and fall back to the text placeholder in iTerm by default. Users

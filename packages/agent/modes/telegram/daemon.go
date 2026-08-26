@@ -11,7 +11,7 @@ import (
 func PIDPath(ncodeHome string) string { return filepath.Join(ncodeHome, "bot.pid") }
 
 // LogPath returns the location of the bot's log file (stdout+stderr
-// from a detached `zot bot start`).
+// from a detached `ncode bot start`).
 func LogPath(ncodeHome string) string { return filepath.Join(ncodeHome, "logs", "bot.log") }
 
 // WritePID persists pid to bot.pid. Overwrites any existing file.

@@ -55,7 +55,7 @@ var slashCatalog = []slashCommand{
 	{Name: "/telegram", Desc: "connect, disconnect, or show status of the telegram bridge"},
 	{Name: "/settings", Desc: "open settings"},
 	{Name: "/clear", Desc: "clear the chat transcript"},
-	{Name: "/exit", Desc: "exit zot"},
+	{Name: "/exit", Desc: "exit ncode"},
 }
 
 var sessionSlashCommands = []slashCommand{

@@ -225,7 +225,7 @@ func LoadThemeFromHome(ncodeHome, preferred string, detected Theme) (Theme, stri
 // for a settings picker. Invalid JSON files are skipped.
 func AvailableThemes(ncodeHome string) []ThemeOption {
 	out := []ThemeOption{
-		{Value: "auto", Label: "auto", Description: "detect terminal background and use zot defaults", Builtin: true},
+		{Value: "auto", Label: "auto", Description: "detect terminal background and use ncode defaults", Builtin: true},
 		{Value: "dark", Label: "dark", Description: "built-in dark theme", Builtin: true},
 		{Value: "light", Label: "light", Description: "built-in light theme", Builtin: true},
 	}

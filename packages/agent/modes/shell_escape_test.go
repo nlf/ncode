@@ -13,9 +13,9 @@ import (
 func TestShellEscapeAddsOutputToAgentContext(t *testing.T) {
 	agent := core.NewAgent(nil, "", "", nil)
 	i := NewInteractive(InteractiveConfig{Agent: agent, CWD: t.TempDir()})
-	cmd := "printf zot-shell-context"
+	cmd := "printf ncode-shell-context"
 	if runtime.GOOS == "windows" {
-		cmd = "echo zot-shell-context"
+		cmd = "echo ncode-shell-context"
 	}
 
 	i.startShellEscape(context.Background(), cmd)
@@ -28,7 +28,7 @@ func TestShellEscapeAddsOutputToAgentContext(t *testing.T) {
 		i.mu.Unlock()
 		if len(messages) == 1 && !running {
 			text := userMessageText(messages[0])
-			if !strings.Contains(text, "zot-shell-context") {
+			if !strings.Contains(text, "ncode-shell-context") {
 				t.Fatalf("shell context = %q, want command output", text)
 			}
 			if messages[0].Meta[shellEscapeMetaKey] != "true" {

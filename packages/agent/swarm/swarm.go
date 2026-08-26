@@ -54,12 +54,12 @@ type Config struct {
 	Root string
 
 	// RepoRoot is the working directory every spawned agent runs
-	// in — the same cwd the parent zot is using. There is no
+	// in — the same cwd the parent ncode is using. There is no
 	// per-agent isolation: agents edit the host's files directly.
 	RepoRoot string
 
 	// NewRunner produces the Runner for an Agent. If nil, the default
-	// `zot --swarm-agent ...` exec runner is used. Tests inject a fake
+	// `ncode --swarm-agent ...` exec runner is used. Tests inject a fake
 	// here.
 	NewRunner func(a *Agent) Runner
 
@@ -140,7 +140,7 @@ func New(cfg Config) *Swarm {
 }
 
 // SetActiveSession scopes the dashboard view (and Spawn stamping)
-// to a particular host zot session id. Pass empty to clear the
+// to a particular host ncode session id. Pass empty to clear the
 // scope and revert to "show every agent" (the original behaviour).
 //
 // Existing in-memory agents keep their SessionID; only the filter
@@ -255,7 +255,7 @@ func (f *Swarm) SpawnReq(ctx context.Context, req SpawnRequest) (*Agent, error) 
 	f.order = append(f.order, id)
 	f.mu.Unlock()
 
-	// Persist the agent's identity so a later `zot` invocation can
+	// Persist the agent's identity so a later `ncode` invocation can
 	// reload it from disk via Swarm.Reload. Best-effort: if the disk
 	// is read-only we still let the runner start, the user just won't
 	// see this agent on the next launch.

@@ -1,6 +1,6 @@
 <div align="center">
-  <a href="https://www.zot.sh">
-    <img src="packages/provider/auth/assets/zot-logo.png" alt="zot coding agent harness" width="130" height="130" />
+  <a href="https://github.com/nlf/ncode">
+    <img src="packages/provider/auth/assets/ncode-logo.png" alt="ncode coding agent harness" width="130" height="130" />
   </a>
 </div>
 <br>
@@ -10,7 +10,7 @@
   <img alt="30+ providers" src="https://img.shields.io/badge/providers-30+-34E2EA">
 </p>
 <p align="center">
-  <a href="https://www.zot.sh">zot.sh</a>
+  <a href="https://github.com/nlf/ncode">github.com/nlf/ncode</a>
 </p>
 
 ## What is it?
@@ -22,32 +22,34 @@ Yet another coding agent harness, lightweight and written (vibe-slopped) in go.
 - four tools (read, write, edit, bash).
 - three run modes (interactive tui, print, json).
 - built-in telegram bot.
-- extensions in any language via subprocess + json-rpc. None installed by default; opt in with `zot ext install` or `zot --ext`. See [docs/extensions.md](docs/extensions.md).
+- extensions in any language via subprocess + json-rpc. None installed by default; opt in with `ncode ext install` or `ncode --ext`. See [docs/extensions.md](docs/extensions.md).
 - user and extension themes via JSON; see [docs/themes.md](docs/themes.md).
 - standing instructions via `AGENTS.md` files (global and per-project); see [Persistent instructions](#persistent-instructions-agentsmd).
 - reusable instructions via `SKILL.md` files; see [docs/skills.md](docs/skills.md).
 
 ## Install
 
+> **Clean break:** ncode starts with fresh state and integrations. It does not reuse credentials, settings, sessions, caches, extensions, SDK clients, RPC clients, swarm metadata, or other state from the predecessor product. Install and configure ncode directly; there is no importer, conversion prompt, or compatibility fallback.
+
 ### One-liner (macOS, Linux)
 
 ```bash
-curl -fsSL https://www.zot.sh/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/nlf/ncode/main/install.sh | bash
 ```
 
 Detects your OS and architecture, downloads the latest release from GitHub, verifies the SHA-256 against the release's `checksums.txt`, extracts the binary, and drops it in `/usr/local/bin`, `~/.local/bin`, or `~/bin`, whichever is writable first. Pass a version or prefix to pin:
 
 ```bash
-curl -fsSL https://www.zot.sh/install.sh | bash -s -- v0.0.1 ~/bin
+curl -fsSL https://raw.githubusercontent.com/nlf/ncode/main/install.sh | bash -s -- v0.0.1 ~/bin
 ```
 
 ### One-liner (Windows, PowerShell)
 
 ```powershell
-iwr -useb https://www.zot.sh/install.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/nlf/ncode/main/install.ps1 | iex
 ```
 
-Drops `zot.exe` into `$HOME\bin` and adds it to the user PATH if missing. Open a fresh terminal afterwards.
+Drops `ncode.exe` into `$HOME\bin` and adds it to the user PATH if missing. Open a fresh terminal afterwards.
 
 ### go install
 
@@ -55,7 +57,7 @@ Drops `zot.exe` into `$HOME\bin` and adds it to the user PATH if missing. Open a
 go install github.com/nlf/ncode/cmd/ncode@latest
 ```
 
-The installed binary reports the tagged module version and supports `zot update`.
+The installed binary reports the tagged module version and supports `ncode update`.
 
 ### From source
 
@@ -70,21 +72,23 @@ make install      # into $GOPATH/bin
 
 Every release on the [releases page](https://github.com/nlf/ncode/releases) ships archives for Linux, macOS, and Windows on amd64 and arm64 (except windows/arm64), plus a `checksums.txt` file. Download, verify, `chmod +x`, and drop on your `$PATH`.
 
-## Authenticate
+## First run and authentication
 
-The easiest way is to just run `zot` and type `/login`. The TUI opens even without credentials and walks you through a browser-based login flow.
+> **Start fresh:** ncode never reads or reuses predecessor credentials, settings, sessions, caches, extensions, SDK/RPC clients, swarm metadata, or other state. It does not show an import, migration, or conversion prompt. Configure ncode under `$NCODE_HOME` and reconnect integrations with the ncode contracts documented here.
+
+Run `ncode` and type `/login`. The TUI opens without credentials and walks you through a browser-based login flow.
 
 ### Credential lookup order
 
 1. `--api-key` flag
 2. provider-specific env var (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `DEEPSEEK_API_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `MISTRAL_API_KEY`, `XAI_API_KEY`, `CEREBRAS_API_KEY`, `TOGETHER_API_KEY`, `HF_TOKEN`, `ZAI_API_KEY`, `XIAOMI_API_KEY`, `MINIMAX_API_KEY`, `FIREWORKS_API_KEY`, `AI_GATEWAY_API_KEY`, `COPILOT_GITHUB_TOKEN`, `GITHUB_COPILOT_TOKEN`, and others for provider-specific backends)
-3. `$ZOT_HOME/auth.json` (API key or OAuth token; mode 0600)
+3. `$NCODE_HOME/auth.json` (API key or OAuth token; mode 0600)
 
-`$ZOT_HOME` defaults to:
-- All platforms: `$XDG_STATE_HOME/zot` when `XDG_STATE_HOME` is set
-- macOS fallback: `~/Library/Application Support/zot`
-- Linux fallback: `~/.local/state/zot`
-- Windows fallback: `%LOCALAPPDATA%\zot`
+`$NCODE_HOME` defaults to:
+- All platforms: `$XDG_STATE_HOME/ncode` when `XDG_STATE_HOME` is set
+- macOS fallback: `~/Library/Application Support/ncode`
+- Linux fallback: `~/.local/state/ncode`
+- Windows fallback: `%LOCALAPPDATA%\ncode`
 
 ### API keys from commands
 
@@ -104,37 +108,37 @@ To keep an API key in a password manager instead of `auth.json`, configure an `a
 
 For a provider added through `models.json`, put the same credential object under `additional_api_key_creds` using its provider ID. `program` is executed directly, without a shell, so each argument must be a separate `args` entry. `timeout_ms` is optional and defaults to 120 seconds.
 
-zot runs the command only when that provider is selected, not while checking login status or refreshing model catalogs in the background. Successful output is cached in memory for the rest of the zot process and is never written to disk. The command must print one non-empty line to stdout; zot removes trailing CR/LF characters, limits output to 64 KiB, and does not include command output in errors. Saving a normal key through `/login` replaces the command configuration, and `/logout` removes it.
+ncode runs the command only when that provider is selected, not while checking login status or refreshing model catalogs in the background. Successful output is cached in memory for the rest of the ncode process and is never written to disk. The command must print one non-empty line to stdout; ncode removes trailing CR/LF characters, limits output to 64 KiB, and does not include command output in errors. Saving a normal key through `/login` replaces the command configuration, and `/logout` removes it.
 
-Treat `auth.json` as executable configuration: anyone who can modify it can cause zot to run a program under your user account. zot does not interpret `!` prefixes or execute command strings through a shell.
+Treat `auth.json` as executable configuration: anyone who can modify it can cause ncode to run a program under your user account. ncode does not interpret `!` prefixes or execute command strings through a shell.
 
 ### `/login` flow
 
-Run `zot` and type `/login`. Pick one of two methods:
+Run `ncode` and type `/login`. Pick one of two methods:
 
-- **API key**: a small local web server starts on `127.0.0.1:<free-port>`, your browser opens a form, you pick a provider from the full API-key provider list, paste the key, and zot saves it to `auth.json` if accepted. Providers with a lightweight model-list endpoint are probed before saving; provider backends that need extra project/account env vars are saved directly.
+- **API key**: a small local web server starts on `127.0.0.1:<free-port>`, your browser opens a form, you pick a provider from the full API-key provider list, paste the key, and ncode saves it to `auth.json` if accepted. Providers with a lightweight model-list endpoint are probed before saving; provider backends that need extra project/account env vars are saved directly.
 - **Subscription**: use your Claude Pro/Max, ChatGPT Plus/Pro, Kimi Code, SuperGrok/X Premium, or GitHub Copilot subscription. DeepSeek and Google Gemini do **not** have a subscription login path. For those, use the API-key flow.
   - Anthropic and OpenAI pin the browser callback to fixed provider-specific ports (`localhost:53692` for Anthropic, `localhost:1455` for OpenAI) because those are the only ports their auth servers will redirect to.
   - Anthropic uses the Claude Code OAuth flow. Messages go to `api.anthropic.com` with a bearer token and the Claude Code identity headers.
   - OpenAI uses the Codex CLI OAuth flow. Messages go to `chatgpt.com/backend-api/codex/responses` with the `chatgpt-account-id` extracted from the returned id_token.
-  - Kimi uses the Kimi Code device-code OAuth flow. zot opens the verification URL, polls until you approve it in the browser, then sends messages to `api.kimi.com/coding/v1` with the Kimi Code identity headers.
-  - xAI uses a device-code OAuth flow. zot opens a prefilled authorization URL, polls for approval, and uses the resulting token with the xAI API.
-  - GitHub Copilot uses GitHub's device-code login flow. zot stores the GitHub access token and exchanges it for short-lived Copilot inference tokens on demand.
+  - Kimi uses the Kimi Code device-code OAuth flow. ncode opens the verification URL, polls until you approve it in the browser, then sends messages to `api.kimi.com/coding/v1` with the Kimi Code identity headers.
+  - xAI uses a device-code OAuth flow. ncode opens a prefilled authorization URL, polls for approval, and uses the resulting token with the xAI API.
+  - GitHub Copilot uses GitHub's device-code login flow. ncode stores the GitHub access token and exchanges it for short-lived Copilot inference tokens on demand.
 
 > **Note on subscription login.** The OAuth client IDs used are the ones published in Anthropic's Claude Code CLI, OpenAI's Codex CLI, Kimi Code CLI, xAI's device flow, and GitHub Copilot's device-code flow. Reusing them from a third-party tool may be against their terms of service and may be revoked at any time. Use it at your own risk; the API-key flow is the safe default.
 
 ### Token refresh
 
-OAuth access tokens are short-lived (Anthropic ~8h, OpenAI ~30d; Kimi, xAI, and GitHub Copilot also use refresh/exchange flows). zot refreshes or exchanges them automatically:
+OAuth access tokens are short-lived (Anthropic ~8h, OpenAI ~30d; Kimi, xAI, and GitHub Copilot also use refresh/exchange flows). ncode refreshes or exchanges them automatically:
 
-- At every credential lookup, zot checks the stored `expiry` and, if past it (with a 60s safety margin), hits the provider's `oauth/token` endpoint with the stored `refresh_token`, persists the new `access_token`, `refresh_token`, and `expiry` back to `auth.json`, and hands the fresh token to the client.
+- At every credential lookup, ncode checks the stored `expiry` and, if past it (with a 60s safety margin), hits the provider's `oauth/token` endpoint with the stored `refresh_token`, persists the new `access_token`, `refresh_token`, and `expiry` back to `auth.json`, and hands the fresh token to the client.
 - The telegram bridge additionally refreshes once per turn so a bot that runs for days keeps working without manual intervention.
 - If the refresh itself fails (the `refresh_token` was revoked, or the account was logged out everywhere), the error bubbles up to the caller: the TUI shows it in the status line, the bot replies with it in your DM. Run `/login` to get a fresh token pair.
 
-All data lives under `$ZOT_HOME`:
+All data lives under `$NCODE_HOME`:
 
 ```
-$ZOT_HOME/
+$NCODE_HOME/
 ├── config.json         # last-used provider/model/theme, saved automatically
 ├── auth.json           # api keys and oauth tokens (mode 0600)
 ├── sessions/           # jsonl transcripts, one dir per cwd
@@ -147,11 +151,11 @@ $ZOT_HOME/
 └── logs/               # app log files
 ```
 
-Drop a `SYSTEM.md` in `$ZOT_HOME` to replace the built-in identity and zot-docs guidance for every run. `--system-prompt` still wins per-invocation. Pass an empty value (`--system-prompt ""`) to intentionally omit the built-in identity. Custom prompts still receive appended instructions and generated context, including `AGENTS.md`, skills, auto-swarm guidance when enabled, and the date/cwd footer. Delete the file to revert to the default.
+Drop a `SYSTEM.md` in `$NCODE_HOME` to replace the built-in identity and ncode-docs guidance for every run. `--system-prompt` still wins per-invocation. Pass an empty value (`--system-prompt ""`) to intentionally omit the built-in identity. Custom prompts still receive appended instructions and generated context, including `AGENTS.md`, skills, auto-swarm guidance when enabled, and the date/cwd footer. Delete the file to revert to the default.
 
 ### HTTP proxy
 
-To route zot-managed HTTP and HTTPS requests through one proxy, add `http_proxy` to `$ZOT_HOME/config.json`:
+To route ncode-managed HTTP and HTTPS requests through one proxy, add `http_proxy` to `$NCODE_HOME/config.json`:
 
 ```json
 {
@@ -159,20 +163,20 @@ To route zot-managed HTTP and HTTPS requests through one proxy, add `http_proxy`
 }
 ```
 
-The setting is applied at startup to both HTTP and HTTPS traffic. Existing `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, and `https_proxy` environment variables take precedence for their corresponding protocol. `NO_PROXY` and `no_proxy` continue to control bypasses. Restart zot after changing the config file. If the URL contains proxy credentials, prefer protected environment variables because `config.json` is not a credential store.
+The setting is applied at startup to both HTTP and HTTPS traffic. Existing `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, and `https_proxy` environment variables take precedence for their corresponding protocol. `NO_PROXY` and `no_proxy` continue to control bypasses. Restart ncode after changing the config file. If the URL contains proxy credentials, prefer protected environment variables because `config.json` is not a credential store.
 
 ## Persistent instructions (AGENTS.md)
 
-Use `AGENTS.md` to give zot standing instructions that layer **on top of** the default system prompt, without replacing it. This is the friendliest way to shape behavior (for example, taming local models that jump straight to code edits) because it adds guidance rather than taking over the base identity the way `SYSTEM.md` does.
+Use `AGENTS.md` to give ncode standing instructions that layer **on top of** the default system prompt, without replacing it. This is the friendliest way to shape behavior (for example, taming local models that jump straight to code edits) because it adds guidance rather than taking over the base identity the way `SYSTEM.md` does.
 
-zot discovers `AGENTS.md` files automatically at startup and loads them in this order:
+ncode discovers `AGENTS.md` files automatically at startup and loads them in this order:
 
-1. `$ZOT_HOME/AGENTS.md` (global, machine-wide instructions that apply to every project).
+1. `$NCODE_HOME/AGENTS.md` (global, machine-wide instructions that apply to every project).
 2. Every `AGENTS.md` from the filesystem root down to the current working directory. More specific (deeper) files may override earlier ones. This includes `~/AGENTS.md` when the working directory is inside your home directory.
 
 All discovered files are appended to the prompt in that order, so a global baseline can be refined per project. To list loaded context paths, extensions, and user-installed skills above the interactive transcript, enable **show loaded resources at startup** in `/settings`. The setting is off by default, built-in skills are omitted, and the displayed lists are not sent to the model or stored in the session transcript.
 
-For a general, non-project-specific instruction set, put your rules in `$ZOT_HOME/AGENTS.md`, for example:
+For a general, non-project-specific instruction set, put your rules in `$NCODE_HOME/AGENTS.md`, for example:
 
 ```markdown
 Treat questions and discussions as requests for explanation. Do not edit files or run tools unless explicitly asked to make a change. Ask before modifying code.
@@ -182,32 +186,32 @@ Treat questions and discussions as requests for explanation. Do not edit files o
 
 | Mechanism | Scope | Effect |
 |---|---|---|
-| `$ZOT_HOME/AGENTS.md` | global, every run | appended to the default prompt |
+| `$NCODE_HOME/AGENTS.md` | global, every run | appended to the default prompt |
 | `./AGENTS.md` (and parent dirs) | project | appended to the default prompt |
-| `$ZOT_HOME/SYSTEM.md` | global, every run | replaces the built-in identity and zot-docs guidance |
+| `$NCODE_HOME/SYSTEM.md` | global, every run | replaces the built-in identity and ncode-docs guidance |
 | `--append-system-prompt <text>` | single run | appends for one invocation (repeatable) |
-| `--system-prompt <text>` | single run | replaces the built-in identity and zot-docs guidance |
+| `--system-prompt <text>` | single run | replaces the built-in identity and ncode-docs guidance |
 
-> **Note:** zot does not read a `CLAUDE.md` instruction file. The only Claude-compatible thing it picks up is skills under `.claude/skills/`. If you are migrating from Claude Code, move that content into `AGENTS.md` (global or per-project) and zot will use it.
+> **Note:** ncode does not read a `CLAUDE.md` instruction file. The only Claude-compatible thing it picks up is skills under `.claude/skills/`. If you are migrating from Claude Code, move that content into `AGENTS.md` (global or per-project) and ncode will use it.
 
 ## Changelog on update
 
-The first time you launch a newer zot binary, the TUI shows the GitHub release notes once in a dismissible overlay. Press any key to close. The version is recorded in `config.json`'s `last_changelog_shown` so the same release notes never reappear. Fresh installs don't see a changelog (no upgrade has happened yet). The fetch is best-effort: a network failure or a missing release page silently skips, with another attempt on the next launch.
+The first time you launch a newer ncode binary, the TUI shows the GitHub release notes once in a dismissible overlay. Press any key to close. The version is recorded in `config.json`'s `last_changelog_shown` so the same release notes never reappear. Fresh installs don't see a changelog (no upgrade has happened yet). The fetch is best-effort: a network failure or a missing release page silently skips, with another attempt on the next launch.
 
 ## Usage
 
 ```bash
-zot                              # interactive tui
-zot "fix the failing test"       # tui, pre-filled prompt
-zot -p "list all go files"       # print final text, exit
-echo "list all go files" | zot   # piped stdin implies print mode
-cat README.md | zot -p "summarize this text" # combine stdin with the prompt
-zot -p --stats stats.json "task" # print final text and write generation stats
-zot --json "refactor main.go"    # newline-delimited json events, exit
-zot --continue                   # resume the most recent session for this cwd
-zot --resume                     # pick a session to resume
-zot --list-models                # show supported models
-zot --help
+ncode                              # interactive tui
+ncode "fix the failing test"       # tui, pre-filled prompt
+ncode -p "list all go files"       # print final text, exit
+echo "list all go files" | ncode   # piped stdin implies print mode
+cat README.md | ncode -p "summarize this text" # combine stdin with the prompt
+ncode -p --stats stats.json "task" # print final text and write generation stats
+ncode --json "refactor main.go"    # newline-delimited json events, exit
+ncode --continue                   # resume the most recent session for this cwd
+ncode --resume                     # pick a session to resume
+ncode --list-models                # show supported models
+ncode --help
 ```
 
 Print-mode stats contain `provider`, `model`, `prompt_tokens`, `reasoning_tokens`, `generated_output_tokens`, and `elapsed_ms`. Counts cover all model turns triggered by the prompt, including tool loops. Prompt tokens include cache reads and writes. `reasoning_tokens` is `null` when the provider does not report a separate count; in that case `generated_output_tokens` is the provider's total output count and may include reasoning. Elapsed time covers the agent run, not startup and credential resolution. The file is written only after a successful run.
@@ -221,7 +225,7 @@ Print-mode stats contain `provider`, `model`, `prompt_tokens`, `reasoning_tokens
 | `--api-key <key>` | Override the API key. |
 | `--base-url <url>` | Override the provider base URL (tests, self-hosted). |
 | `--insecure` | Skip TLS certificate verification for the explicit `--base-url` endpoint or a `baseUrl` defined for a user model in `models.json` (self-signed local/internal inference servers). Built-in providers, auth, and model discovery keep normal TLS verification. |
-| `--system-prompt <text>` | Replace the default system prompt for this run (also overrides `$ZOT_HOME/SYSTEM.md`; pass `""` for no built-in identity). |
+| `--system-prompt <text>` | Replace the default system prompt for this run (also overrides `$NCODE_HOME/SYSTEM.md`; pass `""` for no built-in identity). |
 | `--append-system-prompt <text>` | Append text to the system prompt (repeatable). |
 | `--reasoning off\|minimum\|low\|medium\|high\|xhigh\|max` | Set the reasoning level on supported models (default: off). `max` is a separate opt-in tier above `xhigh`. |
 | `--stats <path>` | With `-p`/`--print`, write generation statistics as JSON. |
@@ -244,25 +248,25 @@ Print-mode stats contain `provider`, `model`, `prompt_tokens`, `reasoning_tokens
 - `read`: read text files, or inline images (PNG, JPEG, GIF, WebP).
 - `write`: create or overwrite files, making parent directories as needed.
 - `edit`: one or more exact-match replacements in an existing file.
-- `bash`: run a command in the session cwd with merged stdout/stderr and a timeout. On Unix, zot uses `/bin/bash -c` when available, then `bash -c` from `PATH`, and falls back to POSIX `/bin/sh -c` when Bash is unavailable. On Windows, it uses `cmd /C`. macOS ships Bash 3.2 by default, so newer Bash features may be unavailable.
+- `bash`: run a command in the session cwd with merged stdout/stderr and a timeout. On Unix, ncode uses `/bin/bash -c` when available, then `bash -c` from `PATH`, and falls back to POSIX `/bin/sh -c` when Bash is unavailable. On Windows, it uses `cmd /C`. macOS ships Bash 3.2 by default, so newer Bash features may be unavailable.
 
 When the sandbox is on (see `/jail`), all four tools refuse paths outside the session cwd.
 
 ## Modes
 
 - **Interactive** (default): chat TUI with streaming output, spinner, cost meter, slash commands.
-- **Print**: `zot -p "prompt"` runs the agent to completion and writes only the final assistant text to stdout.
-- **Stream**: `zot --stream "prompt"` runs without the TUI and writes assistant text to stdout as it arrives. Tool activity goes to stderr.
-- **Piped input**: when no mode is specified, piped stdin selects print mode. Print, stream, and JSON modes prepend piped stdin to the positional prompt, separated by a newline. For example, `echo "list all go files" | zot` or `cat README.md | zot -p "summarize this text"`.
-- **JSON**: `zot --json "prompt"` emits one JSON object per agent event to stdout, newline-delimited. The schema is documented in [docs/rpc.md](docs/rpc.md).
-- **RPC**: `zot rpc` runs as a long-lived child process; commands in on stdin, events and responses out on stdout, both as NDJSON. Designed for embedding zot in third-party apps written in any language. See [docs/rpc.md](docs/rpc.md) for the wire schema and `examples/rpc/{python,node,shell,go}` for working clients.
+- **Print**: `ncode -p "prompt"` runs the agent to completion and writes only the final assistant text to stdout.
+- **Stream**: `ncode --stream "prompt"` runs without the TUI and writes assistant text to stdout as it arrives. Tool activity goes to stderr.
+- **Piped input**: when no mode is specified, piped stdin selects print mode. Print, stream, and JSON modes prepend piped stdin to the positional prompt, separated by a newline. For example, `echo "list all go files" | ncode` or `cat README.md | ncode -p "summarize this text"`.
+- **JSON**: `ncode --json "prompt"` emits one JSON object per agent event to stdout, newline-delimited. The schema is documented in [docs/rpc.md](docs/rpc.md).
+- **RPC**: `ncode rpc` runs as a long-lived child process; commands in on stdin, events and responses out on stdout, both as NDJSON. Designed for embedding ncode in third-party apps written in any language. See [docs/rpc.md](docs/rpc.md) for the wire schema and `examples/rpc/{python,node,shell,go}` for working clients.
 
 ## Embedding
 
-Two ways to drive zot from another program:
+Two ways to drive ncode from another program:
 
 - **Go in-process**: import `github.com/nlf/ncode/packages/agent/sdk`. One `Runtime` per project; `Prompt(ctx, text, images)` returns a channel of `Event`. Small example in `examples/sdk/`.
-- **Any language, out-of-process**: spawn `zot rpc` as a subprocess and exchange newline-delimited JSON over its stdin/stdout. Wire format and event schema in [docs/rpc.md](docs/rpc.md). Reference clients live under `examples/rpc/`.
+- **Any language, out-of-process**: spawn `ncode rpc` as a subprocess and exchange newline-delimited JSON over its stdin/stdout. Wire format and event schema in [docs/rpc.md](docs/rpc.md). Reference clients live under `examples/rpc/`.
 
 Both interfaces share the same event schema, so transcripts captured by one can be replayed through the other.
 
@@ -274,12 +278,12 @@ Slash command names are case-insensitive in the TUI and messaging backends; argu
 |---|---|
 | `/help` | Show key bindings and commands. |
 | `/login` | Log in via API key or subscription (opens a dialog). |
-| `/logout [provider]` | Clear credentials for any logged-in provider, or all when omitted. `/logout openai-codex` clears ChatGPT/Codex subscription auth while preserving a public OpenAI API key; `/logout kimi` also disables fallback to the official Kimi Code CLI token until you log in to Kimi through zot again. |
+| `/logout [provider]` | Clear credentials for any logged-in provider, or all when omitted. `/logout openai-codex` clears ChatGPT/Codex subscription auth while preserving a public OpenAI API key; `/logout kimi` also disables fallback to the official Kimi Code CLI token until you log in to Kimi through ncode again. |
 | `/model` | Pick a model from a list (or `/model <id>` to set directly). |
 | `/reasoning` | Set the reasoning level for subsequent model calls. |
 | `/llama` | Connect to the configured llama.cpp router, load, unload, or remove cached models, and search/download GGUF models from Hugging Face with live progress. Shown after llama.cpp login is configured. |
 | `/sessions` | Resume a previous session for this directory. |
-| `/session` | Five ops on the current session: inspect its `timeline`, `export` to a portable `.zotsession` file, `import` one back in, `fork` from a past user message, or view its branch `tree`. Opens a picker without an argument; direct forms include `/session timeline`, `/session export [path]`, `/session import <path>`, `/session fork`, and `/session tree`. Default export destination is `~/Downloads`. |
+| `/session` | Five ops on the current session: inspect its `timeline`, `export` to a portable `.ncodesession` file, `import` one back in, `fork` from a past user message, or view its branch `tree`. Opens a picker without an argument; direct forms include `/session timeline`, `/session export [path]`, `/session import <path>`, `/session fork`, and `/session tree`. Default export destination is `~/Downloads`. |
 | `/jump` | Scroll the chat to a previous turn (or `/jump <text>` to filter). |
 | `/btw` | Side chat with full context that doesn't add to the main thread. |
 | `/swarm` | Spawn, monitor, and chat with background subagents. Each runs in parallel with your main session and shares its working directory. |
@@ -290,9 +294,9 @@ Slash command names are case-insensitive in the TUI and messaging backends; argu
 | `/unjail` | Allow tools to touch paths outside again. |
 | `/reload-ext` | Hot-reload all extensions (re-read manifests, respawn subprocesses, rebuild tool registry). |
 | `/telegram` | Connect, disconnect, or show status of the Telegram bridge (takes `connect` / `disconnect` / `status` as an optional argument; opens a picker without one). When connected, DMs from the paired user become prompts in the running session and the assistant's replies are mirrored back to Telegram. Alias: `/tg`. |
-| `/settings` | Change persistent settings, including inline images, auto-swarm, and the auto-compact threshold. Saved to `$ZOT_HOME/config.json`; takes effect immediately. |
+| `/settings` | Change persistent settings, including inline images, auto-swarm, and the auto-compact threshold. Saved to `$NCODE_HOME/config.json`; takes effect immediately. |
 | `/clear` | Clear the chat transcript. |
-| `/exit` | Exit zot. |
+| `/exit` | Exit ncode. |
 
 Extension-registered commands appear under a divider at the bottom of the popup, sorted by name.
 
@@ -302,23 +306,23 @@ Type `!` followed by a command to run it directly without going through the mode
 
 ### `/sessions`
 
-Shows previous sessions for the current working directory, newest first, with timestamp, model, message count, cost, and the first user prompt. Pick one with `up`/`down`, `enter` to resume, `esc` to cancel. zot swaps the current session file for the selected one and replays the full transcript (including tool calls) into the agent. Sessions remember the model they ended on, so resuming picks up on that exact model even if your global default changed.
+Shows previous sessions for the current working directory, newest first, with timestamp, model, message count, cost, and the first user prompt. Pick one with `up`/`down`, `enter` to resume, `esc` to cancel. ncode swaps the current session file for the selected one and replays the full transcript (including tool calls) into the agent. Sessions remember the model they ended on, so resuming picks up on that exact model even if your global default changed.
 
 ### `/session`
 
 Five ops on the current session. `/session` alone opens a picker; each is also runnable directly.
 
 - **`/session timeline`**. Replaces the chat area with a read-only timeline of the current system prompt, user and assistant messages, and tool calls. The header shows provider-reported context usage and an estimated split between system prompt, tool definitions, and messages. The split uses a simple byte estimate, so it is directional rather than tokenizer-exact. Use `up` / `down` or `pgup` / `pgdn` to select an event, `tab` / `shift+tab` to inspect its summary, payload, result, schema, and transcript-derived timing, and `/` to search. `ctrl+e` writes a JSON export to `~/Downloads` (falling back to the home directory) with `0600` permissions on platforms that support Unix file modes. Images are represented by MIME type and byte size instead of embedding their data. Press `esc` to return to chat.
-- **`/session export [path]`**. Writes the running transcript to a portable `.zotsession` file. Default destination is `~/Downloads/<timestamp>-<session-id>-<prompt-slug>.zotsession`. Pass a path to override; a directory is fine (a dated name is built inside), a bare name gets `.zotsession` appended. The meta's cwd is stripped on the way out so the recipient doesn't see your filesystem layout.
+- **`/session export [path]`**. Writes the running transcript to a portable `.ncodesession` file. Default destination is `~/Downloads/<timestamp>-<session-id>-<prompt-slug>.ncodesession`. Pass a path to override; a directory is fine (a dated name is built inside), a bare name gets `.ncodesession` appended. The meta's cwd is stripped on the way out so the recipient doesn't see your filesystem layout.
 
-  **What's included.** Only the main chat thread of the running session — messages, tool calls, tool results, compactions, and usage. **`/swarm` subagents are NOT included.** Their transcripts, unix-socket inboxes, and per-agent session files are all machine-local; a `.zotsession` is just a chat transcript and has no way to revive a unix socket on another box. If you want the conversation, copy it out of the dashboard manually.
-- **`/session import <path>`**. Copies a `.zotsession` file into `$ZOT_HOME/sessions/<cwd-hash>/` with a fresh id and the current cwd, then switches the running agent onto it. Imported sessions are first-class: they show up in `/sessions`, `/jump`, and the tree. Drag-drop paths in the editor are accepted (zot strips the surrounding quotes automatically).
-- **`/session fork`**. Opens a turn picker (same shape as `/jump`). Pick any past user message; zot copies every message up to and including that turn into a new session, records `parent` + `fork_point` in the new meta, and switches onto the branch. The parent session stays on disk. Use it to try a different question without polluting the original transcript, or to rewind after the agent went down the wrong path.
+  **What's included.** Only the main chat thread of the running session — messages, tool calls, tool results, compactions, and usage. **`/swarm` subagents are NOT included.** Their transcripts, unix-socket inboxes, and per-agent session files are all machine-local; a `.ncodesession` is just a chat transcript and has no way to revive a unix socket on another box. If you want the conversation, copy it out of the dashboard manually.
+- **`/session import <path>`**. Copies a `.ncodesession` file into `$NCODE_HOME/sessions/<cwd-hash>/` with a fresh id and the current cwd, then switches the running agent onto it. Imported sessions are first-class: they show up in `/sessions`, `/jump`, and the tree. Drag-drop paths in the editor are accepted (ncode strips the surrounding quotes automatically).
+- **`/session fork`**. Opens a turn picker (same shape as `/jump`). Pick any past user message; ncode copies every message up to and including that turn into a new session, records `parent` + `fork_point` in the new meta, and switches onto the branch. The parent session stays on disk. Use it to try a different question without polluting the original transcript, or to rewind after the agent went down the wrong path.
 - **`/session tree`**. Shows every session in the current cwd arranged by parent/child relationships, depth-first with indent per level. The current session is tagged `[current]`. Pick any entry to switch into it. Parentless sessions are roots; branches created via `/session fork` nest under whichever session they were forked from. Orphaned children (whose parent file was deleted) still show as roots so they stay discoverable.
 
 ### `/jump`
 
-Opens a turn picker for the current session, one row per user prompt, each showing the turn number, how many tools that turn invoked, and the first line of the prompt. `up`/`down` to pick, `enter` to jump, `esc` to cancel. Any printable rune while the picker is open extends a filter; backspace narrows it back. `/jump <text>` pre-applies the filter; if exactly one turn matches, zot jumps straight there without showing the picker.
+Opens a turn picker for the current session, one row per user prompt, each showing the turn number, how many tools that turn invoked, and the first line of the prompt. `up`/`down` to pick, `enter` to jump, `esc` to cancel. Any printable rune while the picker is open extends a filter; backspace narrows it back. `/jump <text>` pre-applies the filter; if exactly one turn matches, ncode jumps straight there without showing the picker.
 
 Jumping is non-destructive. The transcript is untouched, the viewport just scrolls so the chosen turn is at the top. A muted line at the top of the chat reads `viewing turn N of M, pgdn to catch up`. Scroll back to the bottom with `pgdn` (or keep scrolling with the arrow keys) and the indicator goes away.
 
@@ -337,9 +341,9 @@ Inside the overlay: `enter` sends, `esc` cancels an in-flight call (or closes th
 
 ### `/swarm`
 
-Background subagents that run alongside your main session. Each one is a separate `zot` subprocess with its own model loop, its own persistent session file, and its own chat in the dashboard — but they all run in **the same working directory as the host**, so they see and edit the same files you do. Spawn one for a side task (“draft the migration”, “investigate this stack trace”, “write the test harness for module X”), keep going in the main thread, check in on it whenever you want.
+Background subagents that run alongside your main session. Each one is a separate `ncode` subprocess with its own model loop, its own persistent session file, and its own chat in the dashboard — but they all run in **the same working directory as the host**, so they see and edit the same files you do. Spawn one for a side task (“draft the migration”, “investigate this stack trace”, “write the test harness for module X”), keep going in the main thread, check in on it whenever you want.
 
-> **Agents edit the same files you do.** They use the same `read` / `write` / `edit` / `bash` tools as the main agent against the host's working directory. There's no per-agent worktree or branch. If you need parallel edits on isolated checkouts, set that up yourself with `git worktree` outside zot.
+> **Agents edit the same files you do.** They use the same `read` / `write` / `edit` / `bash` tools as the main agent against the host's working directory. There's no per-agent worktree or branch. If you need parallel edits on isolated checkouts, set that up yourself with `git worktree` outside ncode.
 
 ```
 /swarm                            # open the dashboard
@@ -373,27 +377,27 @@ Background subagents that run alongside your main session. Each one is a separat
 
 **Session scoping** — each agent is stamped with the host session that spawned it and only shows up in that session's dashboard. Swap sessions with `/sessions` and the dashboard re-narrows accordingly. Agents from other sessions keep running in the background and reappear when you switch back.
 
-**Persistence across zot restarts** — every spawn writes a `meta.json` next to its event log and session file under `$ZOT_HOME/swarm/agents/<id>/`. On the next `zot` launch they show up in the dashboard as **detached**; press `R` (or `/swarm resume <id>`) to bring one back. Resumed agents reattach to the same session and inbox socket, so the conversation continues from where it left off.
+**Persistence across ncode restarts** — every spawn writes a `meta.json` next to its event log and session file under `$NCODE_HOME/swarm/agents/<id>/`. On the next `ncode` launch they show up in the dashboard as **detached**; press `R` (or `/swarm resume <id>`) to bring one back. Resumed agents reattach to the same session and inbox socket, so the conversation continues from where it left off.
 
-**Where state lives** — everything per-agent (session file, events log, inbox socket, meta) lives under `$ZOT_HOME/swarm/agents/<id>/`. The agent's actual code edits land directly in your repo; track them with normal `git status` / `git diff`.
+**Where state lives** — everything per-agent (session file, events log, inbox socket, meta) lives under `$NCODE_HOME/swarm/agents/<id>/`. The agent's actual code edits land directly in your repo; track them with normal `git status` / `git diff`.
 
-**`/session export` does NOT bundle subagents.** A `.zotsession` is just the main chat transcript; per-agent state (session file, unix-socket inbox) is machine-local and doesn't round-trip through a JSONL file. To share what an agent said, copy it out of the transcript view manually.
+**`/session export` does NOT bundle subagents.** A `.ncodesession` is just the main chat transcript; per-agent state (session file, unix-socket inbox) is machine-local and doesn't round-trip through a JSONL file. To share what an agent said, copy it out of the transcript view manually.
 
-**Auto-swarm.** With `/settings` -> auto-swarm on, the main agent gets a built-in `swarm_spawn` tool and a system-prompt nudge to use it. It can then fork sub-agents on its own when a request naturally splits into independent parallel work ("implement A and B", "investigate three files"). Each spawn returns the sub-agent id immediately and the main turn keeps going. When every sub-agent the agent spawned in that batch finishes its initial task, zot injects one `[auto-swarm update]` message back into the main chat recapping each agent's status, task, and complete final response. If an agent produced no assistant response, zot includes a truncated transcript tail for diagnostics instead. The main agent then writes a short follow-up summary referencing the agents by id. Off by default; toggle from `/settings`.
+**Auto-swarm.** With `/settings` -> auto-swarm on, the main agent gets a built-in `swarm_spawn` tool and a system-prompt nudge to use it. It can then fork sub-agents on its own when a request naturally splits into independent parallel work ("implement A and B", "investigate three files"). Each spawn returns the sub-agent id immediately and the main turn keeps going. When every sub-agent the agent spawned in that batch finishes its initial task, ncode injects one `[auto-swarm update]` message back into the main chat recapping each agent's status, task, and complete final response. If an agent produced no assistant response, ncode includes a truncated transcript tail for diagnostics instead. The main agent then writes a short follow-up summary referencing the agents by id. Off by default; toggle from `/settings`.
 
 ### `/settings`
 
-Opens a dialog with every persistent setting. `up`/`down` to navigate, `enter` or `space` to change the selected row, `esc` to close (rows that open a sub-view, like model shortcuts, use `esc` to go back one level first). Changes are written to `$ZOT_HOME/config.json` and take effect on the next turn (no restart needed). Current settings:
+Opens a dialog with every persistent setting. `up`/`down` to navigate, `enter` or `space` to change the selected row, `esc` to close (rows that open a sub-view, like model shortcuts, use `esc` to go back one level first). Changes are written to `$NCODE_HOME/config.json` and take effect on the next turn (no restart needed). Current settings:
 
 - **render images when supported** — draw screenshots / `read`-returned images inline using the terminal's image protocol, or fall back to a text placeholder. Auto-detected from `TERM_PROGRAM`; the toggle overrides the detection. The row is greyed out and forced off on terminals that don't speak any image protocol.
-- **auto-swarm** — let the main agent spawn background sub-agents in parallel via a built-in `swarm_spawn` tool. Off by default. When on, the tool is registered with the running agent, the system prompt gains a short addendum telling the model to delegate independent sub-tasks proactively, and zot watches every sub-agent the main agent spawns. As soon as the last sub-agent in a batch finishes its initial task, an `[auto-swarm update]` message is injected back into the chat with each agent's status / task / transcript tail, so the main agent can summarise the collective outcome. Flipping off mid-session removes the tool from the live agent and strips the addendum on the next turn — the model stops trying to delegate. See `/swarm` for the dashboard that lets you monitor, message, kill, or remove the spawned agents.
+- **auto-swarm** — let the main agent spawn background sub-agents in parallel via a built-in `swarm_spawn` tool. Off by default. When on, the tool is registered with the running agent, the system prompt gains a short addendum telling the model to delegate independent sub-tasks proactively, and ncode watches every sub-agent the main agent spawns. As soon as the last sub-agent in a batch finishes its initial task, an `[auto-swarm update]` message is injected back into the chat with each agent's status / task / transcript tail, so the main agent can summarise the collective outcome. Flipping off mid-session removes the tool from the live agent and strips the addendum on the next turn — the model stops trying to delegate. See `/swarm` for the dashboard that lets you monitor, message, kill, or remove the spawned agents.
 - **auto-compact threshold** — choose `off`, `70%`, `80%`, `85%` (default), or `90%` of the model's advertised context window. The selected percentage controls automatic compaction before and after interactive turns and persists as `auto_compact_threshold`. `off` disables percentage-based triggers but keeps manual `/compact` and automatic recovery from context-window and payload-too-large responses.
 - **jail new sessions by default**: start every new agent with tools confined to its working directory. Off by default. The setting applies to interactive, print, JSON, RPC, and background-agent runs, persists as `jail_by_default`, and immediately updates the current interactive session. `/jail` and `/unjail` remain session-scoped overrides and do not change this default.
 - **compact transcript rendering**: reduce visual chrome in the chat transcript. Tool calls render as a quiet header plus indented output instead of a bordered box, and sent messages render without padded background bubbles. Off by default. Changes apply immediately and persist to `config.json` as `compact_mode`.
 - **show loaded resources at startup**: list loaded `AGENTS.md` paths, extensions, and user-installed skills in compact sections above the transcript. Built-in skills are omitted. Off by default. Changes apply immediately and persist to `config.json` as `show_instructions_at_startup`.
 - **TUI settings**: opens a sub-view for input layout and status placement. **Input style** can be `plain` (default prompt line), `lines` (separator lines above and below the input), or `block` (a user-bubble-style input block). **Status position** places model, usage, and working-directory information above or below the input. **Working spinner position** places the busy spinner above or below the input. Changes apply immediately and persist to `config.json` as `tui_input_style`, `tui_status_position`, and `tui_working_position` (`above_input` or `below_input` for the position fields).
 - **reasoning level**: choose reasoning for supported models: off, minimum, low, medium, high, xhigh, or max. The `max` tier is opt-in and sent natively to GPT-5.6 and adaptive-thinking Claude models; unsupported backends clamp it to their highest accepted effort. The change is persisted to `config.json` and applied to the next model call. Use `/reasoning` to open this selector directly. The selector only shows distinct levels supported by the active model; models without reasoning support only offer `off`.
-- **color theme** — choose the built-in auto/dark/light theme or any JSON theme discovered under `$ZOT_HOME/themes` or a loaded extension. Theme files can override any subset of UI colors, syntax colors, and spinner frames/messages. Changes apply immediately; if a selected theme file is deleted, zot resets to auto. See [docs/themes.md](docs/themes.md).
+- **color theme** — choose the built-in auto/dark/light theme or any JSON theme discovered under `$NCODE_HOME/themes` or a loaded extension. Theme files can override any subset of UI colors, syntax colors, and spinner frames/messages. Changes apply immediately; if a selected theme file is deleted, ncode resets to auto. See [docs/themes.md](docs/themes.md).
 - **model shortcuts** — opens a sub-view with nine slots (`model 1` ... `model 9`). `enter` on a slot opens the same `/model` selector and binds the chosen provider/model to that slot; `backspace` clears a slot. Once assigned, press `Ctrl+1` ... `Ctrl+9` from the editor to switch the active model instantly (the same cross-provider swap `/model` performs, transcript and cost carried over). Assigning a shortcut does not change the current model. Shortcuts are skipped while a turn is running.
 
 ### `/skills`
@@ -404,35 +408,35 @@ Opens a picker listing every discovered SKILL.md file, built-ins hidden. Each ro
 
 Sends the current transcript through the model with a structured summarization prompt. The returned summary replaces the transcript as one synthetic user message, with the last few exchanges kept verbatim for continuity. The status bar's context meter resets. Use it when the context meter creeps past ~80%.
 
-zot also auto-compacts in the background: after any turn that reaches the configured context threshold, the agent kicks off a condense pass on its own. Choose `off`, `70%`, `80%`, `85%` (default), or `90%` under `/settings` → **auto-compact threshold**. You'll see `condensing history, esc to cancel` above the status bar and an `(auto)` tag next to the context percentage; `esc` aborts it without touching the transcript. Turning the percentage trigger off does not disable automatic compaction and retry after a context-window or payload-too-large response.
+ncode also auto-compacts in the background: after any turn that reaches the configured context threshold, the agent kicks off a condense pass on its own. Choose `off`, `70%`, `80%`, `85%` (default), or `90%` under `/settings` → **auto-compact threshold**. You'll see `condensing history, esc to cancel` above the status bar and an `(auto)` tag next to the context percentage; `esc` aborts it without touching the transcript. Turning the percentage trigger off does not disable automatic compaction and retry after a context-window or payload-too-large response.
 
 ### `/jail`
 
 Enforces a sandbox rooted at the cwd shown in the status bar. `read`, `write`, and `edit` resolve their target path (including through symlinks) and refuse anything outside the sandbox. `bash` refuses obvious escape patterns (`sudo`, `rm -rf /`, leading `cd /`, `cd ..`, `cd ~`, `chmod -R`, `dd of=/`, and similar) and rejects shell arguments or redirections that point outside the sandbox. The status bar shows `jailed, ~/your/cwd` while active. Enable **jail new sessions by default** in `/settings` to persist this behavior across launches; `/unjail` then unlocks only the current session.
 
-This is a guardrail against accidents, not a hard security boundary. If you need real isolation, run zot under docker or a proper sandbox.
+This is a guardrail against accidents, not a hard security boundary. If you need real isolation, run ncode under docker or a proper sandbox.
 
 ## Sessions
 
-Every interactive or print/json run (unless `--no-session`) writes a JSONL transcript under `$ZOT_HOME/sessions/<cwd-hash>/`. Resume any of them with `--continue`, `--resume`, `--session <path>`, or interactively via `/sessions` inside the TUI. Empty sessions (the user exited without prompting) are deleted on close so the list stays tidy.
+Every interactive or print/json run (unless `--no-session`) writes a JSONL transcript under `$NCODE_HOME/sessions/<cwd-hash>/`. Resume any of them with `--continue`, `--resume`, `--session <path>`, or interactively via `/sessions` inside the TUI. Empty sessions (the user exited without prompting) are deleted on close so the list stays tidy.
 
-Use `zot sessions prune` outside the TUI to find sessions whose recorded working directories no longer exist. The command groups sessions by directory, shows the number and human-readable total size of stored sessions, lets you select groups, and requires confirmation before permanently deleting files. It preserves sessions when a directory check fails with an error other than "not found" and rechecks each selected directory immediately before deletion. A deleted directory and a path hidden by some unmounted filesystems are indistinguishable, so review the selection and ensure remote filesystems are mounted before deleting missing-directory groups.
+Use `ncode sessions prune` outside the TUI to find sessions whose recorded working directories no longer exist. The command groups sessions by directory, shows the number and human-readable total size of stored sessions, lets you select groups, and requires confirmation before permanently deleting files. It preserves sessions when a directory check fails with an error other than "not found" and rechecks each selected directory immediately before deletion. A deleted directory and a path hidden by some unmounted filesystems are indistinguishable, so review the selection and ensure remote filesystems are mounted before deleting missing-directory groups.
 
 Use `--older-than` to prune sessions by last activity instead, including sessions for directories that still exist. Supported age units are `m` (minutes), `h` (hours), `d` (24-hour days), `w` (7-day weeks), `mo` (calendar months), and `y` (calendar years). Add `--cwd PATH` to limit age pruning to one working directory. The session file is checked again immediately before deletion and preserved if it has become active recently.
 
 ```sh
-zot sessions prune --dry-run                         # list missing-directory groups
-zot sessions prune --older-than 4h --dry-run         # inspect sessions inactive for four hours
-zot sessions prune --older-than 1mo --cwd ~/project  # select old sessions for one directory
-zot sessions prune --older-than 1y --all              # select every match, then confirm
-zot sessions prune --older-than 30d --all --yes       # delete every match without prompting
+ncode sessions prune --dry-run                         # list missing-directory groups
+ncode sessions prune --older-than 4h --dry-run         # inspect sessions inactive for four hours
+ncode sessions prune --older-than 1mo --cwd ~/project  # select old sessions for one directory
+ncode sessions prune --older-than 1y --all              # select every match, then confirm
+ncode sessions prune --older-than 30d --all --yes       # delete every match without prompting
 ```
 
-`--all` selects every match and still asks for confirmation. Adding `--yes` makes deletion non-interactive and requires `--all`. Malformed, unreadable, symlinked, and non-absolute session entries are reported and preserved during missing-directory pruning. The scan includes normal sessions below `$ZOT_HOME/sessions/`; explicit session files stored elsewhere and swarm-agent state are not included.
+`--all` selects every match and still asks for confirmation. Adding `--yes` makes deletion non-interactive and requires `--all`. Malformed, unreadable, symlinked, and non-absolute session entries are reported and preserved during missing-directory pruning. The scan includes normal sessions below `$NCODE_HOME/sessions/`; explicit session files stored elsewhere and swarm-agent state are not included.
 
 ## Providers
 
-zot's built-in provider catalog includes:
+ncode's built-in provider catalog includes:
 
 - **Subscription-capable**: Anthropic Claude Pro/Max (`anthropic`), OpenAI Codex / ChatGPT Plus/Pro (`openai-codex`), Kimi Code (`kimi`), SuperGrok/X Premium (`xai`), GitHub Copilot (`github-copilot`).
 - **Direct API providers**: Anthropic, OpenAI Chat Completions, OpenAI Responses, DeepSeek, Google Gemini, Kimi/Moonshot, Moonshot CN, Groq, Cerebras, xAI, Together AI, Hugging Face Router, OpenRouter, Mistral, Z.AI, Xiaomi/MiMo token-plan regions, MiniMax global/CN, Fireworks, Vercel AI Gateway, OpenCode/OpenCode Go.
@@ -445,15 +449,15 @@ Use `/login` to store API keys or subscription credentials. `/model` only shows 
 
 `--list-models` or the `/model` picker shows the full catalog across all built-in providers. Three sources:
 
-- **Catalog**: models baked into zot, covering Claude, GPT/Codex, Gemini/Gemma, Kimi/Moonshot, DeepSeek, Groq-hosted Llama/Gemma/Compound, OpenRouter-routed models, Bedrock model ids, Vertex model ids, Azure OpenAI deployments, Copilot models, and other provider-specific catalog entries.
-- **Live**: IDs discovered from `GET /v1/models` using your stored API key (cached for 6h in `$ZOT_HOME/models-cache.json`, refreshed in the background on startup).
+- **Catalog**: models baked into ncode, covering Claude, GPT/Codex, Gemini/Gemma, Kimi/Moonshot, DeepSeek, Groq-hosted Llama/Gemma/Compound, OpenRouter-routed models, Bedrock model ids, Vertex model ids, Azure OpenAI deployments, Copilot models, and other provider-specific catalog entries.
+- **Live**: IDs discovered from `GET /v1/models` using your stored API key (cached for 6h in `$NCODE_HOME/models-cache.json`, refreshed in the background on startup).
 - **Speculative**: IDs that appear in the upstream generator but aren't live on the public API yet. They'll 404 today and start working the moment the provider ships them.
 
 The context meter in the status line uses the model's advertised context window to show how much of it your last turn consumed.
 
 ### Model fallback (rescue)
 
-When a turn fails because of a recoverable provider error — expired token (`401`), permission denied (`403`), rate limit (`429`), provider outage (`502`/`503`/`504`), or a transient network failure — zot opens a **rescue** picker over the chat instead of just painting a red banner.
+When a turn fails because of a recoverable provider error — expired token (`401`), permission denied (`403`), rate limit (`429`), provider outage (`502`/`503`/`504`), or a transient network failure — ncode opens a **rescue** picker over the chat instead of just painting a red banner.
 
 The picker is the same vertical list / fuzzy filter UI as `/model`, but it only shows models from providers you're currently logged in to (env vars, `auth.json`, Kimi CLI fallback, ollama). The failed model is excluded. Press `↑`/`↓` to choose, `enter` to retry the **same prompt** on the new model, `esc` to dismiss.
 
@@ -465,7 +469,7 @@ No configuration is required — the candidate list is built dynamically from yo
 
 ### Custom models
 
-Place a `models.json` in `$ZOT_HOME` (`$XDG_STATE_HOME/zot/` when set, otherwise the platform default above) to add models that aren't in the baked-in catalog or to override existing entries:
+Place a `models.json` in `$NCODE_HOME` (`$XDG_STATE_HOME/ncode/` when set, otherwise the platform default above) to add models that aren't in the baked-in catalog or to override existing entries:
 
 ```json
 {
@@ -514,7 +518,7 @@ A top-level provider key that is not a built-in id defines a custom provider. Gi
 
 Custom providers are first-class: they appear in `--list-models`, `/model`, and `/login`. `models.json` never stores secrets. Supply the key through `/login`, `--api-key`, or a derived environment variable in upper snake case (so `my-company` reads `MY_COMPANY_API_KEY`). Because many self-hosted gateways do not expose a model-list endpoint, custom provider keys are accepted and stored without a verification probe; an invalid key surfaces on the first model call.
 
-To retrieve this custom provider's key from a password manager, add a matching entry to `$ZOT_HOME/auth.json`:
+To retrieve this custom provider's key from a password manager, add a matching entry to `$NCODE_HOME/auth.json`:
 
 ```json
 {
@@ -533,15 +537,15 @@ To retrieve this custom provider's key from a password manager, add a matching e
 The provider IDs in `models.json` and `auth.json` must match. Then select the custom model directly:
 
 ```bash
-zot --provider my-company --model company-llm-v2
+ncode --provider my-company --model company-llm-v2
 ```
 
 ### Kimi Code
 
-zot has built-in Kimi support through the Kimi Coding endpoint and Moonshot's OpenAI-compatible chat API.
+ncode has built-in Kimi support through the Kimi Coding endpoint and Moonshot's OpenAI-compatible chat API.
 
 ```bash
-zot --provider kimi
+ncode --provider kimi
 ```
 
 By default this uses:
@@ -554,15 +558,15 @@ Credential lookup order for Kimi:
 1. `--api-key`
 2. `KIMI_API_KEY`
 3. `MOONSHOT_API_KEY`
-4. `$ZOT_HOME/auth.json`
+4. `$NCODE_HOME/auth.json`
 5. the official Kimi Code CLI token at `~/.kimi/credentials/kimi-code.json`, unless disabled by `/logout kimi`
 
-Use `/login` for either API-key login or Kimi Code subscription login. The subscription flow uses Kimi Code's device-code OAuth flow: zot opens the verification URL, waits for browser approval, stores the token in `auth.json`, and refreshes it automatically.
+Use `/login` for either API-key login or Kimi Code subscription login. The subscription flow uses Kimi Code's device-code OAuth flow: ncode opens the verification URL, waits for browser approval, stores the token in `auth.json`, and refreshes it automatically.
 
 For direct Moonshot API keys or a custom compatible endpoint:
 
 ```bash
-zot --provider kimi --model kimi-k2-0905-preview --base-url https://api.moonshot.ai/v1 --api-key "$KIMI_API_KEY"
+ncode --provider kimi --model kimi-k2-0905-preview --base-url https://api.moonshot.ai/v1 --api-key "$KIMI_API_KEY"
 ```
 
 Kimi K3 is built in as `kimi/k3`, `moonshotai/kimi-k3`, `moonshotai-cn/kimi-k3`, `opencode-go/kimi-k3`, `openrouter/moonshotai/kimi-k3`, and `vercel-ai-gateway/moonshotai/kimi-k3`. Its output limit is 131,072 tokens on every built-in route.
@@ -575,10 +579,10 @@ xAI supports either `XAI_API_KEY` or `/login` subscription authentication. The s
 
 ### DeepSeek
 
-zot has built-in DeepSeek support through DeepSeek's OpenAI-compatible chat API.
+ncode has built-in DeepSeek support through DeepSeek's OpenAI-compatible chat API.
 
 ```bash
-zot --provider deepseek
+ncode --provider deepseek
 ```
 
 By default this uses:
@@ -592,26 +596,26 @@ Credential lookup order for DeepSeek:
 
 1. `--api-key`
 2. `DEEPSEEK_API_KEY`
-3. `$ZOT_HOME/auth.json`
+3. `$NCODE_HOME/auth.json`
 
-Use `/login` and pick **api key** to paste a DeepSeek key. zot probes `/v1/models` once and stores the key under `deepseek` in `auth.json`.
+Use `/login` and pick **api key** to paste a DeepSeek key. ncode probes `/v1/models` once and stores the key under `deepseek` in `auth.json`.
 
 > **Auth model: API key only.** DeepSeek does not offer a subscription OAuth flow. The `/login subscription` step lists only Anthropic, OpenAI, and Kimi; DeepSeek shows up only under `/login → api key`.
 
-> **Text only at the wire level.** DeepSeek's chat-completions endpoint currently rejects the multimodal content schema (`unknown variant image_url, expected text`). When the active provider is `deepseek`, zot silently drops `ImageBlock` parts from outgoing user/tool messages and keeps only the text. Switching back to a vision-capable model (Claude, GPT-4o/5, Gemini) re-sends the image normally because the session file still stores it.
+> **Text only at the wire level.** DeepSeek's chat-completions endpoint currently rejects the multimodal content schema (`unknown variant image_url, expected text`). When the active provider is `deepseek`, ncode silently drops `ImageBlock` parts from outgoing user/tool messages and keeps only the text. Switching back to a vision-capable model (Claude, GPT-4o/5, Gemini) re-sends the image normally because the session file still stores it.
 
 For a custom-compatible endpoint (mirror, gateway, self-host):
 
 ```bash
-zot --provider deepseek --base-url https://my-deepseek-mirror.example.com/v1 --api-key "$DEEPSEEK_API_KEY"
+ncode --provider deepseek --base-url https://my-deepseek-mirror.example.com/v1 --api-key "$DEEPSEEK_API_KEY"
 ```
 
 ### Google Gemini
 
-zot has built-in Google Gemini support through the [AI Studio Generative Language API](https://aistudio.google.com/).
+ncode has built-in Google Gemini support through the [AI Studio Generative Language API](https://aistudio.google.com/).
 
 ```bash
-zot --provider google
+ncode --provider google
 ```
 
 By default this uses:
@@ -626,9 +630,9 @@ Credential lookup order for Google:
 1. `--api-key`
 2. `GEMINI_API_KEY`
 3. `GOOGLE_API_KEY`
-4. `$ZOT_HOME/auth.json`
+4. `$NCODE_HOME/auth.json`
 
-Use `/login` and pick **api key** to paste an AI Studio key. zot probes `/v1beta/models` once and stores the key under `google` in `auth.json`.
+Use `/login` and pick **api key** to paste an AI Studio key. ncode probes `/v1beta/models` once and stores the key under `google` in `auth.json`.
 
 > **Auth model: API key only (this provider).** Google does not issue OAuth tokens for consumer Gemini Advanced / Google One AI Premium subscriptions, so there is no "log in with your Google subscription" flow. The `/login subscription` step quietly downgrades to the api-key form when you pick Google so you don't end up in a dead end. If you need OAuth/service-account auth instead of an API key, use the `google-vertex` provider below.
 
@@ -640,10 +644,10 @@ You can add additional Gemini model IDs to `models.json` under the `google` prov
 
 ### Gemini Enterprise Agent Platform (formerly Google Vertex AI)
 
-zot also has built-in support for [Gemini Enterprise Agent Platform](https://cloud.google.com/products/gemini-enterprise-agent-platform), Google's enterprise/GCP-hosted Gemini endpoint. Unlike the AI Studio `google` provider above, the `google-vertex` provider supports a Google Cloud API key plus `service_account` and `authorized_user` credential files. It does not support consumer Google login or the complete ADC credential chain, such as metadata-server and workload-identity credentials.
+ncode also has built-in support for [Gemini Enterprise Agent Platform](https://cloud.google.com/products/gemini-enterprise-agent-platform), Google's enterprise/GCP-hosted Gemini endpoint. Unlike the AI Studio `google` provider above, the `google-vertex` provider supports a Google Cloud API key plus `service_account` and `authorized_user` credential files. It does not support consumer Google login or the complete ADC credential chain, such as metadata-server and workload-identity credentials.
 
 ```bash
-zot --provider google-vertex
+ncode --provider google-vertex
 ```
 
 Required configuration (env vars, read at construction time):
@@ -655,34 +659,34 @@ Credential lookup order for Vertex:
 
 1. `GOOGLE_CLOUD_API_KEY`: simplest option. An API key created in the GCP console is sent as `x-goog-api-key`, without a token exchange.
 2. `GOOGLE_APPLICATION_CREDENTIALS`: path to a supported credential JSON file.
-3. **Default ADC file**: if neither of the above is set, zot checks the file written by `gcloud auth application-default login`. This is `~/.config/gcloud/application_default_credentials.json` on Unix systems and `%APPDATA%\gcloud\application_default_credentials.json` on Windows.
+3. **Default ADC file**: if neither of the above is set, ncode checks the file written by `gcloud auth application-default login`. This is `~/.config/gcloud/application_default_credentials.json` on Unix systems and `%APPDATA%\gcloud\application_default_credentials.json` on Windows.
 
 Two credential file shapes are supported:
 
-- `type: "service_account"`: zot signs a JWT with the private key and exchanges it for a short-lived access token.
-- `type: "authorized_user"`: zot exchanges the stored client ID, client secret, and refresh token for a short-lived access token.
+- `type: "service_account"`: ncode signs a JWT with the private key and exchanges it for a short-lived access token.
+- `type: "authorized_user"`: ncode exchanges the stored client ID, client secret, and refresh token for a short-lived access token.
 
 Access tokens are cached in memory and refreshed on demand.
 
-If none of these are available, zot errors with `vertex: no auth — set GOOGLE_CLOUD_API_KEY or GOOGLE_APPLICATION_CREDENTIALS`.
+If none of these are available, ncode errors with `vertex: no auth — set GOOGLE_CLOUD_API_KEY or GOOGLE_APPLICATION_CREDENTIALS`.
 
 ### Local models with ollama
 
-zot works with [ollama](https://ollama.com) out of the box. Ollama serves an OpenAI-compatible API locally, so any model you have pulled works with zot.
+ncode works with [ollama](https://ollama.com) out of the box. Ollama serves an OpenAI-compatible API locally, so any model you have pulled works with ncode.
 
 Quick start:
 
 ```bash
 ollama pull qwen3.5:4b
-zot --provider ollama --model qwen3.5:4b
+ncode --provider ollama --model qwen3.5:4b
 ```
 
-That's it. No API key needed for local models. zot defaults to `http://localhost:11434`.
+That's it. No API key needed for local models. ncode defaults to `http://localhost:11434`.
 
 For a remote ollama instance or one behind auth:
 
 ```bash
-zot --provider ollama --model llama3 --base-url https://my-server.com/v1 --api-key my-token
+ncode --provider ollama --model llama3 --base-url https://my-server.com/v1 --api-key my-token
 ```
 
 You can also add models to your `models.json` so you don't need flags every time:
@@ -708,7 +712,7 @@ The `ollama` provider uses the OpenAI chat completions protocol internally, so i
 
 ### Local models with llama.cpp router mode
 
-zot can connect to a recent [llama.cpp](https://github.com/ggml-org/llama.cpp) router, manage its GGUF files, and use loaded models through the router's OpenAI-compatible inference API. This is separate from Ollama. An Ollama server normally listens on port `11434` and should use zot's `ollama` provider instead.
+ncode can connect to a recent [llama.cpp](https://github.com/ggml-org/llama.cpp) router, manage its GGUF files, and use loaded models through the router's OpenAI-compatible inference API. This is separate from Ollama. An Ollama server normally listens on port `11434` and should use ncode's `ollama` provider instead.
 
 Install or update llama.cpp. On macOS with Homebrew:
 
@@ -718,7 +722,7 @@ brew install llama.cpp
 brew upgrade llama.cpp
 ```
 
-Create a directory for GGUF files and start `llama-server` without `--model`, `-m`, or `-hf`. Supplying one of those options starts a single model rather than the router API zot needs.
+Create a directory for GGUF files and start `llama-server` without `--model`, `-m`, or `-hf`. Supplying one of those options starts a single model rather than the router API ncode needs.
 
 ```bash
 mkdir -p ~/llama-models
@@ -735,7 +739,7 @@ llama-server \
 
 `--no-models-autoload` leaves load decisions to `/llama`. `--jinja` enables model chat templates and improves tool-call compatibility. `-ngl 999` requests maximum GPU offload, while `-c 32768` limits each loaded model to a 32K context. Adjust these values for your hardware.
 
-Confirm that router mode is active before configuring zot:
+Confirm that router mode is active before configuring ncode:
 
 ```bash
 curl http://127.0.0.1:8080/health
@@ -744,7 +748,7 @@ curl http://127.0.0.1:8080/models
 
 The models request must return JSON with a `data` array. A 404 usually means the server is outdated, running on a different port, or was started in single-model mode.
 
-In zot, run `/login`, choose **api key**, and select **llama.cpp**. Enter `http://127.0.0.1:8080` as the router URL and leave the API key empty for a local-only server. Do not enter `/v1`; zot derives the inference URL itself. The saved URL and optional key live in `$ZOT_HOME/auth.json`.
+In ncode, run `/login`, choose **api key**, and select **llama.cpp**. Enter `http://127.0.0.1:8080` as the router URL and leave the API key empty for a local-only server. Do not enter `/v1`; ncode derives the inference URL itself. The saved URL and optional key live in `$NCODE_HOME/auth.json`.
 
 You can configure the same connection through environment variables:
 
@@ -763,7 +767,7 @@ Run `/llama` to:
 - explicitly load or unload a model
 - press `d` to ask the router to remove a downloaded cache model after confirmation
 
-Models discovered through `--models-dir` or a preset cannot be removed by zot. Delete those files from their configured source instead. The router removes the selected GGUF from its Hugging Face cache, but some llama.cpp versions retain shared repository artifacts such as `mmproj` files. Remove the repository's cache directory manually if those artifacts are no longer needed. Hugging Face search uses `HF_TOKEN` when available. Gated repositories require prior access approval, and the `llama-server` process also needs an authorized `HF_TOKEN` because the server performs the download.
+Models discovered through `--models-dir` or a preset cannot be removed by ncode. Delete those files from their configured source instead. The router removes the selected GGUF from its Hugging Face cache, but some llama.cpp versions retain shared repository artifacts such as `mmproj` files. Remove the repository's cache directory manually if those artifacts are no longer needed. Hugging Face search uses `HF_TOKEN` when available. Gated repositories require prior access approval, and the `llama-server` process also needs an authorized `HF_TOKEN` because the server performs the download.
 
 Opening `/model` refreshes the router and lists every loaded model under provider `llama.cpp`. Unloaded models are intentionally omitted because they cannot answer inference requests. Load them through `/llama` first, then select them through `/model`.
 
@@ -771,7 +775,7 @@ A model installed through Ollama is kept in Ollama's internal storage and is not
 
 ## Inline images
 
-When a tool returns an image (for example `read` on a PNG), zot renders it inline on terminals that support it: **Ghostty**, **Kitty**, **iTerm2**, **WezTerm**. On other terminals you see a text placeholder with MIME type, pixel dimensions, and byte size. Control with the `ZOT_INLINE_IMAGES` env var:
+When a tool returns an image (for example `read` on a PNG), ncode renders it inline on terminals that support it: **Ghostty**, **Kitty**, **iTerm2**, **WezTerm**. On other terminals you see a text placeholder with MIME type, pixel dimensions, and byte size. Control with the `NCODE_INLINE_IMAGES` env var:
 
 | Value | Effect |
 |---|---|
@@ -780,15 +784,15 @@ When a tool returns an image (for example `read` on a PNG), zot renders it inlin
 | `kitty` | Force the Kitty graphics protocol. |
 | `off`, `none` | Always use the text placeholder. |
 
-Herdr's Kitty graphics support is currently experimental, so zot does not enable inline images there automatically. After enabling `experimental.kitty_graphics` in Herdr, set `ZOT_INLINE_IMAGES=kitty` to opt in.
+Herdr's Kitty graphics support is currently experimental, so ncode does not enable inline images there automatically. After enabling `experimental.kitty_graphics` in Herdr, set `NCODE_INLINE_IMAGES=kitty` to opt in.
 
-Frames containing images are full-repainted (no differential diff) to prevent stale image pixels from lingering through scroll. That costs one terminal flash per image-containing frame; set `ZOT_INLINE_IMAGES=off` if that bothers you.
+Frames containing images are full-repainted (no differential diff) to prevent stale image pixels from lingering through scroll. That costs one terminal flash per image-containing frame; set `NCODE_INLINE_IMAGES=off` if that bothers you.
 
 ## Tool rendering
 
-By default each tool call (bash, read, write, edit) renders inside a bordered panel — a `┌─ header ─┐`, `│`-prefixed body rows, and a `└─┘` footer. On a screen with many calls the borders can read as busy, so zot also offers a **flat** mode: a single quiet header line per call (`▌ bash …`) with indented, border-free output. Same information — tool name, arg summary, streamed output, the `... (N more lines, ctrl+o to expand)` truncation — just no frame.
+By default each tool call (bash, read, write, edit) renders inside a bordered panel — a `┌─ header ─┐`, `│`-prefixed body rows, and a `└─┘` footer. On a screen with many calls the borders can read as busy, so ncode also offers a **flat** mode: a single quiet header line per call (`▌ bash …`) with indented, border-free output. Same information — tool name, arg summary, streamed output, the `... (N more lines, ctrl+o to expand)` truncation — just no frame.
 
-Set the `tool_render` key in `$ZOT_HOME/config.json`:
+Set the `tool_render` key in `$NCODE_HOME/config.json`:
 
 ```json
 {
@@ -801,7 +805,7 @@ Set the `tool_render` key in `$ZOT_HOME/config.json`:
 | unset / `"box"` (default) | Each tool call is wrapped in a bordered panel. |
 | `"flat"` | Boxless: a quiet header line plus indented output. |
 
-The `ZOT_FLAT_TOOLS` env var overrides the config for a single run, which is handy for trying it without editing the file:
+The `NCODE_FLAT_TOOLS` env var overrides the config for a single run, which is handy for trying it without editing the file:
 
 | Value | Effect |
 |---|---|
@@ -810,18 +814,18 @@ The `ZOT_FLAT_TOOLS` env var overrides the config for a single run, which is han
 | unset | Fall back to the `tool_render` config key. |
 
 ```sh
-ZOT_FLAT_TOOLS=1 zot   # flat, just this run
-ZOT_FLAT_TOOLS=0 zot   # boxes, even if config.json says "flat"
+NCODE_FLAT_TOOLS=1 ncode   # flat, just this run
+NCODE_FLAT_TOOLS=0 ncode   # boxes, even if config.json says "flat"
 ```
 
 Either way, theme colors still drive the rendering (the header uses your accent/foreground, output uses the tool-output color) and `ctrl+o` still expands a truncated result.
 
 ### Tool arg width
 
-The header line for a tool call shows the tool name plus a one-line summary of its primary argument — a `path`, a `command`, or a query. That summary is truncated to 60 cells by default (`web_answer What is the best architecture to implement resilience wit...`). On a wide terminal that can clip long queries more than you'd like, so set the `ZOT_TOOL_ARG_WIDTH` env var to raise (or lower) the limit:
+The header line for a tool call shows the tool name plus a one-line summary of its primary argument — a `path`, a `command`, or a query. That summary is truncated to 60 cells by default (`web_answer What is the best architecture to implement resilience wit...`). On a wide terminal that can clip long queries more than you'd like, so set the `NCODE_TOOL_ARG_WIDTH` env var to raise (or lower) the limit:
 
 ```sh
-ZOT_TOOL_ARG_WIDTH=120 zot   # allow up to 120 cells before truncating
+NCODE_TOOL_ARG_WIDTH=120 ncode   # allow up to 120 cells before truncating
 ```
 
 | Value | Effect |
@@ -845,17 +849,17 @@ By default a message you send renders as a padded, background-tinted bubble: a b
 | unset / `false` (default) | Padded, background-tinted user bubble. |
 | `true` | One quiet gutter line per wrapped row. |
 
-The `ZOT_COMPACT_INPUT` env var overrides the config for a single run (`1`/`true`/`on`/`compact` force compact; `0`/`false`/`off`/`bubble` force the bubble):
+The `NCODE_COMPACT_INPUT` env var overrides the config for a single run (`1`/`true`/`on`/`compact` force compact; `0`/`false`/`off`/`bubble` force the bubble):
 
 ```sh
-ZOT_COMPACT_INPUT=1 zot   # compact, just this run
+NCODE_COMPACT_INPUT=1 ncode   # compact, just this run
 ```
 
 ## Queued messages
 
-You can keep typing while the agent is working. Pressing `enter` during a turn queues the message instead of interrupting: it shows up above the status bar as `sliding in: <text>` and is delivered as the next user turn the moment the current one finishes. Queue as many as you want; they run in order. `esc` cancels the active turn and drops the queue so a runaway turn doesn't flood you with stale follow-ups; `ctrl+c` while busy arms the exit hint instead of interrupting, a second `ctrl+c` within two seconds exits zot.
+You can keep typing while the agent is working. Pressing `enter` during a turn queues the message instead of interrupting: it shows up above the status bar as `sliding in: <text>` and is delivered as the next user turn the moment the current one finishes. Queue as many as you want; they run in order. `esc` cancels the active turn and drops the queue so a runaway turn doesn't flood you with stale follow-ups; `ctrl+c` while busy arms the exit hint instead of interrupting, a second `ctrl+c` within two seconds exits ncode.
 
-To recover the most recently queued message back into the editor (to tweak it before it runs), press `Option+↑`. In VS Code's integrated terminal that chord doesn't survive xterm.js's macOS key handling — use `Option+Shift+↑` there. zot's hint line under the sliding-in queue adapts automatically based on `$TERM_PROGRAM`.
+To recover the most recently queued message back into the editor (to tweak it before it runs), press `Option+↑`. In VS Code's integrated terminal that chord doesn't survive xterm.js's macOS key handling — use `Option+Shift+↑` there. ncode's hint line under the sliding-in queue adapts automatically based on `$TERM_PROGRAM`.
 
 Slash commands also work while the agent is busy. Non-destructive ones (`/help`, `/jump`, `/btw`, `/sessions`, `/skills`, `/reasoning`, `/settings`, `/jail`, `/unjail`, `/exit`) take effect immediately. Destructive ones (`/clear`, `/compact`, `/login`, `/logout`, `/model`, `/reload-ext`) cancel the active turn first and then run.
 
@@ -910,41 +914,41 @@ Type `@` followed by a filter string to narrow the list (e.g. `@read` shows only
 
 ## Extensions
 
-zot can be extended in any language via a subprocess + JSON-RPC protocol. Extensions can register slash commands, expose tools to the model, intercept tool calls (block or rewrite args), gate whole turns before the model is called, and rewrite the assistant's visible text before it reaches the user. None are installed by default; opt in explicitly. Hot-reload any time with `/reload-ext`.
+ncode can be extended in any language via a subprocess + JSON-RPC protocol. Extensions can register slash commands, expose tools to the model, intercept tool calls (block or rewrite args), gate whole turns before the model is called, and rewrite the assistant's visible text before it reaches the user. None are installed by default; opt in explicitly. Hot-reload any time with `/reload-ext`.
 
 ### Install and manage
 
 ```bash
-zot ext install <path|git-url>   # copy / clone into $ZOT_HOME/extensions/
-zot ext list                      # show installed extensions
-zot ext doctor                    # diagnose load, registration, and conflict issues
-zot ext logs <name> [-f]          # cat or tail the extension's stderr log
-zot ext enable <name>             # re-enable a disabled extension
-zot ext disable <name>            # disable without removing
-zot ext remove <name>             # delete an extension directory
+ncode ext install <path|git-url>   # copy / clone into $NCODE_HOME/extensions/
+ncode ext list                      # show installed extensions
+ncode ext doctor                    # diagnose load, registration, and conflict issues
+ncode ext logs <name> [-f]          # cat or tail the extension's stderr log
+ncode ext enable <name>             # re-enable a disabled extension
+ncode ext disable <name>            # disable without removing
+ncode ext remove <name>             # delete an extension directory
 ```
 
-`zot ext doctor` keeps normal extension startup fail-soft, but gives
+`ncode ext doctor` keeps normal extension startup fail-soft, but gives
 you an explicit troubleshooting view: manifest errors, disabled or
 shadowed extensions, subprocess load errors, ready/auto-ready status,
 registered commands/tools, registration conflicts, warnings, and the
 stderr log path.
 
-For development, point `zot --ext <path>` at a working directory and skip the install step entirely. Repeatable; takes precedence over installed extensions of the same name.
+For development, point `ncode --ext <path>` at a working directory and skip the install step entirely. Repeatable; takes precedence over installed extensions of the same name.
 
 ### Updating extensions
 
-`zot update` refreshes the zot binary **and** every installed extension that lives in a git checkout. Per-extension behaviour:
+`ncode update` refreshes the ncode binary **and** every installed extension that lives in a git checkout. Per-extension behaviour:
 
 - Disabled extensions are skipped.
-- Extensions without a `.git/` directory (installed by `zot ext install ./local-path`) are skipped — there is no remote to pull from.
-- For the rest, zot stashes any dirty worktree state (including untracked runtime files like `todos.json` or `config.json`), runs `git pull --ff-only`, and pops the stash. If the pop produces conflicts, the conflict markers are left in place and you'll see a warning.
-- Diverged branches, offline pulls, or any other git failure are reported as `failed` and the next extension is processed. `zot update` itself never aborts because of an extension.
-- zot does **not** run any build step (`go build`, `npm install`, `make`) after the pull. Extension authors are expected to commit the runnable artifact (binary, transpiled JS, etc.). If you need a build, rebuild manually and use `/reload-ext`.
+- Extensions without a `.git/` directory (installed by `ncode ext install ./local-path`) are skipped — there is no remote to pull from.
+- For the rest, ncode stashes any dirty worktree state (including untracked runtime files like `todos.json` or `config.json`), runs `git pull --ff-only`, and pops the stash. If the pop produces conflicts, the conflict markers are left in place and you'll see a warning.
+- Diverged branches, offline pulls, or any other git failure are reported as `failed` and the next extension is processed. `ncode update` itself never aborts because of an extension.
+- ncode does **not** run any build step (`go build`, `npm install`, `make`) after the pull. Extension authors are expected to commit the runnable artifact (binary, transpiled JS, etc.). If you need a build, rebuild manually and use `/reload-ext`.
 
 ### Theme-only extensions
 
-An extension may ship only a theme: `extension.json` plus `theme.json` (or `themes/theme.json`) and no executable. zot loads it without spawning a subprocess and shows it in `/settings` with source information. See [docs/themes.md](docs/themes.md).
+An extension may ship only a theme: `extension.json` plus `theme.json` (or `themes/theme.json`) and no executable. ncode loads it without spawning a subprocess and shows it in `/settings` with source information. See [docs/themes.md](docs/themes.md).
 
 ### Reference
 
@@ -952,12 +956,12 @@ An extension may ship only a theme: `extension.json` plus `theme.json` (or `them
 
 ## Skills
 
-A skill is a per-folder `SKILL.md` file with a YAML frontmatter header. zot discovers skills at startup, surfaces their names in the system prompt, and exposes a built-in `skill` tool the model uses to load the body on demand.
+A skill is a per-folder `SKILL.md` file with a YAML frontmatter header. ncode discovers skills at startup, surfaces their names in the system prompt, and exposes a built-in `skill` tool the model uses to load the body on demand.
 
-By default zot loads built-in skills plus user-installed skills from:
+By default ncode loads built-in skills plus user-installed skills from:
 
-- `./.zot/skills/<name>/SKILL.md` (project)
-- `$ZOT_HOME/skills/<name>/SKILL.md` (global)
+- `./.ncode/skills/<name>/SKILL.md` (project)
+- `$NCODE_HOME/skills/<name>/SKILL.md` (global)
 - `./.claude/skills/<name>/SKILL.md`, `~/.claude/skills/<name>/SKILL.md` (Claude-compatible layout)
 - `./.agents/skills/<name>/SKILL.md`, `~/.agents/skills/<name>/SKILL.md` (agent-compatible layout)
 
@@ -965,14 +969,14 @@ See [docs/skills.md](docs/skills.md) for the frontmatter fields, authoring tips,
 
 ## Telegram bot (bridge)
 
-zot can run as a telegram bot so you can DM it from your phone. Two ways to run it: **from inside the TUI** (the running session mirrors into Telegram) or **as a standalone background daemon** (a headless bot with its own independent agent).
+ncode can run as a telegram bot so you can DM it from your phone. Two ways to run it: **from inside the TUI** (the running session mirrors into Telegram) or **as a standalone background daemon** (a headless bot with its own independent agent).
 
 ### From inside the TUI
 
 Type `/telegram` in the running TUI to open a picker with **connect**, **disconnect**, and **status**. When connected:
 
 - DMs from the paired user become prompts in the **same** session you're typing in, so you can continue a conversation from the terminal on your phone and back again.
-- Messages you type in the TUI are mirrored into the Telegram thread prefixed `you: ...` and the assistant's replies come back prefixed `zot: ...`, so the Telegram chat stays a complete record of both sides of the conversation.
+- Messages you type in the TUI are mirrored into the Telegram thread prefixed `you: ...` and the assistant's replies come back prefixed `ncode: ...`, so the Telegram chat stays a complete record of both sides of the conversation.
 - Messages sent from Telegram show up as your own bubble in Telegram (no mirror) and the assistant's reply to them comes back bare (no prefix).
 - The status bar shows a `- tg -` tag while the bridge is active.
 - `/telegram connect` / `/telegram disconnect` / `/telegram status` (or `/tg`) also work as direct commands without the picker.
@@ -984,32 +988,32 @@ The in-TUI bridge refuses to start while the standalone daemon (below) is runnin
 For headless servers or long-running bots unattached to a TUI:
 
 ```bash
-zot telegram-bot setup     # paste a BotFather token, verify, save
-zot telegram-bot run       # foreground: long-poll in this terminal (ctrl+c to stop)
-zot telegram-bot start     # background: detach and return immediately
-zot telegram-bot stop      # SIGTERM the background bot (SIGKILL after 5s)
-zot telegram-bot logs -f   # tail $ZOT_HOME/logs/bot.log (omit -f to just cat)
-zot telegram-bot status    # config (token masked) + running/stopped
-zot telegram-bot reset     # forget the token and paired user
-# short alias: `zot tg ...` is accepted for every subcommand
+ncode telegram-bot setup     # paste a BotFather token, verify, save
+ncode telegram-bot run       # foreground: long-poll in this terminal (ctrl+c to stop)
+ncode telegram-bot start     # background: detach and return immediately
+ncode telegram-bot stop      # SIGTERM the background bot (SIGKILL after 5s)
+ncode telegram-bot logs -f   # tail $NCODE_HOME/logs/bot.log (omit -f to just cat)
+ncode telegram-bot status    # config (token masked) + running/stopped
+ncode telegram-bot reset     # forget the token and paired user
+# short alias: `ncode tg ...` is accepted for every subcommand
 ```
 
-The background flavor writes the child's PID to `$ZOT_HOME/bot.pid` and redirects stdout and stderr to `$ZOT_HOME/logs/bot.log`. `zot telegram-bot stop` reads that PID, sends SIGTERM, waits up to five seconds, then escalates to SIGKILL if the child is still alive. Running two instances at once is refused at startup.
+The background flavor writes the child's PID to `$NCODE_HOME/bot.pid` and redirects stdout and stderr to `$NCODE_HOME/logs/bot.log`. `ncode telegram-bot stop` reads that PID, sends SIGTERM, waits up to five seconds, then escalates to SIGKILL if the child is still alive. Running two instances at once is refused at startup.
 
 > **Use the installed binary for `start`.** `go run ./cmd/ncode telegram-bot start` won't work. `go run` builds a binary in a temp directory and deletes it when it exits, which kills the detached child. Run `make install` (or `go build`) first and invoke the installed binary.
 
 Setup flow:
 
 1. Talk to [@BotFather](https://t.me/BotFather) on telegram, run `/newbot`, copy the token it gives you.
-2. Run `zot telegram-bot setup` and paste the token when prompted.
-3. Run `zot telegram-bot run` in the directory you want the agent to operate in.
+2. Run `ncode telegram-bot setup` and paste the token when prompted.
+3. Run `ncode telegram-bot run` in the directory you want the agent to operate in.
 4. Open your bot on telegram, send `/start`. The first user to do this claims the bridge (stored as `allowed_user_id`); every other user is rejected.
 
-From then on, any DM you send is forwarded to the agent as a user prompt. Attached photos or `image/*` documents are downloaded and passed to vision-capable models. In-bot telegram commands are case-insensitive: `/help`, `/status`, `/stop` (cancel the current turn). Config lives in `$ZOT_HOME/bot.json` (mode 0600).
+From then on, any DM you send is forwarded to the agent as a user prompt. Attached photos or `image/*` documents are downloaded and passed to vision-capable models. In-bot telegram commands are case-insensitive: `/help`, `/status`, `/stop` (cancel the current turn). Config lives in `$NCODE_HOME/bot.json` (mode 0600).
 
 Starting either Telegram bridge removes any webhook configured for that bot before long polling begins, while preserving pending updates. Telegram does not allow webhooks and `getUpdates` polling at the same time, so do not share the bot token with another service that expects to keep a webhook active.
 
-Bot mode respects the usual zot flags: `--provider`, `--model`, `--cwd`, `--reasoning`, `--continue`, `--no-session`, `--no-tools`, and so on. Run `zot tg run -c --model claude-opus-4-1` to resume the latest session on Opus, for example.
+Bot mode respects the usual ncode flags: `--provider`, `--model`, `--cwd`, `--reasoning`, `--continue`, `--no-session`, `--no-tools`, and so on. Run `ncode tg run -c --model claude-opus-4-1` to resume the latest session on Opus, for example.
 
 ### Architecture: protocol-agnostic bot core
 
@@ -1044,7 +1048,7 @@ packages/agent/modes/telegram/        telegram adapter, api client, daemon
 packages/agent/tools/                 read, write, edit, bash, sandbox
 packages/agent/skills/                skill discovery, frontmatter parser, skill tool
 packages/agent/swarm/                 background subagent runtime
-packages/agent/sdk/                   public Go SDK for embedding zot in-process (package sdk)
+packages/agent/sdk/                   public Go SDK for embedding ncode in-process (package sdk)
 packages/agent/ext/                   public Go SDK for writing extensions (package ext)
 ```
 

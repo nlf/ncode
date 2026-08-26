@@ -75,7 +75,7 @@ func setupHelp() string {
 
 	var b strings.Builder
 	b.WriteString("mcp-bridge setup\n\n")
-	b.WriteString("Add a known MCP server template to your zot MCP config.\n\n")
+	b.WriteString("Add a known MCP server template to your ncode MCP config.\n\n")
 	b.WriteString("Usage:\n")
 	b.WriteString("  /mcp setup add <template> [--global|--project] [--name <server-name>]\n")
 	b.WriteString("  /mcp setup templates\n\n")

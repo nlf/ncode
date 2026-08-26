@@ -1,4 +1,4 @@
-# approve — example zot extension
+# approve — example ncode extension
 
 Demonstrates the **spontaneous `open_panel`** pattern: an
 extension-registered tool opens a panel from inside its handler
@@ -39,12 +39,12 @@ go build -o approve .
 ## Install
 
 ```bash
-zot ext install .
+ncode ext install .
 ```
 
 ## Try it
 
-In zot, ask:
+In ncode, ask:
 
 > Request approval to delete the temp directory.
 

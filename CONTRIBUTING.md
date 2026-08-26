@@ -1,4 +1,4 @@
-# Contributing to zot
+# Contributing to ncode
 
 Contributions are welcome, including bug reports, design feedback, documentation, tests, and code. This guide explains what makes a contribution easy to evaluate and safe to merge.
 
@@ -8,7 +8,7 @@ Contributions are welcome, including bug reports, design feedback, documentation
 
 Use the bug-report template and provide enough information for someone else to reproduce the problem:
 
-- the output of `zot --version`
+- the output of `ncode --version`
 - operating system and terminal
 - provider and model, when relevant
 - the smallest sequence of actions that triggers the problem
@@ -35,7 +35,7 @@ Focused typo, documentation, and test improvements can usually go directly to a 
 
 ## Design boundaries
 
-zot is intended to remain a lightweight, single-binary application. A contribution should fit that direction rather than increasing scope by default.
+ncode is intended to remain a lightweight, single-binary application. A contribution should fit that direction rather than increasing scope by default.
 
 The major ownership boundaries are:
 
@@ -74,7 +74,7 @@ make test        # run all tests with the race detector
 make lint        # run go vet and verify gofmt
 ```
 
-Tests must not depend on real provider credentials, paid model calls, a developer's global zot state, or a specific terminal. Use local HTTP test servers, fixtures, temporary directories, and synthetic credentials.
+Tests must not depend on real provider credentials, paid model calls, a developer's global ncode state, or a specific terminal. Use local HTTP test servers, fixtures, temporary directories, and synthetic credentials.
 
 ## Making a change
 
@@ -144,7 +144,7 @@ If a validation command cannot pass because of an unrelated repository or enviro
 Open the pull request against `main` and include:
 
 - the problem being addressed
-- the chosen solution and why it belongs in zot
+- the chosen solution and why it belongs in ncode
 - tests added or updated
 - commands used for verification
 - user-visible, compatibility, and platform effects

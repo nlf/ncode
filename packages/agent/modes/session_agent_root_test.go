@@ -43,8 +43,8 @@ func TestSessionsSlashUsesAgentSessionRoot(t *testing.T) {
 }
 
 func TestSessionsRootDefaultsToNcodeHome(t *testing.T) {
-	i := &Interactive{cfg: InteractiveConfig{NcodeHome: "/zot/home"}}
-	if got := i.sessionsRoot(); got != "/zot/home" {
+	i := &Interactive{cfg: InteractiveConfig{NcodeHome: "/ncode/home"}}
+	if got := i.sessionsRoot(); got != "/ncode/home" {
 		t.Fatalf("sessions root = %q, want NcodeHome fallback", got)
 	}
 }

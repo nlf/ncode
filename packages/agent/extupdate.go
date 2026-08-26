@@ -45,7 +45,7 @@ func updateAllExtensions(ncodeHome string) {
 		if os.IsNotExist(err) {
 			return // no extensions installed; nothing to do
 		}
-		fmt.Fprintf(os.Stderr, "zot update: skipping extension update (read %s: %v)\n", dir, err)
+		fmt.Fprintf(os.Stderr, "ncode update: skipping extension update (read %s: %v)\n", dir, err)
 		return
 	}
 
@@ -67,7 +67,7 @@ func updateAllExtensions(ncodeHome string) {
 	}
 
 	fmt.Println()
-	fmt.Println("zot update: updating extensions...")
+	fmt.Println("ncode update: updating extensions...")
 
 	var updated, upToDate, skipped, failed int
 	for _, name := range names {
@@ -85,7 +85,7 @@ func updateAllExtensions(ncodeHome string) {
 		}
 	}
 
-	fmt.Printf("zot update: extensions: %d updated, %d up-to-date, %d skipped, %d failed\n",
+	fmt.Printf("ncode update: extensions: %d updated, %d up-to-date, %d skipped, %d failed\n",
 		updated, upToDate, skipped, failed)
 }
 

@@ -36,7 +36,7 @@ func TestExtensionDirsUseNcodeProjectPath(t *testing.T) {
 	}
 }
 
-// TestExtInstallDotSource verifies that `zot ext install .` derives the
+// TestExtInstallDotSource verifies that `ncode ext install .` derives the
 // extension name from the resolved directory name rather than collapsing
 // to the extensions/ parent directory (the false "already exists" bug).
 func TestExtInstallDotSource(t *testing.T) {

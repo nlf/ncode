@@ -154,7 +154,7 @@ func ExportSession(srcPath, dstPath string) (string, error) {
 // owned by the current user / directory / clock. Returns the path
 // of the created session file, ready to pass to OpenSession.
 //
-// The imported session is a first-class zot session: it'll show up
+// The imported session is a first-class ncode session: it'll show up
 // in /sessions, /jump, and on-disk summaries just like any other.
 // Messages and usage rows are preserved verbatim.
 func ImportSession(srcPath, root, cwd, version string) (string, error) {

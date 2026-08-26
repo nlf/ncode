@@ -1,4 +1,4 @@
-# secret — example zot extension
+# secret — example ncode extension
 
 Demonstrates **secret collection via a masked panel**: the model asks
 for a resource that needs a credential, the extension collects the
@@ -50,12 +50,12 @@ go build -o secret .
 ## Install
 
 ```bash
-zot ext install .
+ncode ext install .
 ```
 
 ## Try it
 
-In zot, ask:
+In ncode, ask:
 
 > Fetch https://internal.example.com/report — it needs a password.
 

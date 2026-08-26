@@ -1110,7 +1110,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		swarmMgr.SetActiveSession(sess.ID)
 	}
 	// Best-effort shutdown on interactive exit: stop all running
-	// agents so they don't outlive their parent zot.
+	// agents so they don't outlive their parent ncode.
 	defer swarmMgr.StopAll()
 
 	var startupSkills []*skills.Skill
@@ -1273,7 +1273,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		})
 	}
 
-	// Signal-driven flush: a SIGTERM / SIGHUP to the zot process
+	// Signal-driven flush: a SIGTERM / SIGHUP to the ncode process
 	// (closed terminal window, system shutdown, kill) used to lose
 	// the entire in-memory transcript because the deferred post-Run
 	// flush below never ran. Per-message persistence above covers
@@ -1329,7 +1329,7 @@ func openOrCreateSession(args Args, r Resolved, ag *core.Agent, version string) 
 	if args.NoSess {
 		return nil, nil
 	}
-	// Sweep meta-only files left over from older zot versions (and from
+	// Sweep meta-only files left over from older ncode versions (and from
 	// any session that crashed before its first AppendMessage). Cheap;
 	// reads the first few bytes of each file in the cwd's session dir.
 	sessionsRoot := NcodeHome()
