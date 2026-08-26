@@ -1,23 +1,23 @@
 ---
-name: write-zot-extension
-description: Help the user create a new zot extension (slash command, LLM tool, or guard) in any language.
+name: write-ncode-extension
+description: Help the user create a new ncode extension (slash command, LLM tool, or guard) in any language.
 ---
 
-# Writing a zot extension
+# Writing a ncode extension
 
-Use this skill when the user asks for help building a zot extension —
+Use this skill when the user asks for help building a ncode extension —
 a new slash command, a new tool the LLM can call, an audit hook, or
 a permission gate. Skim this whole skill first, then collaborate
 with the user on the specific extension they want.
 
 ## What an extension is
 
-A zot extension is **an external executable** that zot launches as a
+A ncode extension is **an external executable** that ncode launches as a
 subprocess and talks to over its stdin/stdout in newline-delimited
 JSON. It can be written in any language that can read/write JSON
 lines from stdio: Go, TypeScript (via tsx), Python, Rust, shell with
 jq, anything. Crash isolation is automatic; one bad extension never
-takes down zot.
+takes down ncode.
 
 Three things an extension can do (any combination):
 
@@ -27,7 +27,7 @@ Three things an extension can do (any combination):
    (one-shot styled note in the chat), or a "noop".
 
 2. **Tools** — register tools the LLM itself calls. Schema is
-   JSON Schema; zot routes the model's `tool_call` to the
+   JSON Schema; ncode routes the model's `tool_call` to the
    extension's `tool_result`. Same lifecycle as built-in tools
    (read/write/edit/bash/skill).
 
@@ -42,16 +42,16 @@ Three things an extension can do (any combination):
 Each extension lives in its own directory:
 
 ```
-~/Library/Application Support/zot/extensions/<name>/
+~/Library/Application Support/ncode/extensions/<name>/
 ├── extension.json    # manifest (required)
 └── <executable>      # whatever exec points at
 ```
 
-Or project-local: `<project>/.zot/extensions/<name>/`. Project-local
+Or project-local: `<project>/.ncode/extensions/<name>/`. Project-local
 wins on name conflict.
 
 For ad-hoc use during development, skip the install step entirely
-and run `zot --ext PATH` (repeatable: `-e PATH -e PATH`).
+and run `ncode --ext PATH` (repeatable: `-e PATH -e PATH`).
 
 ### Manifest
 
@@ -68,7 +68,7 @@ and run `zot --ext PATH` (repeatable: `-e PATH -e PATH`).
 ```
 
 Field rules:
-- `name` (required, unique) — id zot uses internally; matches the
+- `name` (required, unique) — id ncode uses internally; matches the
   hello frame. Slash commands & tools live in the same name space
   as built-ins; conflicts are silently shadowed by built-ins.
 - `exec` (required) — the executable path. Resolution:
@@ -99,18 +99,22 @@ The very first frame the extension sends is `hello`:
 Capabilities are advisory; current values are `commands`, `tools`,
 `events`. Send all that apply.
 
-zot replies with `hello_ack`:
+ncode replies with `hello_ack`:
 
 ```json
-{"type":"hello_ack","protocol_version":1,"zot_version":"0.0.x",
+{"type":"hello_ack","product":"ncode","protocol_version":2,"ncode_version":"0.0.x",
  "provider":"anthropic","model":"claude-opus-4-7","cwd":"/path/to/project"}
 ```
+
+Require all three identity fields exactly as shown before registering anything.
+Do not accept an acknowledgement with another product, another protocol
+version, or a missing `ncode_version`; there is no dual acknowledgement.
 
 ### Registration (after hello_ack)
 
 The canonical startup order is `hello`, wait for `hello_ack`, send
 registration frames in any order, then send a single `ready` sentinel
-so zot can finalize the agent's tool registry:
+so ncode can finalize the agent's tool registry:
 
 ```json
 {"type":"register_command","name":"weather","description":"current weather"}
@@ -120,7 +124,7 @@ so zot can finalize the agent's tool registry:
 {"type":"ready"}
 ```
 
-If you don't send `ready`, zot's idle watchdog auto-treats you as
+If you don't send `ready`, ncode's idle watchdog auto-treats you as
 ready after 250ms of no frames, but always send it explicitly when
 you can. Newer extensions on faster hosts shave that 250ms off.
 
@@ -130,7 +134,7 @@ process itself runs from the extension directory, so do not use
 
 ### Runtime frames
 
-**zot → extension:**
+**ncode → extension:**
 
 ```json
 {"type":"command_invoked","id":"abc","name":"weather","args":"berlin"}
@@ -141,7 +145,7 @@ process itself runs from the extension directory, so do not use
 {"type":"shutdown"}
 ```
 
-**extension → zot (replies + spontaneous notifications):**
+**extension → ncode (replies + spontaneous notifications):**
 
 ```json
 {"type":"command_response","id":"abc","action":"prompt",
@@ -164,7 +168,7 @@ without waiting for the next turn; other extensions' notes are kept.
 - `"insert"` — drop `insert` into the editor at the cursor
 - `"display"` — append `display` to chat as a one-shot note (no
   model call, not in transcript)
-- `"noop"` — handled internally; zot doesn't change the UI
+- `"noop"` — handled internally; ncode doesn't change the UI
 
 `tool_result.content[]` blocks: `{"type":"text","text":"..."}` or
 `{"type":"image","mime_type":"image/png","data":"<base64>"}`.
@@ -179,7 +183,7 @@ never stalls the agent.
   stdout that isn't a JSON frame breaks the wire. The first stdout
   frame must be `hello`; do not send `notify`, logs, or registration
   frames before that handshake starts. Use stderr for logs / debug
-  output (zot captures stderr to `$ZOT_HOME/logs/ext-<name>.log`).
+  output (ncode captures stderr to `$NCODE_HOME/logs/ext-<name>.log`).
 - **One JSON object per line.** No multi-line JSON. Always end
   every frame with `\n`.
 - **Flush after writing.** Most stdout writes are line-buffered when
@@ -236,7 +240,7 @@ func main() {
 Build: `go build -o weather .`
 
 `OnHello` is optional. Use it when configuration or registrations need
-host metadata such as `HostInfo.CWD`, `Provider`, `Model`, `ZotVersion`,
+host metadata such as `HostInfo.CWD`, `Provider`, `Model`, `NcodeVersion`,
 `ExtensionDir`, or `DataDir`. The SDK sends `hello`, waits for
 `hello_ack`, runs `OnHello`, announces registrations, then sends `ready`.
 
@@ -268,6 +272,9 @@ const rl = createInterface({ input: stdin, crlfDelay: Infinity });
 rl.on("line", (line) => {
   const f = JSON.parse(line);
   if (f.type === "hello_ack") {
+    if (f.product !== "ncode" || f.protocol_version !== 2 || !f.ncode_version) {
+      throw new Error("ncode extension protocol v2 acknowledgement required");
+    }
     // f.cwd is the user's project directory.
     send({ type: "register_command", name: "note", description: "append a note" });
     send({ type: "register_tool", name: "read_notes",
@@ -308,6 +315,9 @@ emit({"type": "hello", "name": "hello-py", "version": "1.0.0", "capabilities": [
 for line in sys.stdin:
     msg = json.loads(line)
     if msg["type"] == "hello_ack":
+        if (msg.get("product") != "ncode" or msg.get("protocol_version") != 2
+                or not msg.get("ncode_version")):
+            raise SystemExit("ncode extension protocol v2 acknowledgement required")
         # msg["cwd"] is the user's project directory.
         emit({"type": "register_command", "name": "hellopy", "description": "say hi (python)"})
         emit({"type": "ready"})
@@ -324,23 +334,23 @@ for line in sys.stdin:
 ## Install / dev workflow
 
 ```bash
-zot ext install ./weather       # copy into $ZOT_HOME/extensions/
-zot --ext ./weather             # run from disk for one zot session (no install)
-zot --ext .                     # cwd is the extension dir
-zot ext list                    # show installed extensions
-zot ext logs weather            # cat the extension's stderr
-zot ext logs weather -f         # tail it
-zot ext disable weather         # keep installed but skip on launch
-zot ext enable weather
-zot ext remove weather
+ncode ext install ./weather       # copy into $NCODE_HOME/extensions/
+ncode --ext ./weather             # run from disk for one ncode session (no install)
+ncode --ext .                     # cwd is the extension dir
+ncode ext list                    # show installed extensions
+ncode ext logs weather            # cat the extension's stderr
+ncode ext logs weather -f         # tail it
+ncode ext disable weather         # keep installed but skip on launch
+ncode ext enable weather
+ncode ext remove weather
 ```
 
 For TS / Python extensions, no build step is needed — edit the source
-in place and relaunch zot.
+in place and relaunch ncode.
 
 For Go, run `go build -o <name> .` in the extension directory after
-edits, then `zot ext install` (which copies the manifest + binary)
-or `zot --ext .` to test from the working tree.
+edits, then `ncode ext install` (which copies the manifest + binary)
+or `ncode --ext .` to test from the working tree.
 
 ## Manual debug
 
@@ -349,7 +359,7 @@ to see exactly what's happening on the wire:
 
 ```bash
 {
-  printf '%s\n' '{"type":"hello_ack","protocol_version":1,"zot_version":"x","provider":"a","model":"o","cwd":"/tmp"}'
+  printf '%s\n' '{"type":"hello_ack","product":"ncode","protocol_version":2,"ncode_version":"x","provider":"a","model":"o","cwd":"/tmp"}'
   sleep 0.2
   printf '%s\n' '{"type":"command_invoked","id":"1","name":"weather","args":"Berlin"}'
   sleep 0.5
@@ -358,7 +368,7 @@ to see exactly what's happening on the wire:
 ```
 
 Compare what comes out of stdout to the expected wire format. If a
-frame doesn't match what zot expects, it's discarded silently and
+frame doesn't match what ncode expects, it's discarded silently and
 logged to `ext-<name>.log`.
 
 ## Process to follow with the user
@@ -374,9 +384,9 @@ logged to `ext-<name>.log`.
    scripts.
 4. Write the extension dir (manifest + source).
 5. For Go, build it. For TS / Python, mark the script executable.
-6. Suggest `zot --ext <path>` for testing without committing to an
+6. Suggest `ncode --ext <path>` for testing without committing to an
    install.
-7. When happy, `zot ext install <path>`.
+7. When happy, `ncode ext install <path>`.
 
 Don't try to write a full SDK or framework on top of the protocol
 unless the user asked for one — the wire format is small enough

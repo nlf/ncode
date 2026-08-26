@@ -1,6 +1,6 @@
 # Apply progress: clean-break-ncode-identity
 
-Updated: 2026-08-26T20:03:19Z
+Updated: 2026-08-26T20:59:29Z
 
 ## Attempt summary
 
@@ -846,3 +846,173 @@ Ownership recount after the tasks context edit found 44 implementation rows (`25
 - **Protocol preservation:** RPC remains v1; response/event/hello shapes and token-unset prompt-first behavior are unchanged.
 - **Live providers/credentials/network:** none used.
 - **Remaining implementation tasks:** unchanged exact 19 unchecked lines already listed cumulatively above, beginning with WU8 RED. WU8 was not started.
+
+## WU 8 apply evidence
+
+### Attempt summary
+
+- **Status:** WU 8 is complete; WU 1–WU 8 are complete and WU 9 is next/unstarted.
+- **Assigned boundary:** exactly WU 8 — signaled extension protocol-v2 ncode acknowledgement, extension Go SDK, raw clients, authoring skill, and extension documentation.
+- **Native authority:** parent supplied active token `sha256:89974a7ebd50ef447647d51d861d710fdb7e50247c25dc79be049b5e2584571f`. The `gentle-ai` CLI was unavailable, so no duplicate acquire or settlement was attempted; parent owns settlement after its independent gate.
+- **Delivery boundary:** one long-lived branch `feat/clean-break-ncode-identity-02`, accepted one-final-PR size exception, and one independently revertible WU8 slice. No commit, push, PR, branch switch, review, settlement, or WU9 work occurred.
+- **Scope:** rename-aware implementation/test/docs scope is **716 changed lines** (`518` additions, `198` deletions), within the supplied 1,800-line and planned 650–900-line WU8 boundaries.
+- **Network/provider boundary:** all Go module validation used `GOPROXY=off`; no live provider, credentials, release API, or other network service was used.
+
+### Structured status consumed/produced
+
+```yaml
+schemaName: spec-driven
+changeName: clean-break-ncode-identity
+artifactStore: both
+planningHome:
+  root: /Users/nlf/Projects/nlf/ncode/openspec
+  changesDir: /Users/nlf/Projects/nlf/ncode/openspec/changes
+changeRoot: /Users/nlf/Projects/nlf/ncode/openspec/changes/clean-break-ncode-identity
+artifactPaths:
+  proposal: [openspec/changes/clean-break-ncode-identity/proposal.md]
+  specs: [openspec/changes/clean-break-ncode-identity/specs/ncode-identity/spec.md]
+  design: [openspec/changes/clean-break-ncode-identity/design.md]
+  tasks: [openspec/changes/clean-break-ncode-identity/tasks.md, sdd/clean-break-ncode-identity/tasks]
+  applyProgress: [openspec/changes/clean-break-ncode-identity/apply-progress.md, sdd/clean-break-ncode-identity/apply-progress]
+artifacts:
+  proposal: done
+  specs: done
+  design: done
+  tasks: done
+  applyProgress: done
+taskProgress:
+  total: 44
+  complete: 29
+  remaining: 15
+deferredParentActions:
+  total: 2
+  complete: 2
+  remaining: 0
+taskArtifactErrors: []
+applyState: ready
+dependencies:
+  apply: ready
+  verify: blocked
+  sync: blocked
+  archive: blocked
+actionContext:
+  mode: repo-local
+  workspaceRoot: /Users/nlf/Projects/nlf/ncode
+  allowedEditRoots: [/Users/nlf/Projects/nlf/ncode]
+  warnings:
+    - native gentle-ai status/attempt CLI unavailable; authoritative OpenSpec status reconstructed from the installed status contract
+nextRecommended: parent-lifecycle
+isNonAuthoritative: false
+```
+
+The active change and branch were explicit and unambiguous. Every edit stayed under the authoritative repository root. The accepted single-feature-branch size exception resolves the workload gate. Ownership recount found 29/44 implementation rows checked, 15 unchecked, 2/2 parent rows checked, and zero malformed markers.
+
+### Completed implementation tasks and persisted checkboxes
+
+- [x] WU8 RED — protocol acknowledgement/lifecycle tests and genuine failures, persisted in OpenSpec tasks and Engram task observation `117`.
+- [x] WU8 GREEN — ncode v2 host/SDK/docs/raw-client contract, persisted in both task backends.
+- [x] WU8 TRIANGULATE — dual/legacy rejection, authoring-skill rename, idle auto-ready, and copied nested builds, persisted in both task backends.
+- [x] WU8 REFACTOR — transitional-name removal, exact searches, focused/full verification, and WU9-next context, persisted in both task backends.
+
+### TDD Cycle Evidence
+
+| Task | Test files | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|---|---|
+| WU8 RED | `packages/agent/extproto/protocol_test.go`, `packages/agent/ext/ext_test.go`, `packages/agent/ext/legacy_zot_ack_test.go`, `packages/agent/extensions/manager_test.go`; existing intercept/tool/SDK tests | Unit + subprocess integration + protocol contract | Focused extproto/ext/extensions/SDK suite PASS; baseline `make test` PASS | Focused run failed in four distinct ways: protocol constant was 1; `HostInfo.NcodeVersion` was empty for `ncode_version`; old v1 product acknowledgement was accepted; manager emitted v1 `zot_version` without `product`. RED `make test` failed on only the new WU8 cases. | N/A | Neutral hello/tool-frame characterization already passed in the RED suite. | N/A |
+| WU8 GREEN | same tests plus host/SDK production | Unit + subprocess integration | RED above | RED above | `ProtocolVersion=2`, exact host fields, strict SDK identity/version checks, `HostInfo.NcodeVersion`, ncode diagnostics, docs, skill content, and raw clients passed focused tests and `make test`. | Valid ncode v2 and legacy v1 inputs exercised different paths; idle no-ready behavior remained green. | N/A |
+| WU8 TRIANGULATE | dedicated `legacy_zot_ack_test.go` fixtures; manager idle test; nested MCP test | Negative + lifecycle + external module integration | GREEN above | `TestDualNcodeAndZotAcknowledgementIsRejected` genuinely failed because the SDK accepted an otherwise-valid v2 acknowledgement carrying an additional old product field. | Strict unknown-field decoding rejected the dual acknowledgement while the exact ncode v2 case stayed green. | Old-only, dual, exact-native, neutral frame, explicit ready, and idle-without-ready paths are covered. Complete external copies of both nested modules passed offline tidy/test/build. | Skill directory moved to `write-ncode-extension`; copied-module cleanup and repository immutability were proved. |
+| WU8 REFACTOR | all WU8 tests | Regression/race + static protocol audit | TRIANGULATE green | N/A | N/A | Existing interceptor, tool, readiness, RPC-v1, and neutral frame behavior remained green. | Old field literals were isolated to dedicated fixtures; transitional active names and extension protocol-v1 searches returned zero; focused tests, nested builds, `git diff --check`, and `make test` passed. |
+
+### RED evidence
+
+- Focused safety net: `go test ./packages/agent/extproto ./packages/agent/ext ./packages/agent/extensions ./packages/agent/sdk -count=1` — PASS.
+- Baseline `make test` (`go test -race ./...`) — PASS.
+- RED focused command over the five new protocol/lifecycle tests — expected FAIL:
+  - `TestHelloAckPublishesExactNcodeProtocolV2Identity`: `ProtocolVersion = 1, want 2`.
+  - `TestRunAcceptsNcodeProtocolV2AckAndExposesHostInfo`: `NcodeVersion` was empty because the wire tag remained old.
+  - `TestLegacyZotVersionAcknowledgementIsRejected`: old acknowledgement was accepted and the SDK continued.
+  - `TestManagerEmitsNcodeProtocolV2AckAndIdleExtensionAutoReadies`: host output was `protocol_version:1` plus `zot_version`, with no `product` or `ncode_version`.
+- RED `make test` — expected FAIL on those new extproto/ext/extensions cases while unaffected packages stayed green.
+- TRIANGULATE RED: `go test ./packages/agent/ext -run '^TestDualNcodeAndZotAcknowledgementIsRejected$' -count=1` — expected FAIL because an otherwise valid v2 acknowledgement with both version fields was accepted.
+
+### Exact extension protocol proof
+
+- `extproto.Product` is exactly `"ncode"`; `extproto.ProtocolVersion` is exactly `2`.
+- Host `hello_ack` serializes exactly the required identity keys `type:"hello_ack"`, `product:"ncode"`, `protocol_version:2`, and `ncode_version:<host version>`, followed by retained provider/model/cwd/directory metadata.
+- The old field is absent from active structs, host emission, docs, skill, and raw clients. It exists only in `legacy_zot_ack_test.go` rejection fixtures.
+- The Go extension SDK requires exact product `ncode`, protocol version 2, and non-empty `ncode_version`; unknown fields, trailing JSON, old-only acknowledgements, and dual acknowledgements fail closed.
+- `HostInfo.NcodeVersion` receives the exact `ncode_version` value before `OnHello` registrations run.
+- `TestNeutralHelloAndToolFramesRemainUnchanged` proves the extension-originated `hello` and host `tool_call` JSON shapes byte-for-byte; searches preserve neutral `extension.json`, `hello`, `ready`, `register_tool`, and `tool_call` names.
+- `TestManagerEmitsNcodeProtocolV2AckAndIdleExtensionAutoReadies` proves an extension that emits no `ready` frame still reaches `Ready=true`, `AutoReady=true`, `ReadyTimedOut=false`, with `[ncode] no ready frame; auto-readying after idle` in its log.
+- Active WU8 search for `zot_version|ZotVersion|write-zot-extension|[zot]`, excluding dedicated `legacy_zot_*` fixtures — zero matches.
+- Active WU8 extension-protocol-v1 search — zero matches. Separate RPC proof remains `"protocol_version": 1` at `packages/agent/rpc.go:224,244`; WU8 did not alter RPC v1.
+- `ExtensionToolSource` remains declared at `packages/agent/build.go:116`; readiness channels, `readyIdleWindow`, timeouts, manifests, and neutral frames remain in place.
+
+### Cleanup and external nested-module evidence
+
+Two independent complete-copy validations were run; both copied each whole nested module before any replacement and required `diff -qr` equality against its source. Only the external copies received `replace github.com/nlf/ncode => /Users/nlf/Projects/nlf/ncode`.
+
+1. `/tmp/ncode-wu8-extension-copies.g54mgL`
+   - `mcp-bridge`: offline tidy, `go test ./... -count=1`, and build — PASS.
+   - `todo`: offline tidy, `go test ./... -count=1`, and build — PASS.
+   - Repository status SHA-256 before/after: `943804ae0bf4751dac4486b0fc688029cab1fcdf6bf5849f6c068fd231b5ca19`.
+   - Repository module-metadata SHA-256 before/after: `c9aa814cb7bab4842d516207d66042919433ba7ca99ec055cbd1a18ef1984c3e`.
+   - Temp root deleted and explicitly proved absent.
+2. `/tmp/ncode-wu8-refactor-copies.e39cOx`
+   - Both modules again passed complete-copy offline tidy/test/build.
+   - Repository status SHA-256 before/after: `05e08a198e06195be07fcbb917afbd5cb03b323a21ae0b5389ec004b5c84c35d`.
+   - Repository module-metadata SHA-256 before/after: `c9aa814cb7bab4842d516207d66042919433ba7ca99ec055cbd1a18ef1984c3e`.
+   - Temp root deleted and explicitly proved absent.
+
+No tracked nested `replace`, local modfile, workspace, generated build output, or temporary copy remains in the repository.
+
+### Final verification
+
+- `go test ./packages/agent/extproto ./packages/agent/ext ./packages/agent/extensions ./packages/agent/sdk ./packages/agent/skills -count=1` — PASS.
+- Focused named protocol/neutral/legacy/idle/interceptor/tool expression — PASS.
+- `node --check examples/extensions/clock/index.js` — PASS.
+- TypeScript compiler was unavailable; an offline static contract check proved the scratchpad raw client contains exact product/protocol/version validation and strict allowed acknowledgement keys.
+- Complete-copy nested MCP bridge and todo offline tidy/test/build — PASS twice, with cleanup proof above.
+- Transitional protocol and active extension-protocol-v1 searches — zero matches.
+- Dedicated rejection-line review — only factual rejection/non-use fixtures.
+- `git diff --check` — PASS.
+- Final `make test` (`go test -race ./...`) — PASS.
+
+### Files changed by WU 8
+
+- Protocol/SDK: `packages/agent/extproto/{extproto.go,protocol_test.go}`, `packages/agent/ext/{ext.go,ext_test.go,legacy_zot_ack_test.go}`.
+- Host/lifecycle: `packages/agent/extensions/{manager.go,manager_test.go,events.go,proc_unix.go,legacy_zot_ack_test.go}`.
+- Nested extension test fixture: `examples/extensions/mcp-bridge/deferred_tools_test.go`.
+- Raw clients: `examples/extensions/clock/index.js`, `examples/extensions/scratchpad/index.ts`.
+- Documentation/authoring: `docs/extensions.md`; `packages/agent/skills/builtin/write-zot-extension/SKILL.md` renamed to `packages/agent/skills/builtin/write-ncode-extension/SKILL.md`; `packages/agent/skills/skills_test.go`.
+- SDD artifacts: `openspec/changes/clean-break-ncode-identity/{tasks.md,apply-progress.md}` plus Engram task/apply-progress observations.
+
+### Deviations and discoveries
+
+- The extension-authoring Go SDK is `packages/agent/ext`, where `HostInfo` and acknowledgement validation live. The separate in-process embedding SDK at `packages/agent/sdk` has no extension handshake or `HostInfo`; it was left behaviorally unchanged and its tests were run as a retained-boundary check.
+- Strict unknown-field decoding is intentional for the signaled v2 acknowledgement: it rejects a dual acknowledgement without retaining a transitional production field name. Neutral non-acknowledgement frames keep their existing decoding behavior.
+- Raw Node/TypeScript clients now wait for and validate the exact v2 acknowledgement before sending registration frames. Their neutral frame names and payloads are unchanged.
+- Extension documentation and the authoring skill were fully rebranded in this WU because they are atomic participants in the published acknowledgement contract; broader unrelated docs/example communication remains WU11.
+- No design deviation affected RPC v1, the construction spine, extension tool adapter, readiness timing, retained manifests/frames, or later runtime/release boundaries.
+
+### Remaining implementation tasks (exact unchecked lines)
+
+- [ ] RED — add failing focused tests in `packages/agent/{swarm_agent,extupdate,updatecmd}_test.go`, `packages/agent/swarm/{runner,inbox,socketpath,event}_test.go`, `packages/agent/tools/*_test.go`, `packages/agent/modes/timeline_view_test.go`, `packages/provider/{gemini,provider}_test.go`, and `packages/tui/*_test.go` for `NCODE_SWARM_*`, `ncode-swarm-*`, ncode temp/log/request names, and ncode product headers; run focused tests and `make test` expecting failures. <!-- sdd-owner: implementation -->
+- [ ] GREEN — update `packages/agent/{swarm_agent.go,extupdate.go,updatecmd.go,build.go}`, `packages/agent/swarm/{socketpath.go,runner.go}`, `packages/agent/tools/bash.go`, `packages/agent/modes/timeline_view.go`, `packages/provider/{gemini.go,openai_codex.go}`, and `packages/tui/clipboard_darwin.go` to the inventory’s exact `NCODE_*`/`ncode-*` values; retain `os.Executable` child location, neutral swarm event/control shapes, and provider-mandated external fingerprints; run focused tests and `make test`. <!-- sdd-owner: implementation -->
+- [ ] TRIANGULATE — add `legacy_zot_swarm_test.go` and provider/internal negative cases proving Zot swarm metadata cannot supply credentials/event logs or create `zot-swarm-*`, while retained child execution, JSONL events, and neutral controls work; use local stubs/`httptest`, never live providers, then run focused tests and `make test`. <!-- sdd-owner: implementation -->
+- [ ] REFACTOR — centralize only repeated ncode prefix assertions while preserving exact output/path assertions; rerun swarm/provider/temp focused tests, composed-name searches, and `make test`. <!-- sdd-owner: implementation -->
+- [ ] RED — add failing static/unit tests or snapshots for `.goreleaser.yaml`, `install.sh`, `install.ps1`, `packages/agent/{update,updatecmd,changelog}_test.go`, and `.github/workflows/release.yml` requiring `nlf/ncode`, `ncode_<version>_<os>_<arch>`, `ncode[.exe]`, `NCODE_VERSION`, `NCODE_PREFIX`, ncode checksums/install URLs, and no legacy endpoint; run local focused tests and `make test` expecting failures. <!-- sdd-owner: implementation -->
+- [ ] GREEN — update `.goreleaser.yaml`, `install.sh`, `install.ps1`, `.github/workflows/release.yml`, and `packages/agent/{update.go,updatecmd.go,changelog.go}` to ncode-only owner/repository/assets/extraction/user-agent/temp identity; delete `examples/extensions/todo/zot-todo-extension` and `examples/rpc/python/__pycache__/zot_client.cpython-314.pyc` without replacements, preserve neutral `checksums.txt`, and add the required clean-break installer/release notice; run tests and `make test`. <!-- sdd-owner: implementation -->
+- [ ] TRIANGULATE — validate GoReleaser config/snapshot and archive contents when tooling is available, installer shell syntax with mocked HTTP/filesystems, PowerShell parser/static checks, updater `httptest` responses, and checksum/asset-name agreement; assert no release call reaches a network provider or live GitHub release, then run `make test`. <!-- sdd-owner: implementation -->
+- [ ] REFACTOR — derive repeated asset-name expectations from one local test helper/config fixture without adding an updater fallback; rerun distribution checks, `make build`, focused updater tests, forbidden asset/endpoint searches, and `make test`. <!-- sdd-owner: implementation -->
+- [ ] Characterize the mechanical communication surface without manufacturing RED: record link/command checks and nested-example builds for `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `docs/{providers,extensions,rpc,skills,themes}.md`, `.github/ISSUE_TEMPLATE/{bug_report,feature_request}.yml`, `examples/**`, `packages/agent/skills/builtin/write-zot-themes/SKILL.md`, and active help/error/log expectations; distinguish exact provenance files from active materials. <!-- sdd-owner: implementation -->
+- [ ] Rename active product prose, commands, imports, state/env/SDK/extension references, test names/expectations, manifests, and example consumers to lowercase ncode; move `write-zot-themes` to `write-ncode-themes`; ensure README Install, installer/install output, and README first-run/authentication prominently state the clean break and no Zot credentials/settings/sessions/caches/extensions/SDK-RPC-swarm reuse, with no migration/prompt instruction. <!-- sdd-owner: implementation -->
+- [ ] Run post-edit evidence: nested example module tests/builds, example shell/Python/Node syntax checks, markdown link/command searches, installer/help snippet checks, `make test`, and a forbidden-active-identity scan; retain Zot wording only in the exact provenance manifest or dedicated `legacy_zot_*` rejection files. <!-- sdd-owner: implementation -->
+- [ ] Add or complete focused no-live-provider retained-capability coverage for provider/auth resolution, print/stream/JSON/RPC v1, sessions, direct permissions/tools, swarm, extensions including idle auto-ready v2 ack, skills, themes, updater via `httptest`, and retained Telegram tests; run the affected packages, `go vet ./...`, and `make test`. <!-- sdd-owner: implementation -->
+- [ ] Update `openspec/changes/clean-break-ncode-identity/identity-inventory.md` before the final search to add this exact `tasks.md` path to the reviewed provenance manifest only if it contains legacy terms solely as historical planning/rejection context; then verify every provenance line and every `legacy_zot_*` line is factual or asserts rejection/non-use, not active support. <!-- sdd-owner: implementation -->
+- [ ] Run the exact final allowlist gates from `identity-inventory.md`: construct `audit_pathspecs` with each exact provenance file plus `openspec/changes/clean-break-ncode-identity/tasks.md` when admitted and only `:(exclude,glob)**/legacy_zot_*`; require zero output from `git grep -nI -i -e zot -- "${audit_pathspecs[@]}"`, old-module, `ZOTCORE_|ZOT_[A-Z0-9_]+`, `.zot(session)?`, and `zot[-_][[:alnum:]_-]+` searches, and from `git ls-files | grep -i zot | grep -vE '(^|/)legacy_zot_[^/]*$'`. <!-- sdd-owner: implementation -->
+- [ ] Run the exact workable-file and mandatory-line reviews from `identity-inventory.md`: build `/tmp/ncode-zot-provenance-files.txt`, `/tmp/ncode-zot-rejection-files.txt`, and `/tmp/ncode-zot-allowed-files.txt`; require `comm -23` against `git grep -Il -i -e zot -- .` to emit no paths; emit and review every line into `/tmp/ncode-zot-provenance-lines.txt` and `/tmp/ncode-zot-rejection-lines.txt`; then run `go mod tidy`, `go list ./...`, `go vet ./...`, `make build`, `make test`, nested example builds, installer/package checks, and the inventory reproduction commands against planning SHA `18325b75cc89c75b5f4842924cb377aa5bef5c4b`. <!-- sdd-owner: implementation -->
+
+### Parent lifecycle and next boundary
+
+Parent owns independent gate, attempt settlement, the independently revertible `feat(extensions): acknowledge ncode protocol v2` commit, any checkpoint push, and later WU9 delegation. WU9 is the exact next implementation boundary; WU9 was not started.

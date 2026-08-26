@@ -183,7 +183,7 @@ func (m *Manager) askIntercept(ctx context.Context, ext *Extension, payload extp
 		ext.mu.Lock()
 		delete(ext.pendingIntercept, id)
 		ext.mu.Unlock()
-		fmt.Fprintf(ext.logFile, "[zot] intercept write failed: %v\n", err)
+		fmt.Fprintf(ext.logFile, "[ncode] intercept write failed: %v\n", err)
 		return InterceptResult{}
 	}
 
@@ -199,7 +199,7 @@ func (m *Manager) askIntercept(ctx context.Context, ext *Extension, payload extp
 		ext.mu.Lock()
 		delete(ext.pendingIntercept, id)
 		ext.mu.Unlock()
-		fmt.Fprintf(ext.logFile, "[zot] intercept %s timed out; allowing\n", payload.Event)
+		fmt.Fprintf(ext.logFile, "[ncode] intercept %s timed out; allowing\n", payload.Event)
 		return InterceptResult{}
 	case <-ctx.Done():
 		ext.mu.Lock()

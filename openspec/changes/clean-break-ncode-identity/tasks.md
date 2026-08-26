@@ -40,8 +40,8 @@ Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
 | Change | `clean-break-ncode-identity` |
 | Strategy | WU 2–WU 12 remain on `feat/clean-break-ncode-identity-02`; checkpoint pushes are allowed, but no intermediate PRs |
 | Final PR | One PR from `feat/clean-break-ncode-identity-02` to `main`, linked to issue #1 with exactly `type:breaking-change` |
-| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 complete → WU 7 complete → WU 8 next/unstarted → WU 9 → WU 10 → WU 11 → WU 12 |
-| Current boundary | WU 7 is complete; WU 8 is next and unstarted |
+| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 complete → WU 7 complete → WU 8 complete → WU 9 next/unstarted → WU 10 → WU 11 → WU 12 |
+| Current boundary | WU 8 is complete; WU 9 is next and unstarted |
 | Review budget | The user explicitly accepts the combined final-PR size exception; no intermediate PR review budget applies |
 | Verification | Preserve each WU as an independently revertible commit; run focused verification and `make test` before beginning the next WU |
 | Gates | Clone-local bounded review remains disabled; strict TDD, native SDD attempt authority, issue linkage, verification, CI, and final merge gates remain |
@@ -56,7 +56,8 @@ main: WU 1 merged
       ├── WU 5 complete
       ├── WU 6 complete
       ├── WU 7 complete
-     └── 📍 WU 8 next (unstarted) → WU 9 … WU 12 → one final PR to main
+      ├── WU 8 complete
+     └── 📍 WU 9 next (unstarted) → WU 10 … WU 12 → one final PR to main
 ```
 
 ## Constraints and common evidence
@@ -130,10 +131,10 @@ main: WU 1 merged
 
 **Boundary:** Own host, `extproto`, Go SDK, raw examples, authoring skill, and extension docs so no buildable revision mixes acknowledgement identities. Preserve neutral extension hello/frames and idle auto-ready. **Commit:** `feat(extensions): acknowledge ncode protocol v2`. **Verification/rollback:** revert the entire acknowledgement contract slice before release.
 
-- [ ] RED — add failing acknowledgement and lifecycle tests in `packages/agent/extproto/*_test.go`, `packages/agent/ext/ext_test.go`, `packages/agent/extensions/{manager,intercept,tool}_test.go`, and `packages/agent/sdk/*_test.go` requiring `product:"ncode"`, `protocol_version:2`, `ncode_version`, `HostInfo.NcodeVersion`, old `zot_version` acknowledgement rejection, and unchanged neutral hello/frame plus idle auto-ready behavior; run focused tests and `make test` expecting failures. <!-- sdd-owner: implementation -->
-- [ ] GREEN — change `packages/agent/extproto/extproto.go` `ProtocolVersion` to 2 and `HelloAckFromHost`; update `packages/agent/extensions/manager.go`, `packages/agent/ext/ext.go`, and `packages/agent/sdk` to emit/validate the ncode acknowledgement and rename the SDK field; retain `ExtensionToolSource`, readiness channels/timeouts, neutral manifest/frame names, and auto-ready logic while changing only its `[zot]` diagnostic to `[ncode]`; update `docs/extensions.md`, `packages/agent/skills/builtin/write-zot-extension/`, and raw extension examples together, then run focused tests and `make test`. <!-- sdd-owner: implementation -->
-- [ ] TRIANGULATE — rename the authoring skill directory to `write-ncode-extension`, add dedicated legacy acknowledgement fixtures, build/test `examples/extensions/mcp-bridge` and `examples/extensions/todo` from their own modules, and verify an idle extension still becomes ready without a ready frame; run all focused tests and `make test`. <!-- sdd-owner: implementation -->
-- [ ] REFACTOR — remove transitional field names/test duplication without accepting a dual ack or weakening old-ack rejection; rerun extproto/manager/ext/SDK tests, nested extension module builds, protocol searches, and `make test`. <!-- sdd-owner: implementation -->
+- [x] RED — add failing acknowledgement and lifecycle tests in `packages/agent/extproto/*_test.go`, `packages/agent/ext/ext_test.go`, `packages/agent/extensions/{manager,intercept,tool}_test.go`, and `packages/agent/sdk/*_test.go` requiring `product:"ncode"`, `protocol_version:2`, `ncode_version`, `HostInfo.NcodeVersion`, old `zot_version` acknowledgement rejection, and unchanged neutral hello/frame plus idle auto-ready behavior; run focused tests and `make test` expecting failures. <!-- sdd-owner: implementation -->
+- [x] GREEN — change `packages/agent/extproto/extproto.go` `ProtocolVersion` to 2 and `HelloAckFromHost`; update `packages/agent/extensions/manager.go`, `packages/agent/ext/ext.go`, and `packages/agent/sdk` to emit/validate the ncode acknowledgement and rename the SDK field; retain `ExtensionToolSource`, readiness channels/timeouts, neutral manifest/frame names, and auto-ready logic while changing only its `[zot]` diagnostic to `[ncode]`; update `docs/extensions.md`, `packages/agent/skills/builtin/write-zot-extension/`, and raw extension examples together, then run focused tests and `make test`. <!-- sdd-owner: implementation -->
+- [x] TRIANGULATE — rename the authoring skill directory to `write-ncode-extension`, add dedicated legacy acknowledgement fixtures, build/test `examples/extensions/mcp-bridge` and `examples/extensions/todo` from their own modules, and verify an idle extension still becomes ready without a ready frame; run all focused tests and `make test`. <!-- sdd-owner: implementation -->
+- [x] REFACTOR — remove transitional field names/test duplication without accepting a dual ack or weakening old-ack rejection; rerun extproto/manager/ext/SDK tests, nested extension module builds, protocol searches, and `make test`. <!-- sdd-owner: implementation -->
 
 ## WU 9 — Rename swarm, subprocess, provider, and internal composed identity
 

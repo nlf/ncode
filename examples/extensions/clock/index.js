@@ -1,4 +1,4 @@
-// clock — a zot extension written in plain Node (no dependencies).
+// clock — a ncode extension written in plain Node (no dependencies).
 //
 // Registers two slash commands:
 //   /now            — pushes the current local time into the chat as
@@ -15,9 +15,9 @@
 // stdout.
 //
 // Install:
-//   zot ext install /path/to/this/dir
+//   ncode ext install /path/to/this/dir
 //
-// Then in zot:
+// Then in ncode:
 //   /now
 //   /uptime
 
@@ -27,11 +27,22 @@ import { stdin, stdout, stderr } from "node:process";
 const NAME = "clock";
 const VERSION = "1.0.0";
 const STARTED_AT = Date.now();
+const ACK_KEYS = new Set([
+  "type",
+  "product",
+  "protocol_version",
+  "ncode_version",
+  "provider",
+  "model",
+  "cwd",
+  "extension_dir",
+  "data_dir",
+]);
 
 /** @typedef {{type: string, id?: string, [k: string]: unknown}} Frame */
 
 /**
- * Send a frame to zot. One JSON object per line; flush immediately
+ * Send a frame to ncode. One JSON object per line; flush immediately
  * so the host doesn't sit waiting on a buffer.
  * @param {Frame} obj
  */
@@ -40,7 +51,7 @@ function send(obj) {
 }
 
 /**
- * stderr is captured by zot to $ZOT_HOME/logs/ext-clock.log; perfect
+ * stderr is captured by ncode to $NCODE_HOME/logs/ext-clock.log; perfect
  * for debug output. Anything written to stdout would corrupt the
  * protocol stream.
  * @param {string} msg
@@ -57,19 +68,22 @@ send({
   capabilities: ["commands"],
 });
 
-// 2. Register every command we can handle.
-send({
-  type: "register_command",
-  name: "now",
-  description: "show the current local time (no model call)",
-});
-send({
-  type: "register_command",
-  name: "uptime",
-  description: "ask the agent to riff on how long the clock ext has run",
-});
+// 2. Wait for the exact ncode protocol-v2 acknowledgement, then register.
+function registerCommands() {
+  send({
+    type: "register_command",
+    name: "now",
+    description: "show the current local time (no model call)",
+  });
+  send({
+    type: "register_command",
+    name: "uptime",
+    description: "ask the agent to riff on how long the clock ext has run",
+  });
+  send({ type: "ready" });
+}
 
-// 3. Read frames until stdin closes (zot shuts us down).
+// 3. Read frames until stdin closes (ncode shuts us down).
 const rl = createInterface({ input: stdin, crlfDelay: Infinity });
 
 rl.on("line", (line) => {
@@ -84,9 +98,20 @@ rl.on("line", (line) => {
 
   switch (frame.type) {
     case "hello_ack":
+      if (
+        frame.product !== "ncode" ||
+        frame.protocol_version !== 2 ||
+        typeof frame.ncode_version !== "string" ||
+        frame.ncode_version === "" ||
+        Object.keys(frame).some((key) => !ACK_KEYS.has(key))
+      ) {
+        log("incompatible host acknowledgement; ncode protocol v2 required");
+        process.exit(1);
+      }
       log(
-        `connected to zot ${frame.zot_version} (${frame.provider}/${frame.model})`,
+        `connected to ncode ${frame.ncode_version} (${frame.provider}/${frame.model})`,
       );
+      registerCommands();
       break;
 
     case "command_invoked":
@@ -147,7 +172,7 @@ function handleCommand(frame) {
         id,
         action: "prompt",
         prompt:
-          `The clock extension has been running for ${seconds}s in this zot session. ` +
+          `The clock extension has been running for ${seconds}s in this ncode session. ` +
           `Riff on that briefly in one short sentence — be a little dramatic. ${focus}`.trim(),
       });
       return;

@@ -19,7 +19,10 @@ package extproto
 
 import "encoding/json"
 
-const ProtocolVersion = 1
+const (
+	Product         = "ncode"
+	ProtocolVersion = 2
+)
 
 type Frame struct {
 	Type string `json:"type"`
@@ -159,8 +162,9 @@ type ShutdownAckFromExt struct {
 
 type HelloAckFromHost struct {
 	Type            string `json:"type"`
+	Product         string `json:"product"`
 	ProtocolVersion int    `json:"protocol_version"`
-	NcodeVersion    string `json:"zot_version"`
+	NcodeVersion    string `json:"ncode_version"`
 	Provider        string `json:"provider"`
 	Model           string `json:"model"`
 	CWD             string `json:"cwd"`

@@ -102,7 +102,7 @@ func TestDiscoverProjectAndGlobalPriorityAndDedup(t *testing.T) {
 		t.Fatalf("errs: %v", errs)
 	}
 	// Expect the two user skills + every built-in shipped with the
-	// binary (currently the write-zot-extension authoring guide).
+	// binary (currently the write-ncode-extension authoring guide).
 	builtins := loadBuiltins()
 	want := 2 + len(builtins)
 	if len(skills) != want {

@@ -33,6 +33,7 @@ package ext
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -500,11 +501,20 @@ func (e *Extension) Run() error {
 		return scanner.Err()
 	}
 	var ack extproto.HelloAckFromHost
-	if err := json.Unmarshal(scanner.Bytes(), &ack); err != nil {
-		return fmt.Errorf("parse hello_ack: %w", err)
+	decoder := json.NewDecoder(bytes.NewReader(scanner.Bytes()))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&ack); err != nil {
+		return fmt.Errorf("parse hello_ack for ncode protocol v2: %w", err)
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		return fmt.Errorf("parse hello_ack for ncode protocol v2: trailing JSON value")
 	}
 	if ack.Type != "hello_ack" {
 		return fmt.Errorf("first host frame must be hello_ack (got %q)", ack.Type)
+	}
+	if ack.Product != extproto.Product || ack.ProtocolVersion != extproto.ProtocolVersion || ack.NcodeVersion == "" {
+		return fmt.Errorf("hello_ack must use ncode protocol v2 (product=%q protocol_version=%d ncode_version=%q)", ack.Product, ack.ProtocolVersion, ack.NcodeVersion)
 	}
 	e.host = HostInfo{
 		ProtocolVersion: ack.ProtocolVersion,
