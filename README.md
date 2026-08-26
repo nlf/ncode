@@ -52,7 +52,7 @@ Drops `zot.exe` into `$HOME\bin` and adds it to the user PATH if missing. Open a
 ### go install
 
 ```bash
-go install github.com/nlf/ncode/cmd/zot@latest
+go install github.com/nlf/ncode/cmd/ncode@latest
 ```
 
 The installed binary reports the tagged module version and supports `zot update`.
@@ -61,8 +61,8 @@ The installed binary reports the tagged module version and supports `zot update`
 
 ```bash
 git clone https://github.com/nlf/ncode
-cd zot
-make build        # produces ./bin/zot
+cd ncode
+make build        # produces ./bin/ncode
 make install      # into $GOPATH/bin
 ```
 
@@ -285,7 +285,7 @@ Slash command names are case-insensitive in the TUI and messaging backends; argu
 | `/swarm` | Spawn, monitor, and chat with background subagents. Each runs in parallel with your main session and shares its working directory. |
 | `/skills` | List discovered skills (SKILL.md files) and preview their bodies. |
 | `/compact` | Summarize the transcript into one message to free up context. |
-| `/study` | Run the canned prompt "Read and understand everything in the current directory." so the agent has full project context before you start asking targeted questions. Pass a path — typed, drag-dropped, or selected via `@` — to target a specific file or directory instead: `/study [dir:packages/]`, `/study cmd/zot/main.go`. |
+| `/study` | Run the canned prompt "Read and understand everything in the current directory." so the agent has full project context before you start asking targeted questions. Pass a path — typed, drag-dropped, or selected via `@` — to target a specific file or directory instead: `/study [dir:packages/]`, `/study cmd/ncode/main.go`. |
 | `/jail` | Confine tools to the current directory. |
 | `/unjail` | Allow tools to touch paths outside again. |
 | `/reload-ext` | Hot-reload all extensions (re-read manifests, respawn subprocesses, rebuild tool registry). |
@@ -996,7 +996,7 @@ zot telegram-bot reset     # forget the token and paired user
 
 The background flavor writes the child's PID to `$ZOT_HOME/bot.pid` and redirects stdout and stderr to `$ZOT_HOME/logs/bot.log`. `zot telegram-bot stop` reads that PID, sends SIGTERM, waits up to five seconds, then escalates to SIGKILL if the child is still alive. Running two instances at once is refused at startup.
 
-> **Use the installed binary for `start`.** `go run ./cmd/zot telegram-bot start` won't work. `go run` builds a binary in a temp directory and deletes it when it exits, which kills the detached child. Run `make install` (or `go build`) first and invoke the installed binary.
+> **Use the installed binary for `start`.** `go run ./cmd/ncode telegram-bot start` won't work. `go run` builds a binary in a temp directory and deletes it when it exits, which kills the detached child. Run `make install` (or `go build`) first and invoke the installed binary.
 
 Setup flow:
 
@@ -1020,7 +1020,7 @@ This means additional messaging backends (Discord, Slack, Signal, and similar) c
 ## Development
 
 ```bash
-make build     # build ./bin/zot
+make build     # build ./bin/ncode
 make test      # go test -race ./...
 make lint      # go vet + gofmt check
 make fmt       # gofmt -w .
@@ -1030,7 +1030,7 @@ make release   # cross-compile linux/darwin/windows on amd64 and arm64
 Source layout (single Go module, four packages under `packages/`):
 
 ```
-cmd/zot/                              main()
+cmd/ncode/                            main()
 packages/provider/                    LLM client surface, model catalog, streaming clients
 packages/provider/auth/               credential store, api-key probe, oauth, login server
 packages/core/                        agent loop, sessions, cost tracking, compaction

@@ -1,4 +1,4 @@
-// Command zot is a lightweight terminal coding agent.
+// Command ncode is a lightweight terminal coding agent.
 package main
 
 import (
@@ -12,7 +12,7 @@ import (
 
 // Injected at build time via -ldflags "-X main.version=... -X main.commit=... -X main.date=...".
 // See .goreleaser.yaml for the release build and the Makefile for
-// local builds. Defaults make `zot --version` print something sensible
+// local builds. Defaults make `ncode --version` print something sensible
 // when built without ldflags.
 var (
 	// 0.0.0 is the pre-release placeholder for local / untagged
@@ -37,12 +37,12 @@ func main() {
 		v = v + ")"
 	}
 	if err := agent.Run(os.Args[1:], v); err != nil {
-		fmt.Fprintln(os.Stderr, "zot:", err)
+		fmt.Fprintln(os.Stderr, "ncode:", err)
 		os.Exit(1)
 	}
 }
 
-// resolvedVersion falls back to the module version embedded by Go when zot is
+// resolvedVersion falls back to the module version embedded by Go when ncode is
 // installed with "go install ...@version". Release archives still use the
 // version injected by GoReleaser, and local source builds remain 0.0.0.
 func resolvedVersion(linkedVersion string) string {

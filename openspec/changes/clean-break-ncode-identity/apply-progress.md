@@ -1,15 +1,16 @@
 # Apply progress: clean-break-ncode-identity
 
-Updated: 2026-08-26T18:23:48Z
+Updated: 2026-08-26T18:50:41Z
 
 ## Attempt summary
 
-- **Status:** WU 1 is merged and WU 2–WU 3 are complete; the broader change remains in progress, with WU 4 next and not started.
-- **Assigned boundary:** WU 3 — Rename Go product symbols and package comments — complete; WU 4 is the next boundary.
-- **Delivery:** WU 2–WU 12 remain on the single long-lived branch `feat/clean-break-ncode-identity-02`. Preserve each WU as an independently revertible commit, push checkpoints as appropriate, create no intermediate PRs, and open one final PR to `main` linked to issue #1 with exactly `type:breaking-change`.
-- **Review budget:** the prior correction was exactly 43 changed lines relative to the reset candidate (22 additions + 21 deletions across 5 files), below its authorized 120-line maximum. The cumulative WU3-final-comments attempt stayed within its separate 100-line maximum; exact attempt and worktree statistics are recorded in the WU 3 evidence below.
-- **Commits/branches/PRs:** WU 3 apply created no commit, push, or PR. Parent lifecycle must preserve WU 3 and each later WU as separate commits on `feat/clean-break-ncode-identity-02`; no intermediate PRs are to be created.
-- **Verification:** WU 3 baseline, post-rename, and corrective comment-only REFACTOR rounds include focused and full package tests, `go vet ./...`, a comprehensive tracked-Go comment inventory, architecture-seam inspection, `git diff --check`, and `make test`, all passing. The authoritative OpenSpec status and parent continuation keep WU 4 unstarted.
+- **Status:** WU 1 is merged and WU 2–WU 4 are complete; the broader change remains in progress, with WU 5 next and unstarted.
+- **Assigned boundary:** WU 4 — Move command and local build identity — complete; WU 5 is the next boundary.
+- **Delivery:** WU 2–WU 12 remain on the single long-lived branch `feat/clean-break-ncode-identity-02`. Preserve each WU as an independently revertible commit, create no intermediate PRs, and open one final PR to `main` linked to issue #1 with exactly `type:breaking-change`.
+- **Review budget:** WU 4 used `343` rename-aware changed lines (203 additions + 140 deletions; 559 without rename detection) against the native 700-line maximum; the combined final-PR size exception remains approved.
+- **Commits/branches/PRs:** WU 4 apply created no commit, push, PR, merge, or branch switch. Parent lifecycle owns the revertible WU 4 commit and native attempt settlement.
+- **Verification:** baseline characterization, post-move build/install/help/version checks, focused command tests, local-input searches, `git diff --check`, and `make test` passed.
+- **Automatic-gate artifact correction:** corrected only stale Chain Context in `tasks.md` to show WU 4 complete and WU 5 next/unstarted; every checkbox and all WU 5 task text were preserved.
 - **Review/gates:** clone-local bounded review remains disabled. Strict TDD, native SDD attempt authority, issue linkage, verification, CI, the final PR, and final merge gates remain.
 - **Delivery decision timing:** this single-feature-branch/final-PR decision was made after WU 2 apply; it changes delivery only and does not alter WU 2 evidence or implementation statistics.
 - **Opaque correction attempts consumed:** prior `sha256:e9bbdf8ae822620cf981a130054fc26a9d7a644b54b16356c1d8da5ea9c5f1a2`; final parser-comment attempt `sha256:39875b93e6f8475e355d832717e5de698aff782c10303674aaf27e5c4147cffa`. The reset-candidate remediation binding matched `sha256:cba34272f556f3830479f8e98f2da5d22939bea1de89f35388632bedacd84539`.
@@ -29,8 +30,8 @@ artifacts:
   applyProgress: done
 taskProgress:
   total: 44
-  complete: 10
-  remaining: 34
+  complete: 13
+  remaining: 31
 deferredParentActions:
   total: 2
   complete: 2
@@ -42,10 +43,12 @@ actionContext:
   allowedEditRoots:
     - /Users/nlf/Projects/nlf/ncode
   warnings: []
-workUnit: WU3-complete
-nextWorkUnit: WU4
+workUnit: WU4-complete
+nextWorkUnit: WU5
 nextWorkUnitStarted: false
-correctionLineBudget: { max: 100, actual: 70, cumulativeWorktreeChangedLines: 709 }
+attemptAuthority: sha256:1906181958b9fa019279b35a883baed7e38cb7658af5f1f2018fbf4c7403ea6b
+attemptSettlement: deferred-to-parent
+changedLineBudget: { max: 700, actual: 343, conservativeNoRename: 559 }
 sizeException: approved-combined-final-pr
 deliveryStrategy: single-long-lived-feature-branch
 deliveryBranch: feat/clean-break-ncode-identity-02
@@ -70,7 +73,7 @@ nextRecommended: parent-lifecycle
 isNonAuthoritative: false
 ```
 
-The active change was explicitly selected by the parent and confirmed from the complete authoritative OpenSpec artifacts under safe repo-local edit roots. Native `gentle-ai` status was unavailable, so the shape-compatible status above was produced from the installed status contract. No malformed task ownership markers were found.
+The active change and exact WU4 proceed token were supplied by the parent and matched the authoritative repo-local branch/root. Allowed edits stayed under `/Users/nlf/Projects/nlf/ncode`; warnings were empty. No malformed task ownership markers were found.
 
 ## Completed implementation tasks and persisted checkboxes
 
@@ -449,11 +452,55 @@ Two initial REFACTOR search attempts used ineffective `rg` glob exclusions and s
 - `NcodeVersion` intentionally preserves `json:"zot_version"`; current executable/UI and state/env/path behavior is unchanged; WU4 was not implemented.
 - `ExtensionToolSource`, SDK-to-agent direction, and `Resolve` → `Resolved.NewClient` → `Resolved.NewAgent` remain intact; no commit, push, PR, branch switch, or review occurred.
 
-## Remaining implementation tasks (exact unchecked lines)
+## WU 4 apply evidence
 
-- [ ] Characterize the mechanical command/build surface without manufacturing RED: record `make build`, `go build -o /tmp/zot ./cmd/zot`, command help/version output, `Makefile` binary targets, `cmd/zot/{main.go,main_test.go}`, and `docs.go` embed references before the move. <!-- sdd-owner: implementation -->
-- [ ] Move `cmd/zot/{main.go,main_test.go}` to `cmd/ncode/`, update `Makefile` and command/test references to `./cmd/ncode` and `bin/ncode`, and rename command/product help/version/error literals to lowercase ncode; leave no `cmd/zot`, `bin/zot`, dispatch branch, or alias target. <!-- sdd-owner: implementation -->
-- [ ] Run post-move evidence: `go build -o /tmp/ncode ./cmd/ncode`, isolated-`GOBIN` `go install github.com/nlf/ncode/cmd/ncode`, `make build`, command help/version tests, `make test`, and searches proving `/tmp/zot`, `cmd/zot`, and `bin/zot` are absent from active build inputs. <!-- sdd-owner: implementation -->
+### Completed implementation tasks and persisted checkboxes
+
+- [x] Characterization without manufactured RED — persisted at `tasks.md:92`.
+- [x] Command/local-build move and identity update — persisted at `tasks.md:93`.
+- [x] Post-move build/install/help/version/full verification — persisted at `tasks.md:94`.
+
+### TDD Cycle Evidence
+
+| Task | Layer | Safety Net / RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|
+| Characterize | Approval/structural | `make build`, `go build -o /tmp/zot ./cmd/zot`, `go test ./cmd/zot`, and `make test` passed. Baseline help/version advertised `zot`; no RED was manufactured for the approved mechanical move. | N/A | Makefile targets, both command files, and unchanged `docs.go` embed inputs were inventoried. | Temporary baseline outputs were removed after evidence capture. |
+| Move/rebrand | Structural + command integration | Approval baseline above. | `cmd/ncode`, `bin/ncode`, central/subcommand help, version output, and local product errors were updated together; focused command/agent/TUI tests passed. | `TestHelpOutputStreams` now covers help on stdout, argument-error help on stderr, absence of Zot command rows, and exact `ncode test` version output. | Command literals were rebranded without changing routers, state/env/path/protocol behavior, or release/updater internals. |
+| Post-move | Build/install/race | Characterization above. | Direct build, isolated-GOBIN install, and `make build` passed with only ncode executable outputs. | Both `--version` and `-v`, command help, no-alias/dispatch searches, and local build-input path searches passed. | `git diff --check` and `make test` passed. |
+
+Triangulation was structural for the move itself because there is one command location/output. Observable help/version behavior was triangulated across long/short version flags and success/error help streams.
+
+### Characterization and verification
+
+- Baseline `make build` produced `bin/zot`; `go build -o /tmp/zot ./cmd/zot`, `go test ./cmd/zot -count=1`, and `make test` passed.
+- Baseline `/tmp/zot --help` advertised Zot commands; `--version` and `-v` printed `zot 0.3.51-0.20260826183238-5099c80b49c7`.
+- Baseline Makefile had `build`, `install`, `run`, and five cross-build outputs rooted at `cmd/zot`/`bin/zot`; command sources were `main.go`/`main_test.go`; `docs.go` embedded `README.md docs/*.md` and installed five mapped docs.
+- `go build -o /tmp/ncode ./cmd/ncode` — PASS; help and both version flags identify lowercase ncode.
+- Isolated `GOBIN` `go install github.com/nlf/ncode/cmd/ncode` — PASS; installed only `ncode`.
+- `make build` — PASS; produced executable `bin/ncode` and no `bin/zot`.
+- `go test ./cmd/ncode -run '^TestResolvedVersionFromBuildInfo$' -count=1` — PASS.
+- `go test ./packages/agent -run '^TestHelpOutputStreams$' -count=1` — PASS.
+- `go test ./packages/agent ./packages/tui -count=1` — PASS.
+- `make test` (`go test -race ./...`) — PASS.
+- Local build-input and alias searches over `Makefile`, `docs.go`, `cmd/ncode`, and command routers found no `/tmp/zot`, `cmd/zot`, `bin/zot`, Zot target, or Zot dispatch branch; worktree paths `cmd/zot`, `bin/zot`, and `/tmp/zot` were absent.
+- `git diff --check` — PASS; temporary binaries and isolated install directories were removed.
+
+### Files and scope
+
+- Moved: `cmd/zot/{main.go,main_test.go}` → `cmd/ncode/`.
+- Build/docs: `Makefile`, `README.md`, `CONTRIBUTING.md`.
+- Command/help/error code and test: `packages/agent/{args.go,args_test.go,botcmd.go,build.go,cli.go,extcmd.go,modelsync.go,sessionscmd.go}`, `packages/agent/skills/tool.go`, `packages/tui/clipboard_text_linux.go`.
+- SDD artifacts: `tasks.md` and this cumulative `apply-progress.md`.
+- Exact WU4 scope: **343 changed lines** (203 additions + 140 deletions, rename-aware); conservative no-rename accounting is 559 (311 + 248), also below the native 700-line maximum.
+
+### Deviations and deferred boundaries
+
+- No design behavior deviation occurred. Mechanical characterization replaced manufactured RED as explicitly authorized; one version assertion was added during triangulation.
+- README and CONTRIBUTING command/build paths moved now because they are active embedded/local-build references; broader communication remains WU11.
+- `.goreleaser.yaml` still contains its WU10-owned Zot release build id/main/binary, and updater/installer/release asset identity remains deferred to WU10. State variables and paths such as `$ZOT_HOME`/`.zot`, RPC and extension protocol fields, and runtime composed names remain assigned to WU5–WU10.
+- No commit, push, PR, merge, branch switch, review transaction, native attempt settlement, or WU5 work occurred.
+
+## Remaining implementation tasks (exact unchecked lines)
 - [ ] RED — add failing table-driven tests in `packages/agent/config_home_test.go`, `packages/agent/build_test.go`, `packages/agent/extcmd_test.go`, `packages/agent/extensions/manager_test.go`, `packages/agent/skills/skills_test.go`, `packages/core/session_portable_test.go`, and `examples/extensions/mcp-bridge/*_test.go` for the exact `NCODE_HOME`/XDG/macOS/Windows `%LOCALAPPDATA%`/fallback `.ncode` order, `.ncode/{extensions,skills,mcp.json}`, `.ncodesession`, no `.zot` scan, and host/MCP equivalence; run focused tests and `make test` expecting the new assertions to fail. <!-- sdd-owner: implementation -->
 - [ ] GREEN — implement the exact `NcodeHome` order in `packages/agent/config.go`; update `packages/agent/{extcmd.go,extensions/manager.go,skills/skills.go}`, `packages/core/session_portable.go`, relevant `packages/agent/modes/*` session help/import UI, and `examples/extensions/mcp-bridge/config.go` to use only ncode roots/project paths and `.ncodesession`; preserve non-branded basenames and make the MCP bridge use `%LOCALAPPDATA%`, not `%APPDATA%`; run focused tests and `make test`. <!-- sdd-owner: implementation -->
 - [ ] TRIANGULATE — add `legacy_zot_home_test.go`, `legacy_zot_project_path_test.go`, and `legacy_zot_portable_session_test.go` at the owning package locations with coexistence sentinels/snapshots proving `$ZOT_HOME`, OS Zot defaults, `.zot`, and `.zotsession` are ignored and unchanged; add filesystem timing coverage for path resolution, eager ignored-error docs installation in `Resolve`, and existing lazy triggers, then run focused tests and `make test`. <!-- sdd-owner: implementation -->
@@ -488,11 +535,11 @@ Two initial REFACTOR search attempts used ineffective `rg` glob exclusions and s
 
 ## Deferred parent lifecycle actions
 
-Both parent-owned rows are checked. Clone-local bounded review remains disabled, and WU 3 apply started no review transaction. Parent still owns the independently revertible WU commits, checkpoint pushes, issue linkage, CI, one final PR from `feat/clean-break-ncode-identity-02` to `main` with exactly `type:breaking-change`, final merge, and delegation of WU 4.
+Both parent-owned rows are checked and were preserved. Clone-local bounded review remains disabled. Parent owns the independently revertible WU4 commit, native attempt settlement, checkpoint pushes, issue linkage, CI, one final PR from `feat/clean-break-ncode-identity-02` to `main` with exactly `type:breaking-change`, final merge, and any later WU5 delegation.
 
 ## Risks and next boundary
 
 - The user explicitly accepts the combined final-PR size exception; independently revertible WU commits plus focused verification and `make test` before the next WU remain the delivery controls.
 - Standalone nested-module tidy remains publication-bootstrapped until a released ncode version declares the new module path; transient local-root validation passed and tracked modules remain replace-free.
-- This worktree is on `feat/clean-break-ncode-identity-02`; WU 3 apply performed no commit, push, PR, merge, branch switch, review transaction, or WU 4 work.
-- WU 4 is next but has not started. Parent must first preserve WU 3 as its own revertible commit and complete the applicable checkpoint lifecycle without opening an intermediate PR.
+- This worktree remains on `feat/clean-break-ncode-identity-02`; WU4 apply performed no commit, push, PR, merge, branch switch, review transaction, settlement, or WU5 work.
+- WU5 is next but unstarted. Parent must first preserve WU4 as its own revertible commit and settle the native attempt after its independent gate.

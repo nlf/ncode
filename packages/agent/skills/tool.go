@@ -84,7 +84,7 @@ func (t *Tool) Execute(ctx context.Context, args json.RawMessage, progress func(
 	if s == nil {
 		return core.ToolResult{
 			IsError: true,
-			Content: []provider.Content{provider.TextBlock{Text: fmt.Sprintf("skill: no skill named %q (run /skills in zot to see what's available)", in.Name)}},
+			Content: []provider.Content{provider.TextBlock{Text: fmt.Sprintf("skill: no skill named %q (run /skills in ncode to see what's available)", in.Name)}},
 		}, nil
 	}
 

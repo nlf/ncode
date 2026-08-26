@@ -513,7 +513,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 				}
 			}
 			fmt.Fprintf(os.Stderr,
-				"zot: model %q is not in the active catalogue; using %q instead. Pick a different model with --model or /model.\n",
+				"ncode: model %q is not in the active catalogue; using %q instead. Pick a different model with --model or /model.\n",
 				model, fm.ID)
 			if args.Model == "" && cfg.Model == model {
 				cfg.Model = fm.ID
@@ -562,7 +562,7 @@ func Resolve(args Args, requireCred bool) (Resolved, error) {
 	}
 
 	if credErr != nil && requireCred {
-		return Resolved{}, fmt.Errorf("%w; set %s_API_KEY, pass --api-key, or run `zot` and /login",
+		return Resolved{}, fmt.Errorf("%w; set %s_API_KEY, pass --api-key, or run `ncode` and /login",
 			credErr, envVarName(provName))
 	}
 

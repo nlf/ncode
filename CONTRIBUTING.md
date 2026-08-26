@@ -62,13 +62,13 @@ Use the Go version declared in `go.mod`, then build from the repository root:
 ```sh
 go mod download
 make build
-./bin/zot --version
+./bin/ncode --version
 ```
 
 Useful commands:
 
 ```sh
-make build       # compile ./bin/zot
+make build       # compile ./bin/ncode
 make run         # build and start the interactive application
 make test        # run all tests with the race detector
 make lint        # run go vet and verify gofmt

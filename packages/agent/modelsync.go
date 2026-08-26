@@ -42,7 +42,7 @@ func LoadCachedModels() {
 func LoadUserModels() {
 	models, warnings := provider.LoadUserModelsWithWarnings(UserModelsPath())
 	for _, w := range warnings {
-		fmt.Fprintln(os.Stderr, "zot:", w)
+		fmt.Fprintln(os.Stderr, "ncode:", w)
 	}
 	provider.SetUserModels(models)
 }
@@ -88,13 +88,13 @@ func isGatewayRoutedModelID(model string) bool {
 func ValidateAndRepairConfig() {
 	cfg, err := LoadConfig()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "zot: config.json: %v (using defaults)\n", err)
+		fmt.Fprintf(os.Stderr, "ncode: config.json: %v (using defaults)\n", err)
 		return
 	}
 	changed := false
 
 	if cfg.Provider != "" && !isKnownProvider(cfg.Provider) {
-		fmt.Fprintf(os.Stderr, "zot: config.json: unknown provider %q reset to \"anthropic\"\n", cfg.Provider)
+		fmt.Fprintf(os.Stderr, "ncode: config.json: unknown provider %q reset to \"anthropic\"\n", cfg.Provider)
 		cfg.Provider = "anthropic"
 		cfg.Model = ""
 		changed = true
@@ -110,7 +110,7 @@ func ValidateAndRepairConfig() {
 			} else if m, err := provider.FindModel("", cfg.Model); err == nil {
 				fix := defaultModelForProvider(cfg.Provider)
 				fmt.Fprintf(os.Stderr,
-					"zot: config.json: model %q belongs to provider %q (config has provider=%q); switched model to %q\n",
+					"ncode: config.json: model %q belongs to provider %q (config has provider=%q); switched model to %q\n",
 					cfg.Model, m.Provider, cfg.Provider, fix)
 				cfg.Model = fix
 				changed = true
@@ -118,7 +118,7 @@ func ValidateAndRepairConfig() {
 				// Model id not in any catalog. Reset to provider's default.
 				fix := defaultModelForProvider(cfg.Provider)
 				fmt.Fprintf(os.Stderr,
-					"zot: config.json: model %q not found in the active catalog; switched to %q\n",
+					"ncode: config.json: model %q not found in the active catalog; switched to %q\n",
 					cfg.Model, fix)
 				cfg.Model = fix
 				changed = true
@@ -128,7 +128,7 @@ func ValidateAndRepairConfig() {
 
 	if changed {
 		if err := SaveConfig(cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "zot: config.json: failed to persist repair: %v\n", err)
+			fmt.Fprintf(os.Stderr, "ncode: config.json: failed to persist repair: %v\n", err)
 		}
 	}
 }

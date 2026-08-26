@@ -40,8 +40,8 @@ Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
 | Change | `clean-break-ncode-identity` |
 | Strategy | WU 2–WU 12 remain on `feat/clean-break-ncode-identity-02`; checkpoint pushes are allowed, but no intermediate PRs |
 | Final PR | One PR from `feat/clean-break-ncode-identity-02` to `main`, linked to issue #1 with exactly `type:breaking-change` |
-| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 next → WU 5 → WU 6 → WU 7 → WU 8 → WU 9 → WU 10 → WU 11 → WU 12 |
-| Current boundary | WU 3 is complete; WU 4 is next and has not started |
+| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 next/unstarted → WU 6 → WU 7 → WU 8 → WU 9 → WU 10 → WU 11 → WU 12 |
+| Current boundary | WU 4 is complete; WU 5 is next and unstarted |
 | Review budget | The user explicitly accepts the combined final-PR size exception; no intermediate PR review budget applies |
 | Verification | Preserve each WU as an independently revertible commit; run focused verification and `make test` before beginning the next WU |
 | Gates | Clone-local bounded review remains disabled; strict TDD, native SDD attempt authority, issue linkage, verification, CI, and final merge gates remain |
@@ -52,7 +52,8 @@ main: WU 1 merged
  └── feat/clean-break-ncode-identity-02
       ├── WU 2 complete
       ├── WU 3 complete
-      └── 📍 WU 4 next → WU 5 … WU 12 → one final PR to main
+      ├── WU 4 complete
+      └── 📍 WU 5 next (unstarted) → WU 6 … WU 12 → one final PR to main
 ```
 
 ## Constraints and common evidence
@@ -91,9 +92,9 @@ main: WU 1 merged
 
 **Boundary:** Start with the renamed import graph; finish with `cmd/ncode` and local build/install outputs only. Release/updater/installers remain WU 10. **Commit:** `refactor(cli): build ncode command`. **Verification/rollback:** a locally built/installed binary is ncode-only; revert this slice as one unit.
 
-- [ ] Characterize the mechanical command/build surface without manufacturing RED: record `make build`, `go build -o /tmp/zot ./cmd/zot`, command help/version output, `Makefile` binary targets, `cmd/zot/{main.go,main_test.go}`, and `docs.go` embed references before the move. <!-- sdd-owner: implementation -->
-- [ ] Move `cmd/zot/{main.go,main_test.go}` to `cmd/ncode/`, update `Makefile` and command/test references to `./cmd/ncode` and `bin/ncode`, and rename command/product help/version/error literals to lowercase ncode; leave no `cmd/zot`, `bin/zot`, dispatch branch, or alias target. <!-- sdd-owner: implementation -->
-- [ ] Run post-move evidence: `go build -o /tmp/ncode ./cmd/ncode`, isolated-`GOBIN` `go install github.com/nlf/ncode/cmd/ncode`, `make build`, command help/version tests, `make test`, and searches proving `/tmp/zot`, `cmd/zot`, and `bin/zot` are absent from active build inputs. <!-- sdd-owner: implementation -->
+- [x] Characterize the mechanical command/build surface without manufacturing RED: record `make build`, `go build -o /tmp/zot ./cmd/zot`, command help/version output, `Makefile` binary targets, `cmd/zot/{main.go,main_test.go}`, and `docs.go` embed references before the move. <!-- sdd-owner: implementation -->
+- [x] Move `cmd/zot/{main.go,main_test.go}` to `cmd/ncode/`, update `Makefile` and command/test references to `./cmd/ncode` and `bin/ncode`, and rename command/product help/version/error literals to lowercase ncode; leave no `cmd/zot`, `bin/zot`, dispatch branch, or alias target. <!-- sdd-owner: implementation -->
+- [x] Run post-move evidence: `go build -o /tmp/ncode ./cmd/ncode`, isolated-`GOBIN` `go install github.com/nlf/ncode/cmd/ncode`, `make build`, command help/version tests, `make test`, and searches proving `/tmp/zot`, `cmd/zot`, and `bin/zot` are absent from active build inputs. <!-- sdd-owner: implementation -->
 
 ## WU 5 — Establish ncode-only state, project, and portable paths
 

@@ -207,13 +207,13 @@ func prepareRuntimeCatalog() {
 	RefreshModelsAsync()
 }
 
-// Run is the top-level entrypoint for the zot binary.
+// Run is the top-level entrypoint for the ncode binary.
 func Run(rawArgs []string, version string) error {
 	// Apply network configuration before any subcommand can make an HTTP
 	// request. Standard proxy environment variables retain precedence.
 	applyConfiguredHTTPProxy()
 
-	// Subcommand router: `zot bot ...` is handled separately so the
+	// Subcommand router: `ncode bot ...` is handled separately so the
 	// generic flag parser doesn't reject "bot" as a positional arg.
 	if handled, err := runBotCommand(rawArgs, version); handled {
 		return err
@@ -251,7 +251,7 @@ func runWithArgsRaw(rawArgs []string, version string) error {
 		return nil
 	}
 	if args.Version {
-		fmt.Println("zot", version)
+		fmt.Println("ncode", version)
 		return nil
 	}
 	// Model catalog: load any cached discovery data before we inspect
@@ -737,7 +737,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 	// rescue (a bad key, a typo'd base URL, or a corporate gateway that
 	// only the originally-picked provider needed). Re-resolving without
 	// them lets the rescue retry use env vars / auth.json / provider
-	// defaults the way zot would have without the overrides.
+	// defaults the way ncode would have without the overrides.
 	buildAgentForRescue := func(providerOverride, modelOverride string) (*core.Agent, string, string, error) {
 		next := args
 		next.APIKey = ""
@@ -1009,7 +1009,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		// Fresh session in the new cwd's bucket. We bypass
 		// openOrCreateSession's --continue / --resume branches
 		// because /cd's semantics are "start fresh here", matching
-		// what relaunching `zot --cwd <path>` would do today.
+		// what relaunching `ncode --cwd <path>` would do today.
 		if !args.NoSess {
 			newRoot := NcodeHome()
 			core.PruneEmptySessions(newRoot, absPath)

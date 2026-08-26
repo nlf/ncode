@@ -177,14 +177,14 @@ func subtractCalendarAge(now time.Time, years, months int) time.Time {
 var errSessionsPruneHelp = errors.New("sessions prune help requested")
 
 func printSessionsHelp(out io.Writer) {
-	fmt.Fprintln(out, `zot sessions - manage stored sessions
+	fmt.Fprintln(out, `ncode sessions - manage stored sessions
 
 usage:
-  zot sessions prune                         select missing directory groups
-  zot sessions prune --older-than 30d        select sessions inactive for 30 days
-  zot sessions prune --older-than 1mo --cwd PATH
-  zot sessions prune --dry-run               list matches without deleting
-  zot sessions prune --all [--yes]           select every match, optionally without prompting
+  ncode sessions prune                         select missing directory groups
+  ncode sessions prune --older-than 30d        select sessions inactive for 30 days
+  ncode sessions prune --older-than 1mo --cwd PATH
+  ncode sessions prune --dry-run               list matches without deleting
+  ncode sessions prune --all [--yes]           select every match, optionally without prompting
 
 Age units are m (minutes), h (hours), d (24-hour days), w (7-day weeks),
 mo (calendar months), and y (calendar years). Age uses last session activity.
