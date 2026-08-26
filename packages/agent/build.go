@@ -1042,7 +1042,7 @@ func kimiCodeHeaders() map[string]string {
 		}
 	}
 	if deviceID == "" {
-		deviceID = "zot"
+		deviceID = "ncode"
 	}
 	return map[string]string{
 		"User-Agent":         "KimiCLI/1.41.0",

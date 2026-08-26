@@ -500,7 +500,7 @@ func (v *timelineView) Export(dir string, data timelineData) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("encode timeline: %w", err)
 	}
-	name := "zot-timeline-" + time.Now().Format("20060102-150405.000000000") + ".json"
+	name := "ncode-timeline-" + time.Now().Format("20060102-150405.000000000") + ".json"
 	path := filepath.Join(dir, name)
 	if err := os.WriteFile(path, append(encoded, '\n'), 0o600); err != nil {
 		return "", fmt.Errorf("write timeline: %w", err)

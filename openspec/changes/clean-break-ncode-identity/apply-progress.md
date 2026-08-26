@@ -1016,3 +1016,162 @@ No tracked nested `replace`, local modfile, workspace, generated build output, o
 ### Parent lifecycle and next boundary
 
 Parent owns independent gate, attempt settlement, the independently revertible `feat(extensions): acknowledge ncode protocol v2` commit, any checkpoint push, and later WU9 delegation. WU9 is the exact next implementation boundary; WU9 was not started.
+
+## WU 9 apply evidence
+
+Updated: 2026-08-26T21:22:05Z
+
+### Attempt summary
+
+- **Status:** WU 9 is complete; WU 1–WU 9 are complete and WU 10 is next/unstarted.
+- **Assigned boundary:** exactly WU 9 — swarm/subprocess metadata, runtime-composed temp/log/socket/request names, and product-owned provider headers in the delegated files.
+- **Native authority:** parent supplied active token `sha256:1964a2ab34397bb25c3cd19f3c388f4788046de6c27fb739598230cebae2130b`. The `gentle-ai` CLI was unavailable, so no duplicate acquire was possible. No settlement was attempted; parent owns settlement.
+- **Delivery boundary:** one long-lived branch `feat/clean-break-ncode-identity-02`, accepted one-final-PR size exception, and one independently revertible WU9 slice. No commit, push, PR, branch switch, review, settlement, or WU10 work occurred.
+- **Scope:** implementation/test scope is **407 changed lines** (`357` additions, `50` deletions), within the supplied 1,400-line maximum and the planned 300–480-line WU9 range. It is 7 lines above the nominal 400-line review budget, covered by the recorded combined final-PR size exception.
+- **Network/provider boundary:** all provider checks used local transports; all swarm subprocess checks used the local Go test binary or repository stub child. No live provider, credential, release API, or network service was used.
+
+### Structured status consumed/produced
+
+```yaml
+schemaName: spec-driven
+changeName: clean-break-ncode-identity
+artifactStore: both
+planningHome:
+  root: /Users/nlf/Projects/nlf/ncode/openspec
+  changesDir: /Users/nlf/Projects/nlf/ncode/openspec/changes
+changeRoot: /Users/nlf/Projects/nlf/ncode/openspec/changes/clean-break-ncode-identity
+artifactPaths:
+  proposal: [openspec/changes/clean-break-ncode-identity/proposal.md]
+  specs: [openspec/changes/clean-break-ncode-identity/specs/ncode-identity/spec.md]
+  design: [openspec/changes/clean-break-ncode-identity/design.md]
+  tasks: [openspec/changes/clean-break-ncode-identity/tasks.md, sdd/clean-break-ncode-identity/tasks]
+  applyProgress: [openspec/changes/clean-break-ncode-identity/apply-progress.md, sdd/clean-break-ncode-identity/apply-progress]
+artifacts:
+  proposal: done
+  specs: done
+  design: done
+  tasks: done
+  applyProgress: done
+taskProgress:
+  total: 44
+  complete: 33
+  remaining: 11
+deferredParentActions:
+  total: 2
+  complete: 2
+  remaining: 0
+taskArtifactErrors: []
+applyState: ready
+dependencies:
+  apply: ready
+  verify: blocked
+  sync: blocked
+  archive: blocked
+actionContext:
+  mode: repo-local
+  workspaceRoot: /Users/nlf/Projects/nlf/ncode
+  allowedEditRoots: [/Users/nlf/Projects/nlf/ncode]
+  warnings:
+    - native gentle-ai status/attempt CLI unavailable; authoritative OpenSpec status reconstructed from the installed status contract
+    - initial Engram reads reported unavailable; final apply-progress save and task observation update succeeded
+nextRecommended: parent-lifecycle
+isNonAuthoritative: false
+```
+
+The active change and branch were explicit and unambiguous. Every edit stayed under the authoritative repository root. Ownership recount found 33/44 implementation rows checked, 11 unchecked, 2/2 parent rows checked, and zero malformed markers. The accepted single-feature-branch size exception resolves the workload gate for this 407-line implementation slice.
+
+### Completed implementation tasks and persisted checkboxes
+
+- [x] WU9 RED — focused runtime identity tests and genuine failures, persisted in OpenSpec tasks and Engram task observation `117`.
+- [x] WU9 GREEN — exact ncode runtime mappings with retained child/protocol/provider behavior, persisted in both task backends.
+- [x] WU9 TRIANGULATE — legacy swarm/provider/internal negatives plus retained child execution, JSONL, and neutral controls, persisted in both task backends.
+- [x] WU9 REFACTOR — minimal update-prefix helper, exact composed-name assertions/searches, focused tests, diff check, and final `make test`, persisted in both task backends.
+
+### TDD Cycle Evidence
+
+| Task | Test files | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|---|---|
+| WU9 RED | `packages/agent/{build,extupdate,updatecmd}_test.go`, `packages/agent/swarm/{runner,socketpath}_test.go`, `packages/agent/tools/tools_test.go`, `packages/agent/modes/timeline_view_test.go`, `packages/provider/{gemini,openai_codex}_test.go`, `packages/tui/clipboard_darwin_test.go` | Unit + local subprocess + local transport | Six owning package suites PASS; baseline `make test` PASS | Focused tests failed on `zot-update-*`, `zot-swarm-*`, `zot-bash-*`, `zot-timeline-*`, `zot-gemini-image-*`, `zot-clipboard-images`, Kimi fallback `zot`, and Codex product headers `zot`; update temp helper and Codex random seam initially failed to compile because they did not exist. RED `make test` failed only on the new WU9 contracts. | N/A | Existing NCODE swarm metadata and neutral event assertions were retained as approval evidence. | N/A |
+| WU9 GREEN | same tests plus production mappings | Unit + package integration + race | RED above | RED above | Exact ncode names, Kimi fallback device id, Codex product headers/request fallback, and update prefix helper passed focused tests; all owning package suites and `make test` passed. | Provider-required `codex_cli_rs` and `KimiCLI/1.41.0` fingerprints remained exact while product-owned fallback requests used ncode. | N/A |
+| WU9 TRIANGULATE | `packages/agent/swarm/legacy_zot_swarm_test.go`, `packages/provider/legacy_zot_internal_identity_test.go`, existing runner/inbox/event/emitter tests | Negative + local subprocess + JSONL integration | GREEN above | New negatives passed under GREEN. The first retained JSONL assertion expected one event and revealed the runner intentionally appends a second neutral process-exit event; the test was corrected to assert both exact retained events without changing production. | Legacy swarm metadata supplied neither credential stdin nor event-log ownership; legacy paths remained unchanged. | Legacy-only metadata, ncode metadata, normal product headers, Codex CLI compatibility headers, child execution, JSONL completion/exit, inbox controls, and no legacy socket/image creation cover distinct paths. | N/A |
+| WU9 REFACTOR | all WU9 tests | Regression/race + static composed-name audit | TRIANGULATE green | N/A | N/A | Exact output/path assertions remained in place across every owner package. | `updateTempPattern` is the only shared helper because update temp directories and extension stash labels repeat the same prefix; gofmt, focused tests, zero-match old composed-name search, required-name search, `git diff --check`, and final `make test` passed. |
+
+### RED evidence
+
+- Safety net `go test ./packages/agent ./packages/agent/swarm ./packages/agent/tools ./packages/agent/modes ./packages/provider ./packages/tui -count=1` — PASS.
+- Baseline `make test` (`go test -race ./...`) — PASS.
+- Agent RED — Kimi device id was `zot`; extension stash was `zot-update-<time>`.
+- Swarm RED — socket directory was `zot-swarm-<root-hash>` instead of exact `ncode-swarm-<root-hash>`.
+- Tools RED — full output basename was `zot-bash-<hex>.log`.
+- Timeline RED — export basename was `zot-timeline-<time>.json`.
+- Provider RED — image output was `zot-gemini-image-<uuid>.png`; product-owned originator was `zot`.
+- TUI RED — clipboard image directory was `zot-clipboard-images`.
+- Structural RED — `updateTempPattern` and `codexRandomRead` were undefined before the minimum test seams existed.
+- RED `make test` — expected FAIL on only the new WU9 contracts/build errors while unaffected packages stayed green.
+
+### Exact runtime and retained-behavior proof
+
+- Swarm parent emits exactly `NCODE_SWARM_AGENT_ID`, `NCODE_SWARM_EVENT_LOG`, and conditional `NCODE_SWARM_CREDENTIAL_STDIN`; child readers use only the ncode names.
+- Runtime socket directories are exactly `ncode-swarm-<root-hash>` and preserve short-hash fallback/probing behavior.
+- Parent default child launch still obtains `os.Executable()` and passes that exact path as argv 0; local stub-child execution passed.
+- Swarm JSONL remains flat and neutral. The legacy-negative subprocess produced neutral `agent_stopped` completion and process-exit events, and inbox `user`, `cancel`, and `shutdown` controls remain unchanged.
+- A child given only legacy swarm metadata receives no ncode credential-stdin signal, writes only the configured ncode event log, leaves the legacy event sentinel unchanged, and creates no legacy swarm socket directory.
+- Runtime names are exactly `ncode-bash-*.log`, `ncode-timeline-*.json`, `ncode-gemini-image-*`, `ncode-clipboard-images`, and `ncode-update-*` for update temp/stash identity.
+- Product-owned Codex/Responses fallback headers are `originator: ncode` and `user-agent: ncode (<os> <arch>)`; random-failure request IDs are `ncode-<time>`.
+- Provider-mandated external compatibility fingerprints remain unchanged: ChatGPT subscription/preview requests still use `codex_cli_rs` and Kimi auth compatibility still uses `KimiCLI/1.41.0`.
+- The old WU9 composed-name search over the exact production path list returned zero matches; the required-name search emitted all expected ncode/NCODE sites plus `os.Executable()`.
+- WU10 release owner/repository/assets, extracted binary identity, update endpoint behavior, installers, workflows, and release diagnostics were not changed. In `updatecmd.go`, only the temp pattern helper and `os.MkdirTemp` call changed; in `extupdate.go`, only the internal stash label/example changed.
+
+### Final verification
+
+- Focused named WU9 test command across agent, swarm, tools, modes, provider, and TUI — PASS.
+- `go test ./packages/agent ./packages/agent/swarm ./packages/agent/tools ./packages/agent/modes ./packages/provider ./packages/tui -count=1` after gofmt — PASS.
+- `TestRunnerEndToEndWithStubChild`, neutral inbox/event/emitter tests, legacy metadata tests, and provider header compatibility tests — PASS.
+- Exact old composed-name search over assigned production paths — zero matches.
+- Exact required ncode/NCODE composed-name and self-executable search — expected matches written to `/tmp/ncode-wu9-required-lines.txt`.
+- `git diff --check` — PASS.
+- Final `make test` (`go test -race ./...`) — PASS.
+
+### Test and scope summary
+
+- **New test functions:** 13, including local helper-process coverage; 4 existing exact behavior tests were strengthened or updated for the new identity.
+- **Layers:** unit/path composition, local Git integration, local subprocess/JSONL integration, and local HTTP transport.
+- **Pure/minimal helpers created:** `updateTempPattern`; `codexRandomRead` is a narrow random-failure injection seam.
+- **Implementation/test files:** 26 files; 4 are new test files.
+- **Implementation/test changed lines:** 407 (`357` additions, `50` deletions).
+- **SDD task checkbox delta before this progress append:** 8 changed lines (`4` additions, `4` deletions).
+- **Live providers/credentials/network:** none used.
+
+### Files changed by WU 9
+
+- Agent runtime/tests: `packages/agent/{build.go,build_test.go,extupdate.go,extupdate_test.go,swarm_agent.go,swarm_agent_test.go,updatecmd.go,updatecmd_test.go}`.
+- Swarm runtime/tests: `packages/agent/swarm/{inbox_test.go,legacy_zot_swarm_test.go,runner.go,runner_test.go,socketpath.go,socketpath_test.go}`.
+- Internal temp/log/UI: `packages/agent/tools/{bash.go,tools_test.go}`, `packages/agent/modes/{timeline_view.go,timeline_view_test.go}`, `packages/tui/{clipboard_darwin.go,clipboard_darwin_test.go}`.
+- Provider runtime/tests: `packages/provider/{gemini.go,gemini_test.go,legacy_zot_internal_identity_test.go,openai_codex.go,openai_codex_test.go,provider_test.go}`.
+- SDD artifacts: `openspec/changes/clean-break-ncode-identity/{tasks.md,apply-progress.md}`.
+
+### Deviations and discoveries
+
+- The NCODE swarm environment mapping was already implemented and directly covered by WU6 tests. WU9 retained those readers/writers and added parent/child negative integration rather than rewriting settled environment code.
+- The runner intentionally records both the child's neutral completion event and a neutral process-exit lifecycle event. Triangulation made that retained two-event JSONL contract explicit.
+- Update distribution identity remains deliberately split: WU9 owns only the internal `ncode-update-*` temp/stash prefix, while WU10 still owns release assets, extracted binary names, endpoints, installers, workflows, and updater communication.
+- The provider-specific Codex CLI and Kimi CLI fingerprints are external compatibility values, not product identity. Tests prove they remain unchanged while only product-owned fallbacks become ncode.
+- Engram artifact reads initially reported unavailable, but final persistence recovered: apply-progress observation `121`, task observation `117`, and discovery observation `161` were saved/updated successfully.
+
+### Remaining implementation tasks (exact unchecked lines)
+
+- [ ] RED — add failing static/unit tests or snapshots for `.goreleaser.yaml`, `install.sh`, `install.ps1`, `packages/agent/{update,updatecmd,changelog}_test.go`, and `.github/workflows/release.yml` requiring `nlf/ncode`, `ncode_<version>_<os>_<arch>`, `ncode[.exe]`, `NCODE_VERSION`, `NCODE_PREFIX`, ncode checksums/install URLs, and no legacy endpoint; run local focused tests and `make test` expecting failures. <!-- sdd-owner: implementation -->
+- [ ] GREEN — update `.goreleaser.yaml`, `install.sh`, `install.ps1`, `.github/workflows/release.yml`, and `packages/agent/{update.go,updatecmd.go,changelog.go}` to ncode-only owner/repository/assets/extraction/user-agent/temp identity; delete `examples/extensions/todo/zot-todo-extension` and `examples/rpc/python/__pycache__/zot_client.cpython-314.pyc` without replacements, preserve neutral `checksums.txt`, and add the required clean-break installer/release notice; run tests and `make test`. <!-- sdd-owner: implementation -->
+- [ ] TRIANGULATE — validate GoReleaser config/snapshot and archive contents when tooling is available, installer shell syntax with mocked HTTP/filesystems, PowerShell parser/static checks, updater `httptest` responses, and checksum/asset-name agreement; assert no release call reaches a network provider or live GitHub release, then run `make test`. <!-- sdd-owner: implementation -->
+- [ ] REFACTOR — derive repeated asset-name expectations from one local test helper/config fixture without adding an updater fallback; rerun distribution checks, `make build`, focused updater tests, forbidden asset/endpoint searches, and `make test`. <!-- sdd-owner: implementation -->
+- [ ] Characterize the mechanical communication surface without manufacturing RED: record link/command checks and nested-example builds for `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `docs/{providers,extensions,rpc,skills,themes}.md`, `.github/ISSUE_TEMPLATE/{bug_report,feature_request}.yml`, `examples/**`, `packages/agent/skills/builtin/write-zot-themes/SKILL.md`, and active help/error/log expectations; distinguish exact provenance files from active materials. <!-- sdd-owner: implementation -->
+- [ ] Rename active product prose, commands, imports, state/env/SDK/extension references, test names/expectations, manifests, and example consumers to lowercase ncode; move `write-zot-themes` to `write-ncode-themes`; ensure README Install, installer/install output, and README first-run/authentication prominently state the clean break and no Zot credentials/settings/sessions/caches/extensions/SDK-RPC-swarm reuse, with no migration/prompt instruction. <!-- sdd-owner: implementation -->
+- [ ] Run post-edit evidence: nested example module tests/builds, example shell/Python/Node syntax checks, markdown link/command searches, installer/help snippet checks, `make test`, and a forbidden-active-identity scan; retain Zot wording only in the exact provenance manifest or dedicated `legacy_zot_*` rejection files. <!-- sdd-owner: implementation -->
+- [ ] Add or complete focused no-live-provider retained-capability coverage for provider/auth resolution, print/stream/JSON/RPC v1, sessions, direct permissions/tools, swarm, extensions including idle auto-ready v2 ack, skills, themes, updater via `httptest`, and retained Telegram tests; run the affected packages, `go vet ./...`, and `make test`. <!-- sdd-owner: implementation -->
+- [ ] Update `openspec/changes/clean-break-ncode-identity/identity-inventory.md` before the final search to add this exact `tasks.md` path to the reviewed provenance manifest only if it contains legacy terms solely as historical planning/rejection context; then verify every provenance line and every `legacy_zot_*` line is factual or asserts rejection/non-use, not active support. <!-- sdd-owner: implementation -->
+- [ ] Run the exact final allowlist gates from `identity-inventory.md`: construct `audit_pathspecs` with each exact provenance file plus `openspec/changes/clean-break-ncode-identity/tasks.md` when admitted and only `:(exclude,glob)**/legacy_zot_*`; require zero output from `git grep -nI -i -e zot -- "${audit_pathspecs[@]}"`, old-module, `ZOTCORE_|ZOT_[A-Z0-9_]+`, `.zot(session)?`, and `zot[-_][[:alnum:]_-]+` searches, and from `git ls-files | grep -i zot | grep -vE '(^|/)legacy_zot_[^/]*$'`. <!-- sdd-owner: implementation -->
+- [ ] Run the exact workable-file and mandatory-line reviews from `identity-inventory.md`: build `/tmp/ncode-zot-provenance-files.txt`, `/tmp/ncode-zot-rejection-files.txt`, and `/tmp/ncode-zot-allowed-files.txt`; require `comm -23` against `git grep -Il -i -e zot -- .` to emit no paths; emit and review every line into `/tmp/ncode-zot-provenance-lines.txt` and `/tmp/ncode-zot-rejection-lines.txt`; then run `go mod tidy`, `go list ./...`, `go vet ./...`, `make build`, `make test`, nested example builds, installer/package checks, and the inventory reproduction commands against planning SHA `18325b75cc89c75b5f4842924cb377aa5bef5c4b`. <!-- sdd-owner: implementation -->
+
+### Parent lifecycle and next boundary
+
+Parent owns independent gate, native attempt settlement, the independently revertible `feat(runtime): rebrand internal identity` commit, any checkpoint push, and later WU10 delegation. WU10 is the exact next implementation boundary; WU10 was not started.

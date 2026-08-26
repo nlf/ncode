@@ -338,6 +338,28 @@ func TestUpdateAllExtensions_MixedSet(t *testing.T) {
 	updateAllExtensions(home)
 }
 
+func TestGitStashUsesNcodeRuntimeName(t *testing.T) {
+	gitAvailable(t)
+	dir := filepath.Join(t.TempDir(), "extension")
+	initWorkRepo(t, dir)
+	writeFile(t, filepath.Join(dir, "runtime.json"), `{"state":"dirty"}`)
+
+	ref, stashed, err := gitStash(context.Background(), dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !stashed || ref == "" {
+		t.Fatalf("gitStash = (%q, %v), want a named stash", ref, stashed)
+	}
+	out, err := runGit(context.Background(), dir, "stash", "list")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, "ncode-update-") {
+		t.Fatalf("stash list = %q, want ncode-update prefix", out)
+	}
+}
+
 func TestSummariseGitError_PrefersErrorOverHint(t *testing.T) {
 	out := "hint: try git pull\nfatal: refusing to merge unrelated histories\nhint: see git-merge"
 	got := summariseGitError(out, exec.Command("false").Run())

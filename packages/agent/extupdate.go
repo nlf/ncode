@@ -180,7 +180,7 @@ func updateOneExtension(extDir, name string) string {
 func gitStash(ctx context.Context, dir string) (stashRef string, stashed bool, err error) {
 	// Tag the stash with a recognisable name so the user can find it
 	// later if pop fails and they want to inspect it.
-	msg := fmt.Sprintf("zot-update-%d", time.Now().Unix())
+	msg := fmt.Sprintf("%s%d", updateTempPattern(), time.Now().Unix())
 	out, err := runGit(ctx, dir, "stash", "push", "--include-untracked", "-m", msg)
 	if err != nil {
 		return "", false, fmt.Errorf("%s", strings.TrimSpace(out))
@@ -196,7 +196,7 @@ func gitStash(ctx context.Context, dir string) (stashRef string, stashed bool, e
 	if lerr == nil {
 		for _, line := range strings.Split(listOut, "\n") {
 			if strings.Contains(line, msg) {
-				// line looks like: "stash@{0}: On main: zot-update-1700000000"
+				// line looks like: "stash@{0}: On main: ncode-update-1700000000"
 				if idx := strings.Index(line, ":"); idx > 0 {
 					return strings.TrimSpace(line[:idx]), true, nil
 				}

@@ -215,9 +215,9 @@ func convertTIFFFileToPNG(srcPath, dstPath string) error {
 
 func clipboardImageDir() string {
 	if info, err := os.Stat("/tmp"); err == nil && info.IsDir() {
-		return filepath.Join("/tmp", "zot-clipboard-images")
+		return filepath.Join("/tmp", "ncode-clipboard-images")
 	}
-	return filepath.Join(os.TempDir(), "zot-clipboard-images")
+	return filepath.Join(os.TempDir(), "ncode-clipboard-images")
 }
 
 func randomHex(n int) string {

@@ -25,7 +25,7 @@ func swarmEventLogPath() string {
 }
 
 // runSwarmAgentMode is the daemon-mode entry point used by every
-// swarm-spawned zot subprocess. It's intentionally close in shape to
+// swarm-spawned ncode subprocess. It's intentionally close in shape to
 // runJSONMode but with two key differences:
 //
 //   - Lifetime: the process stays alive across many user turns. The
@@ -33,7 +33,7 @@ func swarmEventLogPath() string {
 //     turns arrive through the inbox unix socket at args.SwarmAgent.
 //
 //   - Output: every emitted JSON line is also mirrored verbatim into
-//     events.jsonl (see NCODE_SWARM_EVENT_LOG) so a separate zot
+//     events.jsonl (see NCODE_SWARM_EVENT_LOG) so a separate ncode
 //     process can /swarm open this agent and replay its full history
 //     even after the parent that spawned us is long gone.
 //
@@ -83,7 +83,7 @@ func runSwarmAgentMode(ctx context.Context, args Args, version string) error {
 
 	// Event log is owned by the supervisor's runner via stdout, but
 	// the daemon also writes a redundant copy here when the runner's
-	// pipe is closed (e.g. parent zot exited but the agent is still
+	// pipe is closed (e.g. parent ncode exited but the agent is still
 	// running headless). The env var is set by the runner; if it's
 	// empty we silently skip the second mirror.
 	var logMirror *swarm.EventLog
@@ -240,7 +240,7 @@ func (e *swarmEmitter) emit(typ string, data map[string]any) {
 		if err == nil {
 			line = append(line, '\n')
 			if _, werr := e.w.Write(line); werr != nil {
-				// Supervisor's stdout pipe is gone (parent zot exited
+				// Supervisor's stdout pipe is gone (parent ncode exited
 				// but we kept running). Switch to mirror-only mode so
 				// subsequent events still get persisted; also retro-
 				// actively log this very event to the mirror so it

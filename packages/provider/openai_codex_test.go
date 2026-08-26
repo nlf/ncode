@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -70,6 +71,49 @@ func TestCodexImageToolResultMirror(t *testing.T) {
 type roundTripFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
+func TestProductOwnedResponsesHeadersUseNcodeIdentity(t *testing.T) {
+	named := NewOpenAIResponsesNamed("token", "https://example.test/v1/responses", "openai").(*renamedClient)
+	c := named.inner.(*codexClient)
+	var gotReq *http.Request
+	c.http.Transport = roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		gotReq = r
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"text/event-stream"}},
+			Body:       io.NopCloser(strings.NewReader("")),
+		}, nil
+	})
+
+	events, err := c.Stream(context.Background(), Request{
+		Model:    "gpt-5.5",
+		Messages: []Message{{Role: RoleUser, Content: []Content{TextBlock{Text: "hi"}}}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range events {
+	}
+	if gotReq == nil {
+		t.Fatal("request was not sent")
+	}
+	if got := gotReq.Header.Get("originator"); got != "ncode" {
+		t.Fatalf("originator = %q, want ncode", got)
+	}
+	if got := gotReq.Header.Get("user-agent"); !strings.HasPrefix(got, "ncode (") {
+		t.Fatalf("user-agent = %q, want ncode product header", got)
+	}
+}
+
+func TestCodexRequestIDFallbackUsesNcodePrefix(t *testing.T) {
+	previous := codexRandomRead
+	codexRandomRead = func([]byte) (int, error) { return 0, errors.New("random unavailable") }
+	t.Cleanup(func() { codexRandomRead = previous })
+
+	if got := newCodexSessionID(); !strings.HasPrefix(got, "ncode-") {
+		t.Fatalf("fallback request ID = %q, want ncode-*", got)
+	}
+}
 
 func TestCodexPreviewModelUsesCodexCLIShape(t *testing.T) {
 	c := NewOpenAICodex("token", "acct", "https://example.test/backend-api/codex/responses").(*codexClient)
@@ -315,7 +359,7 @@ func TestCodexRetriesUnsupportedPromptCacheRetentionWithNativeIdentity(t *testin
 	if got := headers[0].Get("originator"); got != "codex_cli_rs" {
 		t.Fatalf("initial originator = %q", got)
 	}
-	if got := headers[1].Get("originator"); got != "zot" {
+	if got := headers[1].Get("originator"); got != "ncode" {
 		t.Fatalf("retry originator = %q", got)
 	}
 	sessionID := headers[1].Get("session-id")

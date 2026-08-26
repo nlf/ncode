@@ -22,6 +22,25 @@ func mustJSON(t *testing.T, v any) json.RawMessage {
 	return b
 }
 
+func TestWriteFullOutputUsesNcodeLogName(t *testing.T) {
+	path := writeFullOutput("complete output")
+	if path == "" {
+		t.Fatal("writeFullOutput returned an empty path")
+	}
+	t.Cleanup(func() { _ = os.Remove(path) })
+	name := filepath.Base(path)
+	if !strings.HasPrefix(name, "ncode-bash-") || !strings.HasSuffix(name, ".log") {
+		t.Fatalf("full output basename = %q, want ncode-bash-*.log", name)
+	}
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != "complete output" {
+		t.Fatalf("full output = %q, want exact content", body)
+	}
+}
+
 func TestReadText(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "a.txt")

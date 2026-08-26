@@ -22,7 +22,7 @@ func shortSocketDir(t *testing.T) string {
 	if runtime.GOOS == "windows" {
 		t.Skip("swarm inbox transport uses Unix-domain sockets; Windows support will use a named-pipe backend")
 	}
-	dir, err := os.MkdirTemp("/tmp", "zot-in-")
+	dir, err := os.MkdirTemp("/tmp", "ncode-in-")
 	if err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}

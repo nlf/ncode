@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -161,6 +162,9 @@ func TestTimelineExportOmitsImageDataAndUsesPrivatePermissions(t *testing.T) {
 	path, err := view.Export(t.TempDir(), data)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if name := filepath.Base(path); !strings.HasPrefix(name, "ncode-timeline-") || !strings.HasSuffix(name, ".json") {
+		t.Fatalf("export basename = %q, want ncode-timeline-*.json", name)
 	}
 	contents, err := os.ReadFile(path)
 	if err != nil {

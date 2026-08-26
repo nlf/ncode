@@ -14,11 +14,12 @@ import (
 	"time"
 )
 
-// execRunner spawns `zot --swarm-agent <inbox> --session <path>` in
-// the host's working directory (Agent.Dir, which is always the parent
-// zot's RepoRoot) and consumes its JSONL event stream on stdout.
+// execRunner spawns the current ncode executable with
+// `--swarm-agent <inbox> --session <path>` in the host's working directory
+// (Agent.Dir, which is always the parent ncode's RepoRoot) and consumes its
+// JSONL event stream on stdout.
 //
-// Why a long-lived daemon and not `zot --print`: the supervisor and
+// Why a long-lived daemon and not `ncode --print`: the supervisor and
 // the user expect agents to keep accepting follow-up prompts. A
 // one-shot subprocess can't do that; this design gives each swarm
 // agent a persistent session file plus an inbox socket the parent
@@ -31,13 +32,13 @@ import (
 //
 // The on-disk log is the durable record. The Sink updates are an
 // in-memory mirror so the dashboard doesn't have to tail the file
-// for the parent's own agents. /swarm open in a separate zot would
+// for the parent's own agents. /swarm open in a separate ncode would
 // read the log directly.
 type execRunner struct {
 	agent             *Agent
 	resolveCredential func(context.Context, string) (Credential, error)
 
-	// Command overrides the default `zot --swarm-agent ...`
+	// Command overrides the default current-executable swarm invocation.
 	// invocation. Tests set this to a fake binary (or `go run`
 	// against a tiny stub program) so the supervisor logic can be
 	// tested without a real child. Production code leaves it nil.
@@ -58,7 +59,7 @@ type execRunner struct {
 // so future per-agent overrides (e.g. tools, reasoning) can be added
 // without churning the signature. The fields map 1:1 onto child CLI
 // flags; empty values omit the flag entirely and let the child
-// resolve a default the same way a normal `zot` invocation does.
+// resolve a default the same way a normal `ncode` invocation does.
 type swarmAgentArgsOpts struct {
 	Exe         string
 	Dir         string

@@ -20,7 +20,7 @@ import (
 //     talk to the model.
 //
 //   - Forgetting --cwd: the child resolved tools against the parent
-//     zot's working directory, defeating the whole point of the
+//     ncode's working directory, defeating the whole point of the
 //     worktree isolation.
 //
 //   - Forgetting --session: a daemon-mode agent without a session
@@ -112,9 +112,21 @@ func TestApplyEventPreservesMultilineRolesAndFinalAssistant(t *testing.T) {
 	}
 }
 
+func TestDefaultChildArgsPreservesExecutableLocation(t *testing.T) {
+	executable, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := &Agent{Dir: "/worktree", Task: "inspect"}
+	args := defaultChildArgs(executable, a, "/state/session.json", "/runtime/in.sock")
+	if args[0] != executable {
+		t.Fatalf("child executable = %q, want os.Executable location %q", args[0], executable)
+	}
+}
+
 func TestSwarmAgentArgs(t *testing.T) {
 	args := swarmAgentArgs(swarmAgentArgsOpts{
-		Exe:         "/path/to/zot",
+		Exe:         "/path/to/ncode",
 		Dir:         "/tmp/worktree",
 		SessionPath: "/tmp/state/session.json",
 		InboxPath:   "/tmp/state/in.sock",
@@ -123,7 +135,7 @@ func TestSwarmAgentArgs(t *testing.T) {
 	if len(args) < 7 {
 		t.Fatalf("argv unexpectedly short: %v", args)
 	}
-	if args[0] != "/path/to/zot" {
+	if args[0] != "/path/to/ncode" {
 		t.Fatalf("argv[0] = %q; want the binary path", args[0])
 	}
 	// The task must come last so anything that looks flag-like in
@@ -162,7 +174,7 @@ func TestSwarmAgentArgs(t *testing.T) {
 // positional which the arg parser would treat as a real prompt.
 func TestSwarmAgentArgsEmptyTaskOmitsPositional(t *testing.T) {
 	args := swarmAgentArgs(swarmAgentArgsOpts{
-		Exe: "/zot", Dir: "/wt", SessionPath: "/s.json", InboxPath: "/in.sock",
+		Exe: "/ncode", Dir: "/wt", SessionPath: "/s.json", InboxPath: "/in.sock",
 	})
 	for _, a := range args {
 		if a == "" {
@@ -181,7 +193,7 @@ func TestSwarmAgentArgsEmptyTaskOmitsPositional(t *testing.T) {
 // initial user turn.
 func TestDefaultChildArgsSpawnIncludesTask(t *testing.T) {
 	a := &Agent{Dir: "/wt", Task: "do thing"}
-	args := defaultChildArgs("/zot", a, "/s.json", "/in.sock")
+	args := defaultChildArgs("/ncode", a, "/s.json", "/in.sock")
 	if got := args[len(args)-1]; got != "do thing" {
 		t.Fatalf("spawn argv last = %q; want %q\n%v", got, "do thing", args)
 	}
@@ -195,7 +207,7 @@ func TestDefaultChildArgsSpawnIncludesTask(t *testing.T) {
 // user types next via the inbox.
 func TestDefaultChildArgsResumeOmitsTask(t *testing.T) {
 	a := &Agent{Dir: "/wt", Task: "do thing", Resuming: true}
-	args := defaultChildArgs("/zot", a, "/s.json", "/in.sock")
+	args := defaultChildArgs("/ncode", a, "/s.json", "/in.sock")
 	for _, v := range args {
 		if v == "do thing" {
 			t.Fatalf("resume argv contains the task; it would re-fire as a duplicate turn\n%v", args)

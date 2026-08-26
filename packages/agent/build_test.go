@@ -13,6 +13,17 @@ import (
 	"github.com/nlf/ncode/packages/provider"
 )
 
+func TestKimiCodeHeadersUseNcodeFallbackDeviceID(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	headers := kimiCodeHeaders()
+	if got := headers["X-Msh-Device-Id"]; got != "ncode" {
+		t.Fatalf("X-Msh-Device-Id = %q, want ncode", got)
+	}
+	if got := headers["User-Agent"]; got != "KimiCLI/1.41.0" {
+		t.Fatalf("provider-mandated User-Agent = %q, want KimiCLI/1.41.0", got)
+	}
+}
+
 func TestReadAgentsContextLoadsGlobalAndAncestors(t *testing.T) {
 	root := t.TempDir()
 	ncodeHome := filepath.Join(root, "zot-home")

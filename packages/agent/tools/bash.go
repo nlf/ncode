@@ -224,7 +224,7 @@ func humanDuration(d time.Duration) string {
 func writeFullOutput(s string) string {
 	b := make([]byte, 6)
 	_, _ = rand.Read(b)
-	name := filepath.Join(os.TempDir(), "zot-bash-"+hex.EncodeToString(b)+".log")
+	name := filepath.Join(os.TempDir(), "ncode-bash-"+hex.EncodeToString(b)+".log")
 	if err := os.WriteFile(name, []byte(s), 0o600); err != nil {
 		return ""
 	}

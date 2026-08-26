@@ -37,6 +37,8 @@ import (
 // Refuses to operate on dev builds (version == "0.0.0") because there
 // is no meaningful "is newer" comparison and we'd happily downgrade a
 // freshly-compiled local binary back to whatever's on GitHub.
+func updateTempPattern() string { return "ncode-update-" }
+
 func runUpdateCommand(rawArgs []string, version string) (handled bool, err error) {
 	if len(rawArgs) == 0 || rawArgs[0] != "update" {
 		return false, nil
@@ -147,7 +149,7 @@ func runUpdate(version string) error {
 	assetURL := base + "/" + assetName
 	sumsURL := base + "/checksums.txt"
 
-	tmp, err := os.MkdirTemp("", "zot-update-")
+	tmp, err := os.MkdirTemp("", updateTempPattern())
 	if err != nil {
 		return fmt.Errorf("create temp dir: %w", err)
 	}
