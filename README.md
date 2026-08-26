@@ -26,7 +26,6 @@ Yet another coding agent harness, lightweight and written (vibe-slopped) in go.
 - user and extension themes via JSON; see [docs/themes.md](docs/themes.md).
 - standing instructions via `AGENTS.md` files (global and per-project); see [Persistent instructions](#persistent-instructions-agentsmd).
 - reusable instructions via `SKILL.md` files; see [docs/skills.md](docs/skills.md).
-- portable agents from local directories, `.zot` files, or temporary public GitHub downloads; see [docs/zotfiles.md](docs/zotfiles.md).
 
 ## Install
 
@@ -171,7 +170,7 @@ zot discovers `AGENTS.md` files automatically at startup and loads them in this 
 1. `$ZOT_HOME/AGENTS.md` (global, machine-wide instructions that apply to every project).
 2. Every `AGENTS.md` from the filesystem root down to the current working directory. More specific (deeper) files may override earlier ones. This includes `~/AGENTS.md` when the working directory is inside your home directory.
 
-All discovered files are appended to the prompt in that order, so a global baseline can be refined per project. To list the active Zotfile agent, loaded context paths, extensions, and user-installed skills above the interactive transcript, enable **show loaded resources at startup** in `/settings`. The agent section appears only for `zot run`, the setting is off by default, built-in skills are omitted, and the displayed lists are not sent to the model or stored in the session transcript.
+All discovered files are appended to the prompt in that order, so a global baseline can be refined per project. To list loaded context paths, extensions, and user-installed skills above the interactive transcript, enable **show loaded resources at startup** in `/settings`. The setting is off by default, built-in skills are omitted, and the displayed lists are not sent to the model or stored in the session transcript.
 
 For a general, non-project-specific instruction set, put your rules in `$ZOT_HOME/AGENTS.md`, for example:
 
@@ -257,19 +256,6 @@ When the sandbox is on (see `/jail`), all four tools refuse paths outside the se
 - **Piped input**: when no mode is specified, piped stdin selects print mode. Print, stream, and JSON modes prepend piped stdin to the positional prompt, separated by a newline. For example, `echo "list all go files" | zot` or `cat README.md | zot -p "summarize this text"`.
 - **JSON**: `zot --json "prompt"` emits one JSON object per agent event to stdout, newline-delimited. The schema is documented in [docs/rpc.md](docs/rpc.md).
 - **RPC**: `zot rpc` runs as a long-lived child process; commands in on stdin, events and responses out on stdout, both as NDJSON. Designed for embedding zot in third-party apps written in any language. See [docs/rpc.md](docs/rpc.md) for the wire schema and `examples/rpc/{python,node,shell,go}` for working clients.
-
-## zotfile agents
-
-A zotfile packages an agent's instructions, skills, requirements, and enforced tool permissions as a shareable agent. Run one from a local directory, a packed `.zot` artifact, a short name, or directly from a public GitHub repository:
-
-```bash
-zot run ./my-agent
-zot run ./my-agent.zot
-zot run frkr/zot-archify
-zot run acme/agents/code-reviewer --cwd /path/to/project
-```
-
-Single-part names resolve only to a matching local directory or `.zot` archive. Anyone can publish an agent as a public GitHub repository and run it as `owner/repository`, or publish a collection and run an agent directory as `owner/repository/agent`. zot has no built-in owner, official collection, configured registry, or allowlist. For GitHub sources, zot downloads the repository archive into a temporary directory, validates and runs the selected agent, then removes the downloaded source when the command exits. Agent data, consent receipts, and sessions still persist under `$ZOT_HOME`. See [docs/zotfiles.md](docs/zotfiles.md) for authoring, permissions, packaging, and current limitations.
 
 ## Embedding
 
@@ -404,7 +390,7 @@ Opens a dialog with every persistent setting. `up`/`down` to navigate, `enter` o
 - **auto-compact threshold** — choose `off`, `70%`, `80%`, `85%` (default), or `90%` of the model's advertised context window. The selected percentage controls automatic compaction before and after interactive turns and persists as `auto_compact_threshold`. `off` disables percentage-based triggers but keeps manual `/compact` and automatic recovery from context-window and payload-too-large responses.
 - **jail new sessions by default**: start every new agent with tools confined to its working directory. Off by default. The setting applies to interactive, print, JSON, RPC, and background-agent runs, persists as `jail_by_default`, and immediately updates the current interactive session. `/jail` and `/unjail` remain session-scoped overrides and do not change this default.
 - **compact transcript rendering**: reduce visual chrome in the chat transcript. Tool calls render as a quiet header plus indented output instead of a bordered box, and sent messages render without padded background bubbles. Off by default. Changes apply immediately and persist to `config.json` as `compact_mode`.
-- **show loaded resources at startup**: list the active Zotfile agent (for `zot run`), loaded `AGENTS.md` paths, extensions, and user-installed skills in compact sections above the transcript. Built-in skills are omitted. Off by default. Changes apply immediately and persist to `config.json` as `show_instructions_at_startup`.
+- **show loaded resources at startup**: list loaded `AGENTS.md` paths, extensions, and user-installed skills in compact sections above the transcript. Built-in skills are omitted. Off by default. Changes apply immediately and persist to `config.json` as `show_instructions_at_startup`.
 - **TUI settings**: opens a sub-view for input layout and status placement. **Input style** can be `plain` (default prompt line), `lines` (separator lines above and below the input), or `block` (a user-bubble-style input block). **Status position** places model, usage, and working-directory information above or below the input. **Working spinner position** places the busy spinner above or below the input. Changes apply immediately and persist to `config.json` as `tui_input_style`, `tui_status_position`, and `tui_working_position` (`above_input` or `below_input` for the position fields).
 - **reasoning level**: choose reasoning for supported models: off, minimum, low, medium, high, xhigh, or max. The `max` tier is opt-in and sent natively to GPT-5.6 and adaptive-thinking Claude models; unsupported backends clamp it to their highest accepted effort. The change is persisted to `config.json` and applied to the next model call. Use `/reasoning` to open this selector directly. The selector only shows distinct levels supported by the active model; models without reasoning support only offer `off`.
 - **color theme** — choose the built-in auto/dark/light theme or any JSON theme discovered under `$ZOT_HOME/themes` or a loaded extension. Theme files can override any subset of UI colors, syntax colors, and spinner frames/messages. Changes apply immediately; if a selected theme file is deleted, zot resets to auto. See [docs/themes.md](docs/themes.md).
@@ -442,7 +428,7 @@ zot sessions prune --older-than 1y --all              # select every match, then
 zot sessions prune --older-than 30d --all --yes       # delete every match without prompting
 ```
 
-`--all` selects every match and still asks for confirmation. Adding `--yes` makes deletion non-interactive and requires `--all`. Malformed, unreadable, symlinked, and non-absolute session entries are reported and preserved during missing-directory pruning. The scan includes normal sessions and named-agent sessions below `$ZOT_HOME/sessions/`; explicit session files stored elsewhere and swarm-agent state are not included.
+`--all` selects every match and still asks for confirmation. Adding `--yes` makes deletion non-interactive and requires `--all`. Malformed, unreadable, symlinked, and non-absolute session entries are reported and preserved during missing-directory pruning. The scan includes normal sessions below `$ZOT_HOME/sessions/`; explicit session files stored elsewhere and swarm-agent state are not included.
 
 ## Providers
 

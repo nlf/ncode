@@ -125,7 +125,6 @@ type View struct {
 
 	// Startup resource fields list host-loaded inputs before the transcript
 	// without creating provider messages or persisted entries.
-	StartupAgentName      string
 	StartupContextPaths   []string
 	StartupExtensionNames []string
 	StartupSkillNames     []string
@@ -345,9 +344,6 @@ func (v *View) renderStartupResources(width int) []string {
 			out = append(out, v.Theme.FG256(v.Theme.Muted, "  "+line))
 		}
 		out = append(out, "")
-	}
-	if v.StartupAgentName != "" {
-		appendSection("Agent", []string{v.StartupAgentName})
 	}
 	appendSection("Context", v.StartupContextPaths)
 	appendSection("Extensions", v.StartupExtensionNames)

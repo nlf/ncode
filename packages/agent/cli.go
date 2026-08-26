@@ -191,6 +191,22 @@ func fanoutAgentEvent(mgr *extensions.Manager, ev core.AgentEvent) {
 	}
 }
 
+func prepareRuntimeCatalog() {
+	LoadCachedModels()
+	LoadUserModels()
+	if customProviders := provider.CustomProviders(); len(customProviders) > 0 {
+		var names []string
+		for name := range customProviders {
+			if !isBuiltinProvider(name) {
+				names = append(names, name)
+			}
+		}
+		auth.SetExtraAPIKeyProviders(names)
+	}
+	ValidateAndRepairConfig()
+	RefreshModelsAsync()
+}
+
 // Run is the top-level entrypoint for the zot binary.
 func Run(rawArgs []string, version string) error {
 	// Apply network configuration before any subcommand can make an HTTP
@@ -209,9 +225,6 @@ func Run(rawArgs []string, version string) error {
 		return err
 	}
 	if handled, err := runSessionsCommand(rawArgs); handled {
-		return err
-	}
-	if handled, err := runZotfileCommand(rawArgs, version); handled {
 		return err
 	}
 	return runWithArgsRaw(rawArgs, version)
@@ -391,7 +404,6 @@ func runPrintMode(ctx context.Context, args Args, version string) error {
 
 	r := composition.resolved
 	ag := composition.agent
-	extMgr := composition.extMgr
 	sess, _ := openOrCreateSession(args, r, ag, version)
 	defer sess.Close()
 
@@ -402,10 +414,6 @@ func runPrintMode(ctx context.Context, args Args, version string) error {
 	}
 
 	start := len(ag.Messages())
-	if err := runZotfileStartupPre(ctx, args.StartupPre, r.CWD, r.Sandbox, ag, nil, os.Stderr); err != nil {
-		return err
-	}
-	reloadResourcesAfterStartupPre(ctx, args, extMgr, r.Sandbox, ag)
 	started := time.Now()
 	usage, err := modes.RunPrint(ctx, ag, prompt, nil, os.Stdout)
 	elapsed := time.Since(started)
@@ -431,7 +439,6 @@ func runStreamMode(ctx context.Context, args Args, version string) error {
 
 	r := composition.resolved
 	ag := composition.agent
-	extMgr := composition.extMgr
 	sess, _ := openOrCreateSession(args, r, ag, version)
 	defer sess.Close()
 
@@ -442,60 +449,9 @@ func runStreamMode(ctx context.Context, args Args, version string) error {
 	}
 
 	start := len(ag.Messages())
-	preSink, finishPre := newStreamTextSink(os.Stdout)
-	if err := runZotfileStartupPre(ctx, args.StartupPre, r.CWD, r.Sandbox, ag, preSink, os.Stderr); err != nil {
-		finishPre()
-		return err
-	}
-	finishPre()
-	reloadResourcesAfterStartupPre(ctx, args, extMgr, r.Sandbox, ag)
 	err = modes.RunStream(ctx, ag, prompt, nil, os.Stdout)
 	WriteNewTranscript(ag, sess, start)
 	return err
-}
-
-func newStreamTextSink(out io.Writer) (func(core.AgentEvent), func()) {
-	var streamed, wroteText, lastWasNL bool
-	writeText := func(text string) {
-		if text == "" {
-			return
-		}
-		_, _ = fmt.Fprint(out, text)
-		if syncer, ok := out.(interface{ Sync() error }); ok {
-			_ = syncer.Sync()
-		}
-		wroteText = true
-		lastWasNL = strings.HasSuffix(text, "\n")
-	}
-	sink := func(ev core.AgentEvent) {
-		switch e := ev.(type) {
-		case core.EvAssistantStart:
-			streamed = false
-		case core.EvTextDelta:
-			streamed = true
-			writeText(e.Delta)
-		case core.EvAssistantMessage:
-			if streamed {
-				return
-			}
-			var text strings.Builder
-			for _, content := range e.Message.Content {
-				if block, ok := content.(provider.TextBlock); ok {
-					if text.Len() > 0 {
-						text.WriteString("\n")
-					}
-					text.WriteString(block.Text)
-				}
-			}
-			writeText(text.String())
-		}
-	}
-	finish := func() {
-		if wroteText && !lastWasNL {
-			writeText("\n")
-		}
-	}
-	return sink, finish
 }
 
 func runJSONMode(ctx context.Context, args Args, version string) error {
@@ -510,7 +466,6 @@ func runJSONMode(ctx context.Context, args Args, version string) error {
 
 	r := composition.resolved
 	ag := composition.agent
-	extMgr := composition.extMgr
 	sess, _ := openOrCreateSession(args, r, ag, version)
 	defer sess.Close()
 
@@ -521,82 +476,14 @@ func runJSONMode(ctx context.Context, args Args, version string) error {
 	}
 
 	start := len(ag.Messages())
-	enc := json.NewEncoder(os.Stdout)
-	preSink := func(ev core.AgentEvent) {
-		_ = enc.Encode(modes.EventToJSON(ev))
-	}
-	if err := runZotfileStartupPre(ctx, args.StartupPre, r.CWD, r.Sandbox, ag, preSink, os.Stderr); err != nil {
-		_ = enc.Encode(map[string]any{"type": "error", "message": err.Error()})
-		return err
-	}
-	reloadResourcesAfterStartupPre(ctx, args, extMgr, r.Sandbox, ag)
 	err = modes.RunJSON(ctx, ag, prompt, nil, os.Stdout)
 	WriteNewTranscript(ag, sess, start)
 	return err
 }
 
-// runZotfileStartupPre runs entry.pre before the main non-interactive prompt.
-// "!command" values execute via BashTool; other values are sent as an agent turn.
-// shellOut receives live shell chunks (typically os.Stderr); sink receives
-// agent events for plain-text pre (stream mode wires a live text sink).
-func runZotfileStartupPre(ctx context.Context, pre, cwd string, sandbox *tools.Sandbox, ag *core.Agent, sink func(core.AgentEvent), shellOut io.Writer) error {
-	pre = strings.TrimSpace(pre)
-	if pre == "" {
-		return nil
-	}
-	if cmd, ok := modes.ShellEscapeCommand(pre); ok {
-		raw, err := json.Marshal(map[string]any{"command": cmd})
-		if err != nil {
-			return err
-		}
-		if shellOut != nil {
-			fmt.Fprintf(shellOut, "$ %s\n", cmd)
-			if f, ok := shellOut.(interface{ Sync() error }); ok {
-				_ = f.Sync()
-			}
-		}
-		progress := func(chunk string) {
-			if shellOut == nil || chunk == "" {
-				return
-			}
-			fmt.Fprint(shellOut, chunk)
-			if f, ok := shellOut.(interface{ Sync() error }); ok {
-				_ = f.Sync()
-			}
-		}
-		bash := &tools.BashTool{CWD: cwd, Sandbox: sandbox}
-		res, err := bash.Execute(ctx, raw, progress)
-		if err != nil {
-			return fmt.Errorf("zotfile entry.pre: %w", err)
-		}
-		if res.IsError {
-			var sb strings.Builder
-			for _, c := range res.Content {
-				if tb, ok := c.(provider.TextBlock); ok {
-					sb.WriteString(tb.Text)
-				}
-			}
-			msg := strings.TrimSpace(sb.String())
-			if msg == "" {
-				msg = "command failed"
-			}
-			return fmt.Errorf("zotfile entry.pre: %s", msg)
-		}
-		return nil
-	}
-	if ag == nil {
-		return fmt.Errorf("zotfile entry.pre requires an agent for non-shell prompts")
-	}
-	if sink == nil {
-		sink = func(core.AgentEvent) {}
-	}
-	return ag.Prompt(ctx, pre, nil, sink)
-}
-
 // refreshAgentToolsAndPrompt re-resolves tools (including rediscovered
 // skills and currently loaded extension tools) and updates the live
-// agent's registry and system prompt. Used after /reload-ext and after
-// zotfile entry.pre installs new skills or extensions.
+// agent's registry and system prompt after resource changes such as /reload-ext.
 // mutateRegistry, if non-nil, can inject session-specific tools (e.g. swarm_spawn).
 func refreshAgentToolsAndPrompt(args Args, sharedSandbox *tools.Sandbox, extToolAdapter ExtensionToolSource, ag *core.Agent, mutateRegistry func(core.Registry) core.Registry) {
 	if ag == nil {
@@ -618,20 +505,6 @@ func refreshAgentToolsAndPrompt(args Args, sharedSandbox *tools.Sandbox, extTool
 	}
 	ag.SetTools(reg)
 	ag.System = resolved.SystemPrompt
-}
-
-// reloadResourcesAfterStartupPre reloads extensions (if any) and
-// refreshes the agent tool registry + system prompt so skills/extensions
-// installed by entry.pre are visible to the following turn.
-func reloadResourcesAfterStartupPre(ctx context.Context, args Args, extMgr *extensions.Manager, sharedSandbox *tools.Sandbox, ag *core.Agent) {
-	if strings.TrimSpace(args.StartupPre) == "" || ag == nil {
-		return
-	}
-	adapter := &extToolAdapter{mgr: extMgr}
-	if extMgr != nil {
-		_ = extMgr.Reload(ctx, 2*time.Second)
-	}
-	refreshAgentToolsAndPrompt(args, sharedSandbox, adapter, ag, nil)
 }
 
 // ---- interactive mode: opens the TUI even without credentials ----
@@ -1116,10 +989,6 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		wasJailed := sharedSandbox != nil && sharedSandbox.Locked()
 		args.CWD = absPath
 		r.CWD = absPath
-		if args.PermissionSet != nil {
-			expanded := args.PermissionSet.Expand(absPath, args.AgentDataDir)
-			args.PermissionSet = &expanded
-		}
 		if sharedSandbox != nil {
 			sharedSandbox.Root = absPath
 			if wasJailed {
@@ -1142,7 +1011,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		// because /cd's semantics are "start fresh here", matching
 		// what relaunching `zot --cwd <path>` would do today.
 		if !args.NoSess {
-			newRoot := agentSessionsRoot(ZotHome(), args)
+			newRoot := ZotHome()
 			core.PruneEmptySessions(newRoot, absPath)
 			newSess, serr := core.NewSession(newRoot, absPath, newProvider, newModel, version)
 			if serr != nil {
@@ -1250,59 +1119,46 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 	}
 
 	iv = modes.NewInteractive(modes.InteractiveConfig{
-		Terminal:                  term,
-		Theme:                     theme,
-		InlineImagesEnabled:       initialCfg.InlineImagesEnabled,
-		AutoSwarmEnabled:          initialCfg.AutoSwarmEnabled,
-		AutoCompactThreshold:      initialCfg.AutoCompactThreshold,
-		JailByDefault:             initialCfg.JailByDefault,
-		QuickModelShortcuts:       quickModelShortcuts,
-		RecursiveFileSuggest:      initialCfg.RecursiveFileSuggest,
-		RespectGitignore:          initialCfg.RespectGitignore,
-		CompactMode:               initialCfg.CompactMode,
-		TUIInputStyle:             initialCfg.TUIInputStyle,
-		TUIStatusPosition:         initialCfg.TUIStatusPosition,
-		TUIWorkingPosition:        initialCfg.TUIWorkingPosition,
-		ThemeName:                 initialCfg.Theme,
-		FlatTools:                 initialCfg.FlatToolRender(),
-		CompactUser:               initialCfg.CompactUserInput(),
-		ExtensionThemes:           extMgr.ThemeOptions,
-		AutoSwarmSystemAddendum:   AutoSwarmSystemAddendum,
-		SettingsStore:             configSettingsStore{},
-		Model:                     r.Model,
-		Provider:                  r.Provider,
-		AuthMethod:                r.AuthMethod,
-		BaseURL:                   r.BaseURL,
-		Reasoning:                 r.Reasoning,
-		SystemPrompt:              r.SystemPrompt,
-		Tools:                     r.ToolRegistry,
-		MaxSteps:                  r.MaxSteps,
-		CWD:                       r.CWD,
-		StartupAgentName:          args.AgentName,
-		StartupContextPaths:       instructionContextPaths(r.ContextFiles),
-		StartupExtensionNames:     startupExtensionNames(extMgr.All()),
-		StartupExtensionErrors:    startupExtensionErrors,
-		StartupSkillNames:         startupSkillNames(startupSkills),
-		ShowInstructionsAtStartup: initialCfg.ShowInstructionsAtStartup,
-		ZotHome:                   ZotHome(),
-		SessionsRoot:              agentSessionsRoot(ZotHome(), args),
-		Version:                   version,
-		UpdateInfoChan:            updateCh,
-		Sandbox:                   sharedSandbox,
-		Agent:                     ag,
-		InitialInput:              args.Prompt,
-		StartupPre:                args.StartupPre,
-		OnStartupPreDone: func() {
-			// entry.pre often installs skills/extensions; rediscover them
-			// before the user starts a model turn.
-			current := liveInteractiveAgent(iv, ag)
-			if extMgr != nil {
-				_ = extMgr.Reload(context.Background(), 2*time.Second)
-			}
-			if current != nil {
-				refreshAgentToolsAndPrompt(args, sharedSandbox, extToolAdapter, current, injectSwarmSpawn)
-			}
-		},
+		Terminal:                   term,
+		Theme:                      theme,
+		InlineImagesEnabled:        initialCfg.InlineImagesEnabled,
+		AutoSwarmEnabled:           initialCfg.AutoSwarmEnabled,
+		AutoCompactThreshold:       initialCfg.AutoCompactThreshold,
+		JailByDefault:              initialCfg.JailByDefault,
+		QuickModelShortcuts:        quickModelShortcuts,
+		RecursiveFileSuggest:       initialCfg.RecursiveFileSuggest,
+		RespectGitignore:           initialCfg.RespectGitignore,
+		CompactMode:                initialCfg.CompactMode,
+		TUIInputStyle:              initialCfg.TUIInputStyle,
+		TUIStatusPosition:          initialCfg.TUIStatusPosition,
+		TUIWorkingPosition:         initialCfg.TUIWorkingPosition,
+		ThemeName:                  initialCfg.Theme,
+		FlatTools:                  initialCfg.FlatToolRender(),
+		CompactUser:                initialCfg.CompactUserInput(),
+		ExtensionThemes:            extMgr.ThemeOptions,
+		AutoSwarmSystemAddendum:    AutoSwarmSystemAddendum,
+		SettingsStore:              configSettingsStore{},
+		Model:                      r.Model,
+		Provider:                   r.Provider,
+		AuthMethod:                 r.AuthMethod,
+		BaseURL:                    r.BaseURL,
+		Reasoning:                  r.Reasoning,
+		SystemPrompt:               r.SystemPrompt,
+		Tools:                      r.ToolRegistry,
+		MaxSteps:                   r.MaxSteps,
+		CWD:                        r.CWD,
+		StartupContextPaths:        instructionContextPaths(r.ContextFiles),
+		StartupExtensionNames:      startupExtensionNames(extMgr.All()),
+		StartupExtensionErrors:     startupExtensionErrors,
+		StartupSkillNames:          startupSkillNames(startupSkills),
+		ShowInstructionsAtStartup:  initialCfg.ShowInstructionsAtStartup,
+		ZotHome:                    ZotHome(),
+		SessionsRoot:               ZotHome(),
+		Version:                    version,
+		UpdateInfoChan:             updateCh,
+		Sandbox:                    sharedSandbox,
+		Agent:                      ag,
+		InitialInput:               args.Prompt,
 		AuthManager:                mgr,
 		LlamaCPPConfig:             ResolveLlamaCPPConfig,
 		RefreshLlamaCPPModels:      RefreshLlamaCPPModels,
@@ -1467,13 +1323,6 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 	return runErr
 }
 
-func agentSessionsRoot(root string, args Args) string {
-	if args.AgentName == "" {
-		return root
-	}
-	return filepath.Join(root, "sessions", "agents", safeAgentName(args.AgentName))
-}
-
 // openOrCreateSession returns a session for the run. sess may be nil
 // with a nil error if session persistence is disabled.
 func openOrCreateSession(args Args, r Resolved, ag *core.Agent, version string) (*core.Session, error) {
@@ -1483,7 +1332,7 @@ func openOrCreateSession(args Args, r Resolved, ag *core.Agent, version string) 
 	// Sweep meta-only files left over from older zot versions (and from
 	// any session that crashed before its first AppendMessage). Cheap;
 	// reads the first few bytes of each file in the cwd's session dir.
-	sessionsRoot := agentSessionsRoot(ZotHome(), args)
+	sessionsRoot := ZotHome()
 	core.PruneEmptySessions(sessionsRoot, args.CWD)
 	var (
 		s    *core.Session

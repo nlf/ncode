@@ -36,7 +36,7 @@ Put behavior in the package that owns the concern:
 | `packages/core` | Agent loop, messages, tool contracts, events, confirmation, sessions, compaction |
 | `packages/provider` | Provider clients, wire formats, streaming, retries, model metadata and discovery |
 | `packages/provider/auth` | Login flows, credential lookup, refresh, and storage |
-| `packages/agent` | CLI configuration, model selection, runtime assembly, RPC, and zotfiles |
+| `packages/agent` | CLI configuration, model selection, runtime assembly, and RPC |
 | `packages/agent/modes` | Interactive, print, JSON, dialog, bot, and Telegram interfaces |
 | `packages/agent/extensions` | Extension process lifecycle and host integration |
 | `packages/agent/extproto` | Extension wire protocol |
@@ -148,7 +148,7 @@ Documentation-only changes do not require the Go test suite unless they alter ge
 
 ## Documentation duties
 
-Update documentation in the same change whenever users, integrators, or extension authors would observe different behavior. Relevant locations include `README.md`, `docs/rpc.md`, `docs/extensions.md`, `docs/skills.md`, `docs/themes.md`, and `docs/zotfiles.md`.
+Update documentation in the same change whenever users, integrators, or extension authors would observe different behavior. Relevant locations include `README.md`, `docs/rpc.md`, `docs/extensions.md`, `docs/skills.md`, and `docs/themes.md`.
 
 Examples must match real flags and schemas. State limitations plainly, especially around sandboxing, provider support, compatibility, and platform differences.
 

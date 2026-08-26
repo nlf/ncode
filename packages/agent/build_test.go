@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/patriceckhart/zot/packages/agent/tools"
 	"github.com/patriceckhart/zot/packages/provider"
 )
 
@@ -188,6 +189,36 @@ func TestResolveAppliesJailByDefault(t *testing.T) {
 				t.Fatalf("sandbox locked = %v, want %v", got, tc.want)
 			}
 		})
+	}
+}
+
+func TestResolveAppliesArgsPermissionSetToSandbox(t *testing.T) {
+	t.Setenv("ZOT_HOME", t.TempDir())
+	cwd := t.TempDir()
+	allowed := filepath.Join(cwd, "allowed")
+	permissionSet := &tools.PermissionSet{}
+	permissionSet.FS.Read = []string{allowed}
+
+	resolved, err := Resolve(Args{
+		Provider:       "openai",
+		Model:          "gpt-5",
+		APIKey:         "test-key",
+		CWD:            cwd,
+		NoSkill:        true,
+		NoContextFiles: true,
+		PermissionSet:  permissionSet,
+	}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved.Sandbox.Permissions != permissionSet {
+		t.Fatal("Args.PermissionSet was not passed directly to Sandbox.SetPermissions")
+	}
+	if err := resolved.Sandbox.CheckReadPath(filepath.Join(allowed, "file.txt")); err != nil {
+		t.Fatalf("allowed read was rejected: %v", err)
+	}
+	if err := resolved.Sandbox.CheckReadPath(filepath.Join(cwd, "denied", "file.txt")); err == nil {
+		t.Fatal("read outside Args.PermissionSet scope was allowed")
 	}
 }
 

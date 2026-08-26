@@ -42,7 +42,7 @@ The major ownership boundaries are:
 - `packages/core`: provider-independent agent behavior and session structures
 - `packages/provider`: provider requests, streaming responses, model discovery, retries, and wire-specific behavior
 - `packages/provider/auth`: credential and login handling
-- `packages/agent`: command-line orchestration, configuration, runtime assembly, RPC, and zotfiles
+- `packages/agent`: command-line orchestration, configuration, runtime assembly, and RPC
 - `packages/agent/modes`: interactive and non-interactive user modes
 - `packages/agent/extensions`, `extproto`, and `ext`: extension hosting, protocol, and SDK
 - `packages/agent/skills`: reusable instruction discovery
@@ -164,7 +164,6 @@ Choose the document that owns the public surface:
 - `docs/extensions.md` for extension authors
 - `docs/skills.md` for reusable skills
 - `docs/themes.md` for theme files
-- `docs/zotfiles.md` for portable agents
 
 Examples should be runnable and limitations should be stated directly.
 
