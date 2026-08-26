@@ -38,10 +38,10 @@ Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
 | Field | Value |
 |---|---|
 | Change | `clean-break-ncode-identity` |
-| Strategy | WU 2–WU 12 remain on `feat/clean-break-ncode-identity-02`; checkpoint pushes are allowed, but no intermediate PRs |
+| Strategy | WU 1 is merged; WU 2–WU 12 are complete on `feat/clean-break-ncode-identity-02`; no intermediate PRs were opened |
 | Final PR | One PR from `feat/clean-break-ncode-identity-02` to `main`, linked to issue #1 with exactly `type:breaking-change` |
-| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 complete → WU 7 complete → WU 8 complete → WU 9 complete → WU 10 complete → WU 11 next/unstarted → WU 12 |
-| Current boundary | WU 10 is complete; WU 11 is next and unstarted |
+| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 complete → WU 7 complete → WU 8 complete → WU 9 complete → WU 10 complete → WU 11 complete → WU 12 complete → apply `all_done` → next SDD verify |
+| Current boundary | WU 1–WU 12 are complete; apply is `all_done`; next SDD phase is verify |
 | Review budget | The user explicitly accepts the combined final-PR size exception; no intermediate PR review budget applies |
 | Verification | Preserve each WU as an independently revertible commit; run focused verification and `make test` before beginning the next WU |
 | Gates | Clone-local bounded review remains disabled; strict TDD, native SDD attempt authority, issue linkage, verification, CI, and final merge gates remain |
@@ -59,7 +59,8 @@ main: WU 1 merged
       ├── WU 8 complete
       ├── WU 9 complete
       ├── WU 10 complete
-     └── 📍 WU 11 next (unstarted) → WU 12 → one final PR to main
+      ├── WU 11 complete
+      └── WU 12 complete → apply all_done → 📍 next SDD verify → one final PR to main
 ```
 
 ## Constraints and common evidence
@@ -184,6 +185,7 @@ audit_pathspecs=(
   ':(exclude)openspec/changes/clean-break-ncode-identity/design.md'
   ':(exclude)openspec/changes/clean-break-ncode-identity/identity-inventory.md'
   ':(exclude)openspec/changes/clean-break-ncode-identity/tasks.md'
+  ':(exclude)openspec/changes/clean-break-ncode-identity/apply-progress.md'
   ':(exclude,glob)**/legacy_zot_*'
 )
 git grep -nI -i -e zot -- "${audit_pathspecs[@]}"
@@ -205,6 +207,7 @@ printf '%s\n' \
   openspec/changes/clean-break-ncode-identity/design.md \
   openspec/changes/clean-break-ncode-identity/identity-inventory.md \
   openspec/changes/clean-break-ncode-identity/tasks.md \
+  openspec/changes/clean-break-ncode-identity/apply-progress.md \
   > /tmp/ncode-zot-provenance-files.txt
 git ls-files -- ':(glob)**/legacy_zot_*' > /tmp/ncode-zot-rejection-files.txt
 cat /tmp/ncode-zot-provenance-files.txt /tmp/ncode-zot-rejection-files.txt \
@@ -217,10 +220,10 @@ git grep -nI -i -e zot -- ':(glob)**/legacy_zot_*' \
   | tee /tmp/ncode-zot-rejection-lines.txt
 ```
 
-- [ ] Add or complete focused no-live-provider retained-capability coverage for provider/auth resolution, print/stream/JSON/RPC v1, sessions, direct permissions/tools, swarm, extensions including idle auto-ready v2 ack, skills, themes, updater via `httptest`, and retained Telegram tests; run the affected packages, `go vet ./...`, and `make test`. <!-- sdd-owner: implementation -->
-- [ ] Update `openspec/changes/clean-break-ncode-identity/identity-inventory.md` before the final search to add this exact `tasks.md` path to the reviewed provenance manifest only if it contains legacy terms solely as historical planning/rejection context; then verify every provenance line and every `legacy_zot_*` line is factual or asserts rejection/non-use, not active support. <!-- sdd-owner: implementation -->
-- [ ] Run the exact final allowlist gates from `identity-inventory.md`: construct `audit_pathspecs` with each exact provenance file plus `openspec/changes/clean-break-ncode-identity/tasks.md` when admitted and only `:(exclude,glob)**/legacy_zot_*`; require zero output from `git grep -nI -i -e zot -- "${audit_pathspecs[@]}"`, old-module, `ZOTCORE_|ZOT_[A-Z0-9_]+`, `.zot(session)?`, and `zot[-_][[:alnum:]_-]+` searches, and from `git ls-files | grep -i zot | grep -vE '(^|/)legacy_zot_[^/]*$'`. <!-- sdd-owner: implementation -->
-- [ ] Run the exact workable-file and mandatory-line reviews from `identity-inventory.md`: build `/tmp/ncode-zot-provenance-files.txt`, `/tmp/ncode-zot-rejection-files.txt`, and `/tmp/ncode-zot-allowed-files.txt`; require `comm -23` against `git grep -Il -i -e zot -- .` to emit no paths; emit and review every line into `/tmp/ncode-zot-provenance-lines.txt` and `/tmp/ncode-zot-rejection-lines.txt`; then run `go mod tidy`, `go list ./...`, `go vet ./...`, `make build`, `make test`, nested example builds, installer/package checks, and the inventory reproduction commands against planning SHA `18325b75cc89c75b5f4842924cb377aa5bef5c4b`. <!-- sdd-owner: implementation -->
+- [x] Add or complete focused no-live-provider retained-capability coverage for provider/auth resolution, print/stream/JSON/RPC v1, sessions, direct permissions/tools, swarm, extensions including idle auto-ready v2 ack, skills, themes, updater via `httptest`, and retained Telegram tests; run the affected packages, `go vet ./...`, and `make test`. <!-- sdd-owner: implementation -->
+- [x] Update `openspec/changes/clean-break-ncode-identity/identity-inventory.md` before the final search to add this exact `tasks.md` path to the reviewed provenance manifest only if it contains legacy terms solely as historical planning/rejection context; then verify every provenance line and every `legacy_zot_*` line is factual or asserts rejection/non-use, not active support. <!-- sdd-owner: implementation -->
+- [x] Run the exact final allowlist gates from `identity-inventory.md`: construct `audit_pathspecs` with each exact provenance file plus `openspec/changes/clean-break-ncode-identity/tasks.md` when admitted and only `:(exclude,glob)**/legacy_zot_*`; require zero output from `git grep -nI -i -e zot -- "${audit_pathspecs[@]}"`, old-module, `ZOTCORE_|ZOT_[A-Z0-9_]+`, `.zot(session)?`, and `zot[-_][[:alnum:]_-]+` searches, and from `git ls-files | grep -i zot | grep -vE '(^|/)legacy_zot_[^/]*$'`. <!-- sdd-owner: implementation -->
+- [x] Run the exact workable-file and mandatory-line reviews from `identity-inventory.md`: build `/tmp/ncode-zot-provenance-files.txt`, `/tmp/ncode-zot-rejection-files.txt`, and `/tmp/ncode-zot-allowed-files.txt`; require `comm -23` against `git grep -Il -i -e zot -- .` to emit no paths; emit and review every line into `/tmp/ncode-zot-provenance-lines.txt` and `/tmp/ncode-zot-rejection-lines.txt`; then run `go mod tidy`, `go list ./...`, `go vet ./...`, `make build`, `make test`, nested example builds, installer/package checks, and the inventory reproduction commands against planning SHA `18325b75cc89c75b5f4842924cb377aa5bef5c4b`. <!-- sdd-owner: implementation -->
 
 ## Parent delivery and review gates
 

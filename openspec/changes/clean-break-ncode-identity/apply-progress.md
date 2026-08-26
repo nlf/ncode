@@ -1,16 +1,16 @@
 # Apply progress: clean-break-ncode-identity
 
-Updated: 2026-08-26T21:45:33Z
+Updated: 2026-08-26T22:38:59Z
 
 ## Attempt summary
 
-- **Status:** WU 1 is merged and WU 2–WU 7 are complete; the broader change remains in progress, with WU 8 next and unstarted.
-- **Assigned boundary:** exactly WU 7 — RPC identity edges and reference clients — complete. WU 8 was not started.
-- **Delivery:** WU 2–WU 12 remain on the single long-lived branch `feat/clean-break-ncode-identity-02`; no intermediate PR or branch change was made.
-- **Review budget:** WU 7 implementation and tests use `402` rename-aware changed lines, below the native 1,300-line maximum; the accepted one-final-PR size exception and no-intermediate-review strategy cover the 400-line forecast.
-- **Commits/branches/PRs:** no commit, push, PR, merge, branch switch, review, settlement, or WU 8 work occurred. Parent owns the revertible WU 7 commit and attempt settlement.
-- **Verification:** genuine RED → GREEN → TRIANGULATE → REFACTOR evidence, focused RPC tests, all four reference-client checks, exact forbidden identity/protocol searches, `git diff --check`, and final `make test` passed.
-- **Native authority:** parent supplied proceed token `sha256:b922f6bb7768cbf8d3481e6b3f4c5a15fc56ad88775831cd7079c5299d9b4cc9`; the native CLI was unavailable locally, no extra acquire was possible, and settlement is intentionally deferred to the parent.
+- **Status:** all 44 implementation-owned tasks are complete; WU12 final audit is complete and the apply phase is finished.
+- **Assigned boundary:** exactly WU12 — retained-capability and identity audit — complete; no verify, sync, archive, delivery, or review lifecycle work was started.
+- **Delivery:** work remained on `feat/clean-break-ncode-identity-02`; the accepted one-final-PR size exception resolves the High aggregate forecast, while WU12 stayed a narrow audit slice.
+- **Corrections:** added the one genuinely missing retained JSON-mode characterization test, admitted cumulative apply progress to the exact provenance manifest, and added explicit historical-record headers to the two exact inherited-era documents.
+- **Commits/branches/PRs:** no commit, stage, push, PR, merge, branch switch, review, or settlement occurred. Parent owns lifecycle actions and native attempt settlement.
+- **Verification:** focused no-live-provider capability suites, exact identity manifests and line review, planning/frozen count reproduction, nested complete-copy builds, installer/package/static checks, `go mod tidy`, `go list ./...`, `go vet ./...`, `make build`, and `make test` passed.
+- **Native authority:** parent supplied proceed token `sha256:2f994aeff83f6c322fe5021730de0d2954591e0f12ae63adf64fbbf918d59596`; the native CLI was unavailable, so no extra acquire occurred and settlement is deferred to the parent. Engram was initially unavailable but recovered for the final apply-progress save and tasks update.
 
 ## Structured status consumed/produced
 
@@ -36,16 +36,16 @@ artifacts:
   applyProgress: done
 taskProgress:
   total: 44
-  complete: 25
-  remaining: 19
+  complete: 44
+  remaining: 0
 deferredParentActions:
   total: 2
   complete: 2
   remaining: 0
 taskArtifactErrors: []
-applyState: ready
+applyState: all_done
 dependencies:
-  apply: ready
+  apply: all_done
   verify: blocked
   sync: blocked
   archive: blocked
@@ -56,11 +56,12 @@ actionContext:
     - /Users/nlf/Projects/nlf/ncode
   warnings:
     - native gentle-ai status/attempt CLI unavailable; authoritative OpenSpec state reconstructed from the installed status contract
+    - initial Engram reads reported unavailable; final apply-progress save and tasks observation update succeeded
 nextRecommended: parent-lifecycle
 isNonAuthoritative: false
 ```
 
-The active change was explicit and unambiguous. All edits stayed under the allowed repository root. Ownership validation found no malformed markers. The accepted single-feature-branch size exception resolved the workload gate; WU 8 remains outside this attempt.
+The active change was explicit and unambiguous. All edits stayed under the allowed repository root. Ownership validation found no malformed markers. The accepted single-feature-branch size exception resolved the workload gate; implementation is complete and parent lifecycle is next.
 
 ## Completed implementation tasks and persisted checkboxes
 
@@ -1429,3 +1430,98 @@ The cumulative `apply-progress.md` itself contains 146 historical old-identity l
 ### Parent lifecycle and next boundary
 
 WU11 is complete. Parent owns independent lifecycle checks, native attempt settlement, the WU11 commit, and any checkpoint push. WU12 is the exact next implementation boundary and was not started.
+
+## WU 12 final audit evidence
+
+Updated: 2026-08-26T22:24:22Z
+
+### Completion and persisted tasks
+
+- [x] Retained-capability audit and the one uncovered JSON-mode characterization are persisted in `tasks.md`.
+- [x] Exact provenance-manifest reconciliation and mandatory provenance/rejection line review are persisted in `tasks.md`.
+- [x] Exact allowlist and forbidden-identity gates are persisted in `tasks.md`.
+- [x] Workable-file review, build/test/static/package checks, nested copies, and pinned-count reproduction are persisted in `tasks.md`.
+- Implementation progress is **44/44 complete**; both parent-owned rows remain byte-for-byte checked and are deferred to the parent lifecycle.
+
+### TDD Cycle Evidence
+
+| Task | Test file / layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|---|
+| Retained capability audit | Existing provider/auth, agent, modes, core, tools, swarm, extension, skill, theme, updater, and Telegram suites | Focused no-live-provider matrix passed before audit edits | Not manufactured: this verification task characterizes already-retained behavior | All focused suites passed | Existing evidence covered every requested category except JSON mode | No production refactor was needed |
+| JSON output gap | `packages/agent/modes/json_test.go`, package/integration characterization | Existing print and stream output tests passed | Approval characterization was written against existing behavior; no production code was changed to manufacture failure | Success JSONL event output passed | Provider failure is both returned and serialized as a distinct second path | Removed an audit-only forbidden literal; focused test remained green |
+| Provenance reconciliation | Exact manifest and historical documents, structural/documentation | Inventory and every emitted line were read before correction | Not applicable: exact classification/documentation correction | Twelve exact files are now admitted without a wildcard | All exact provenance lines and all 18 dedicated rejection files were reviewed | Added only two explicit historical-record headers and the cumulative-progress manifest row |
+| Final gates | Repository/static/build integration | Preliminary exact gates exposed the audit test's misplaced legacy literal | The working-tree-complete supplement classified that ordinary test path as unapproved | Removing the audit-only assertion restored zero unclassified paths without production changes | Tracked and tracked+untracked universes both passed | Final manifests and gates were regenerated after all edits |
+
+### Test summary
+
+- **New tests:** one table/subtest-style retained JSON-mode test with two behavioral paths (successful neutral JSONL output and serialized provider failure).
+- **Production code changed:** none.
+- **Live providers, credentials, release services, or network:** none; focused HTTP behavior used local transports/`httptest`, nested module commands used `GOPROXY=off`.
+- **Strict-TDD disposition:** verification/approval characterization; no failure was manufactured for behavior that already existed.
+
+### Retained-capability evidence
+
+- Provider and authentication: local Anthropic/OpenAI/Gemini stream tests, API-key command resolution, auth callback/server round trips, and agent credential resolution passed.
+- Output: production-shaped print composition, print usage, stream delta/fallback, the new JSON success/error characterization, and neutral RPC v1 prompt-first/optional-hello/token behavior passed.
+- Sessions, direct permissions, and tools: JSONL/portable/branch/tree sessions, direct `Args.PermissionSet` wiring, sandbox scope, and read/write/edit/bash behavior passed.
+- Swarm: local stub-child execution, credential/metadata transfer, inbox, event log, and dedicated legacy metadata rejection passed.
+- Extensions: exact protocol-v2 acknowledgement, neutral frames, manager spawn/invoke, idle auto-ready, SDK host info, and old/dual acknowledgement rejection passed.
+- Skills and themes: project/global discovery, priority/dedup, prompt addendum, partial theme loading, fallback, and shared-color overrides passed.
+- Updater and Telegram: updater download/checksum used local HTTP only; Telegram webhook/polling/command/bridge behavior used injected local transports only.
+
+### Identity manifests and mandatory review
+
+- The exact provenance manifest contains 12 paths: architecture, inherited capabilities, two historical records, project/config, proposal/spec/design/inventory/tasks, and cumulative apply progress.
+- The rejection manifest contains 18 exact tracked basenames matching only `legacy_zot_*`; the combined allowed manifest contains 30 paths.
+- Every emitted provenance line was reviewed as inherited baseline/history, upstream/legal evidence, planning/removal/rejection language, or factual prior execution evidence.
+- Every emitted rejection line was reviewed in its owning test context and participates in rejection, ignore, unchanged-sentinel, absence, or non-use assertions.
+- No directory wildcard was admitted. The only pattern allowance remains the exact basename rule for dedicated rejection files.
+
+### Verification commands and outcomes
+
+- Focused retained matrix: provider/auth, resolver/headless/RPC/updater, output modes, sessions/tools, swarm, extension v2/idle/SDK, skills/themes, and Telegram — PASS.
+- `go test ./packages/agent/modes -run '^TestRunJSONRetainsNeutralJSONLSuccessAndErrorOutput$' -count=1` — PASS after characterization and after audit-literal cleanup.
+- Inventory exact zero-active commands for case-insensitive old identity, old module, old environment namespace, dot state/session paths, composed names, and non-dedicated filenames — zero output.
+- Workable-file `comm -23` for tracked files and the supplemental tracked+untracked universe — zero unclassified paths after the narrow test correction.
+- `go mod tidy` — PASS; root `go.mod` and `go.sum` hashes unchanged.
+- `go list ./...` — PASS; 26 root packages.
+- `go vet ./...` — PASS.
+- `make build` — PASS; produced `bin/ncode`, then cleaned it.
+- `make test` — PASS (`go test -race ./...`).
+- `go test ./examples/... -count=1`; all example shell syntax; Python AST; Node syntax — PASS.
+- Complete external copies of both nested extension modules: temporary local-root replacement in each copy, `GOPROXY=off go mod tidy`, `go test ./... -count=1`, and `go build ./...` — PASS; external roots removed and repository status unchanged.
+- Installer/distribution focused tests, `bash -n install.sh`, PowerShell delimiter/anchor static check, local ncode archive contents, and checksum verification — PASS.
+- Pinned planning counts reproduced exactly as `13/2181/282/293/310/106/80`; frozen comparison counts reproduced exactly as `13/2098/278/285/301/105/79`.
+- `git diff --check` — PASS before final artifact reconciliation and required again in the final gate.
+
+### Corrections and files
+
+- Added `packages/agent/modes/json_test.go` for the only real retained-capability gap.
+- Updated `identity-inventory.md` to admit cumulative apply progress as exact factual execution provenance and to use twelve exact files in every final command.
+- Added explicit historical-record headers to the two exact configurable-auto-compact design/plan provenance documents.
+- Updated only the four WU12 implementation checkboxes and this cumulative progress artifact; parent-owned task rows were unchanged.
+- No migration, fallback, compatibility alias, provider behavior, protocol behavior, state behavior, or production code was added or changed.
+
+### Tool limitations and cleanup
+
+- Native `gentle-ai` was unavailable, so status was reconstructed from the installed contract and the parent-supplied attempt was not acquired again or settled.
+- Engram reads were initially unavailable, then recovered; the final apply-progress observation was saved and the tasks observation was updated successfully.
+- GoReleaser, PowerShell, and ShellCheck executables were unavailable and were not downloaded; repository static/unit contracts, shell syntax, PowerShell static checks, and a local package/checksum exercise were used instead.
+- Removed the nested-copy root, package-check root, `bin/ncode`, transient test/build outputs, and external module edits. No tracked generated binary or bytecode was created.
+
+### Workload and next boundary
+
+- WU12 authored scope is a narrow audit slice: one 99-line dedicated test plus identity/provenance/task/progress corrections; no production implementation file changed.
+- The accepted combined-final-PR size exception remains the delivery authority; no chain, PR, commit, push, or branch change was performed here.
+- Apply is complete. The next route is `parent-lifecycle`; the parent owns attempt settlement and all verify/review/delivery/archive decisions.
+
+## WU12 final artifact-blocker correction
+
+Updated: 2026-08-26T22:38:59Z
+
+- Corrected only `tasks.md` Chain Context metadata: WU 1–WU 12 are complete, apply is `all_done`, and the next SDD phase is verify; the order, current boundary, and diagram no longer describe WU10/WU11 as current work.
+- Corrected the exact embedded final audit in `tasks.md` so both `audit_pathspecs` and `/tmp/ncode-zot-provenance-files.txt` include `openspec/changes/clean-break-ncode-identity/apply-progress.md` as the twelfth exact provenance path.
+- Preserved all 46 checkbox rows byte-for-byte: implementation remains 44/44 checked, parent remains 2/2 checked, and ownership marker errors remain zero.
+- Re-ran all six exact tracked forbidden gates and all six tracked+untracked forbidden gates; every gate emitted zero active old-identity lines.
+- Regenerated manifests at 12 exact provenance paths, 18 dedicated rejection paths, and 30 combined allowed paths; `git diff --check` passed.
+- No production or test file was changed by this correction. No commit, stage, push, PR, branch switch, review, verify, sync, archive, attempt acquire, or settlement occurred; parent retains settlement and lifecycle ownership.

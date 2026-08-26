@@ -1,5 +1,7 @@
 # Configurable Auto-Compact Threshold
 
+> **Historical record:** This inherited-era design preserves its original product terminology and paths as provenance; it is not current ncode setup guidance.
+
 ## Goal
 
 Let users choose when Zot automatically compacts an interactive transcript from the existing `/settings` dialog, while preserving the current 85% behavior by default.
