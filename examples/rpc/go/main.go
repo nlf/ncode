@@ -1,4 +1,4 @@
-// Tiny Go program that drives `zot rpc` as a subprocess.
+// Tiny Go program that drives `ncode rpc` as a subprocess.
 //
 // For an in-process Go embedding, use github.com/nlf/ncode/packages/agent/sdk
 // instead — this example exists to show what consumers in OTHER
@@ -22,7 +22,7 @@ func main() {
 	}
 	prompt := strings.Join(os.Args[1:], " ")
 
-	cmd := exec.Command("zot", "rpc")
+	cmd := exec.Command("ncode", "rpc")
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	must(err)

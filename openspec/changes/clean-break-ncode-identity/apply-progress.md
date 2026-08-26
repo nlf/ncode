@@ -1,16 +1,16 @@
 # Apply progress: clean-break-ncode-identity
 
-Updated: 2026-08-26T19:34:44Z
+Updated: 2026-08-26T20:03:19Z
 
 ## Attempt summary
 
-- **Status:** WU 1 is merged and WU 2–WU 6 are complete; the broader change remains in progress, with WU 7 next and unstarted.
-- **Assigned boundary:** exactly WU 6 — the NCODE environment namespace — complete. WU 7 was not started.
+- **Status:** WU 1 is merged and WU 2–WU 7 are complete; the broader change remains in progress, with WU 8 next and unstarted.
+- **Assigned boundary:** exactly WU 7 — RPC identity edges and reference clients — complete. WU 8 was not started.
 - **Delivery:** WU 2–WU 12 remain on the single long-lived branch `feat/clean-break-ncode-identity-02`; no intermediate PR or branch change was made.
-- **Review budget:** WU 6 implementation and tests use `775` changed lines, below the native 1,300-line maximum; the combined final-PR size exception remains approved.
-- **Commits/branches/PRs:** no commit, push, PR, merge, branch switch, review, settlement, or WU 7 work occurred. Parent owns the revertible WU 6 commit and attempt settlement.
-- **Verification:** genuine RED → GREEN → TRIANGULATE → REFACTOR evidence, focused owner-package tests, exact legacy-environment searches, `git diff --check`, and final `make test` passed.
-- **Native authority:** parent supplied proceed token `sha256:d8e863fd687b62fe2707984b7db1fa1d0a74228bbc9a904a3372c6ced055ba2f`; the native CLI was unavailable locally, no extra acquire was possible, and settlement is intentionally deferred to the parent.
+- **Review budget:** WU 7 implementation and tests use `402` rename-aware changed lines, below the native 1,300-line maximum; the accepted one-final-PR size exception and no-intermediate-review strategy cover the 400-line forecast.
+- **Commits/branches/PRs:** no commit, push, PR, merge, branch switch, review, settlement, or WU 8 work occurred. Parent owns the revertible WU 7 commit and attempt settlement.
+- **Verification:** genuine RED → GREEN → TRIANGULATE → REFACTOR evidence, focused RPC tests, all four reference-client checks, exact forbidden identity/protocol searches, `git diff --check`, and final `make test` passed.
+- **Native authority:** parent supplied proceed token `sha256:b922f6bb7768cbf8d3481e6b3f4c5a15fc56ad88775831cd7079c5299d9b4cc9`; the native CLI was unavailable locally, no extra acquire was possible, and settlement is intentionally deferred to the parent.
 
 ## Structured status consumed/produced
 
@@ -36,8 +36,8 @@ artifacts:
   applyProgress: done
 taskProgress:
   total: 44
-  complete: 21
-  remaining: 23
+  complete: 25
+  remaining: 19
 deferredParentActions:
   total: 2
   complete: 2
@@ -60,7 +60,7 @@ nextRecommended: parent-lifecycle
 isNonAuthoritative: false
 ```
 
-The active change was explicit and unambiguous. All edits stayed under the allowed repository root. Ownership validation found no malformed markers. The accepted single-feature-branch size exception resolved the workload gate; WU 7 remains outside this attempt.
+The active change was explicit and unambiguous. All edits stayed under the allowed repository root. Ownership validation found no malformed markers. The accepted single-feature-branch size exception resolved the workload gate; WU 8 remains outside this attempt.
 
 ## Completed implementation tasks and persisted checkboxes
 
@@ -546,10 +546,6 @@ Triangulation was structural for the move itself because there is one command lo
 - The shared `Resolve` → `Resolved.NewClient` → `Resolved.NewAgent` spine, WU4 command identity, RPC v1, extension acknowledgement, swarm/runtime composed identifiers, and release/update endpoints remain outside this unit.
 
 ## Remaining implementation tasks (exact unchecked lines)
-- [ ] RED — add failing RPC tests in `packages/agent/rpc_reasoning_test.go` and adjacent RPC test targets for token-unset prompt-first, `NCODE_RPC_TOKEN` first-frame hello success/failure, `ZOTCORE_RPC_TOKEN` ignored, and unchanged v1 neutral prompt/response/event/optional-hello behavior; run focused tests and `make test` expecting new cases to fail. <!-- sdd-owner: implementation -->
-- [ ] GREEN — update `packages/agent/rpc.go`, command invocation/help, `docs/rpc.md`, and `examples/rpc/{shell,go,python,node}` (renaming `zot-client.js`/`zot_client.py` to ncode names) to invoke `ncode rpc` and use `NCODE_RPC_TOKEN`; do not add RPC v2, product fields, mandatory hello, legacy token read, or frame-shape change; run focused tests, client syntax/build checks, and `make test`. <!-- sdd-owner: implementation -->
-- [ ] TRIANGULATE — add dedicated legacy RPC input coverage proving `ZOTCORE_RPC_TOKEN` alone neither enables nor gates RPC and an unknown explicit Zot-branded extra field has no authorization/configuration meaning; use fakes/local processes only, then run neutral-frame regressions and `make test`. <!-- sdd-owner: implementation -->
-- [ ] REFACTOR — share RPC test transport/setup helpers only if v1 prompt-first and token-required paths remain explicit; rerun RPC tests, all reference-client syntax/build checks, forbidden RPC identity searches, and `make test`. <!-- sdd-owner: implementation -->
 - [ ] RED — add failing acknowledgement and lifecycle tests in `packages/agent/extproto/*_test.go`, `packages/agent/ext/ext_test.go`, `packages/agent/extensions/{manager,intercept,tool}_test.go`, and `packages/agent/sdk/*_test.go` requiring `product:"ncode"`, `protocol_version:2`, `ncode_version`, `HostInfo.NcodeVersion`, old `zot_version` acknowledgement rejection, and unchanged neutral hello/frame plus idle auto-ready behavior; run focused tests and `make test` expecting failures. <!-- sdd-owner: implementation -->
 - [ ] GREEN — change `packages/agent/extproto/extproto.go` `ProtocolVersion` to 2 and `HelloAckFromHost`; update `packages/agent/extensions/manager.go`, `packages/agent/ext/ext.go`, and `packages/agent/sdk` to emit/validate the ncode acknowledgement and rename the SDK field; retain `ExtensionToolSource`, readiness channels/timeouts, neutral manifest/frame names, and auto-ready logic while changing only its `[zot]` diagnostic to `[ncode]`; update `docs/extensions.md`, `packages/agent/skills/builtin/write-zot-extension/`, and raw extension examples together, then run focused tests and `make test`. <!-- sdd-owner: implementation -->
 - [ ] TRIANGULATE — rename the authoring skill directory to `write-ncode-extension`, add dedicated legacy acknowledgement fixtures, build/test `examples/extensions/mcp-bridge` and `examples/extensions/todo` from their own modules, and verify an idle extension still becomes ready without a ready frame; run all focused tests and `make test`. <!-- sdd-owner: implementation -->
@@ -683,3 +679,170 @@ Two initial RED fixtures were corrected before production edits: the theme asser
 - The Go RPC example token read moved in WU6 because it is an actual Go `Getenv` product control; broader RPC invocation, clients, docs, and diagnostics remain WU7.
 - Full-repository old-environment output is not yet a zero-active audit because WU7 owns remaining non-Go RPC clients/docs, WU10 owns installer `ZOT_VERSION`/`ZOT_PREFIX`, WU11 owns active prose, and WU12 owns the final allowlist gate.
 - WU7 is the exact next unchecked implementation boundary. Parent must settle and preserve WU6 as an independently revertible commit before starting it.
+
+## WU 7 apply evidence
+
+### Completed implementation tasks and persisted checkboxes
+
+- [x] RED — RPC identity and neutral-v1 tests with genuine first-frame/client-contract failures, persisted in `tasks.md`.
+- [x] GREEN — ncode invocation, token, diagnostics/comments, docs, and four reference clients, persisted in `tasks.md`.
+- [x] TRIANGULATE — dedicated legacy-token and Zot-branded unknown-extra-field coverage, persisted in `tasks.md`.
+- [x] REFACTOR — explicit prompt-first/token paths, shared test-only frame helpers, client checks, searches, and full tests, persisted in `tasks.md`.
+
+All four rows are visibly `[x]` in the OpenSpec task artifact and in Engram task observation `117`. WU8 remains unchecked and unstarted.
+
+### TDD Cycle Evidence
+
+| Task | Test files | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|---|---|
+| WU7 RED | `rpc_protocol_test.go`, `rpc_env_test.go`, `rpc_identity_test.go`, `legacy_zot_rpc_test.go`, adjacent `rpc_reasoning_test.go` | Package/integration + static contract | Focused RPC/help, complete agent package, and baseline `make test` passed | Focused run and `make test` failed because a non-hello first frame did not close token-gated RPC, legacy Python/Node source filenames remained, and docs/shell/Go/Python/Node still published old invocation/token identity. Neutral prompt-first and optional-hello characterization cases already passed. | N/A | N/A | N/A |
+| WU7 GREEN | server edge, docs, command/help comments, shell/Go/Python/Node clients | Package/integration + client contract | RED above | RED above | First-frame auth now closes after one neutral failure response; all active RPC edges use `ncode rpc`/`NCODE_RPC_TOKEN`; focused RPC, agent package, client contract, and `make test` passed. | Existing matching/wrong native-token cases and prompt/hello paths use distinct inputs. | N/A |
+| WU7 TRIANGULATE | `legacy_zot_rpc_test.go`, `rpc_protocol_test.go`, `rpc_env_test.go` | Negative/package/local fake | GREEN above | Dedicated legacy tests were written before production edits and joined the RED suite. | Legacy-only prompt-first, unknown-field non-authorization, and neutral unknown-field decoding passed. | A valid ncode token with conflicting Zot-branded extras also passed, proving only the native token is authoritative across four legacy/extra-field paths. | N/A |
+| WU7 REFACTOR | all RPC tests, including `rpc_reasoning_test.go` | Regression/race + static/syntax/build | TRIANGULATE green | N/A | N/A | Neutral v1 prompt/response/event/optional-hello cases remain explicit. | Shared only test transport/frame decoding helpers; strengthened reasoning response-shape assertions; focused RPC/help/SDK tests, all clients, searches, `git diff --check`, and final `make test` passed. |
+
+### RED evidence
+
+- Safety net `go test ./packages/agent -run 'RPC|HelpOutputStreams' -count=1` — PASS.
+- Safety net `go test ./packages/agent -count=1` — PASS.
+- Safety net `make test` (`go test -race ./...`) — PASS.
+- RED focused expression covering prompt-first, optional hello, native token, legacy token/extra fields, and published contracts — expected FAIL:
+  - `TestNcodeRPCTokenRejectsNonHelloFirstFrameAndCloses` observed the server emit an auth failure and then incorrectly accept the second hello;
+  - `TestLegacyZotRPCClientSourceNamesAreNotPublished` found both old source filenames;
+  - the five documentation/reference-client subtests found old invocation/token identity or missing ncode client filenames.
+- RED `make test` — expected FAIL on the same new WU7 assertions while unaffected packages remained green.
+
+### GREEN and TRIANGULATE evidence
+
+- GREEN focused WU7 expression — PASS.
+- GREEN `go test ./packages/agent -count=1` — PASS.
+- GREEN `make test` — PASS.
+- TRIANGULATE focused neutral/legacy RPC expression — PASS.
+- TRIANGULATE `make test` — PASS.
+- The only runtime correction makes the documented token requirement truly first-frame: a token-gated non-hello receives one existing-shape `success:false` response and the connection closes. Matching/wrong hello behavior and all token-unset behavior remain otherwise unchanged.
+
+### Reference-client checks
+
+- `bash -n examples/rpc/shell/prompt.sh` — PASS.
+- `go test ./examples/rpc/go -count=1` — PASS (`[no test files]`, package builds).
+- `go build -o <external-temp> ./examples/rpc/go` and executable assertion — PASS; temp output removed.
+- `PYTHONPYCACHEPREFIX=<external-temp> python3 -m py_compile examples/rpc/python/ncode_client.py` — PASS; external cache removed and no repository bytecode created.
+- `node --check examples/rpc/node/ncode-client.js` — PASS.
+
+### Neutral RPC v1 protocol proof
+
+- Token unset: a prompt is accepted as the first frame and reaches a local fake provider with the exact message; the first output remains `type:"response"`, the same id/`command:"prompt"`/`success:true`, and `data.started:true`.
+- Neutral events: local fake output retains `turn_start`, `user_message`, `text_delta`, `assistant_message`, `turn_end`, and `done`; no product or ncode-version field appears.
+- Optional hello: token-unset hello remains optional and returns exactly the four existing data keys `protocol_version`, `version`, `provider`, and `model`, with protocol version `1`.
+- Native authorization: matching `NCODE_RPC_TOKEN` succeeds with neutral v1 hello data; wrong token and non-hello first frame fail without accepting a later frame.
+- Legacy isolation: `ZOTCORE_RPC_TOKEN` alone does not gate prompt-first RPC; unknown `zot_token`/`zot_product` fields cannot authorize native token-gated RPC, cannot override a valid native token, and have no configuration meaning when authorization is disabled.
+- Static protocol search found only protocol version `1` in `rpc.go`/`docs/rpc.md` and found no RPC v2, `product`, or `ncode_version` frame field in server/docs/clients.
+
+### REFACTOR/final verification
+
+- `go test ./packages/agent -run 'RPC|HelpOutputStreams' -count=1` — PASS after the final test-helper/reasoning assertion refactor.
+- `go test ./packages/agent/sdk -count=1` — PASS.
+- Active forbidden RPC identity search over server, invocation/help comments, neutral JSON/SDK comments, docs, clients, and non-legacy tests — zero matches.
+- RPC source-filename search excluding the WU10-owned tracked bytecode artifact — zero Zot-bearing source filenames.
+- `git diff --check` — PASS.
+- Final `make test` — PASS (`go test -race ./...`).
+- No live provider, credential, external network, release API, commit, push, PR, branch switch, review, settlement, or WU8 action occurred.
+
+### Files and scope
+
+- Modified runtime/invocation/comments: `packages/agent/{rpc.go,cli.go}`, `packages/agent/modes/json.go`, `packages/agent/sdk/{sdk.go,types.go}`.
+- Modified and added tests: `packages/agent/{rpc_env_test.go,rpc_reasoning_test.go,rpc_protocol_test.go,rpc_identity_test.go,legacy_zot_rpc_test.go}`.
+- Modified user contract: `docs/rpc.md`, `examples/rpc/{go/main.go,shell/prompt.sh}`.
+- Renamed and updated: `examples/rpc/node/zot-client.js` → `examples/rpc/node/ncode-client.js`; `examples/rpc/python/zot_client.py` → `examples/rpc/python/ncode_client.py`.
+- SDD artifacts: `openspec/changes/clean-break-ncode-identity/{tasks.md,apply-progress.md}` plus Engram task/apply-progress observations.
+- Rename-aware implementation/test scope: **402 changed lines** (`350` additions + `52` deletions), under the native 1,300-line maximum. The accepted one-final-PR strategy resolves the 400-line review forecast; no intermediate PR is created.
+
+### Deviations, deferred boundaries, and next work unit
+
+- No protocol-design deviation occurred: RPC remains neutral version 1, hello remains optional when no native token is set, and no product field, mandatory always-on hello, legacy read, alias, or frame-shape redesign was introduced.
+- Returning after the first token-gated non-hello frame corrects the existing documented “first line must be hello; process exits” behavior rather than adding a new handshake.
+- The tracked `examples/rpc/python/__pycache__/zot_client.cpython-314.pyc` artifact remains untouched because WU10 explicitly owns its deletion; syntax checks wrote only to an external temporary cache.
+- WU8 extension protocol-v2 acknowledgement and SDK work remains wholly unstarted. The cumulative exact unchecked-task section now begins with all four WU8 rows.
+- Parent owns the independently revertible `feat(rpc): publish ncode invocation contract` commit and settlement for token `sha256:b922f6bb7768cbf8d3481e6b3f4c5a15fc56ad88775831cd7079c5299d9b4cc9`.
+
+## WU 7 gate correction: malformed token-gated first frame and stale chain context
+
+### Correction boundary and status
+
+- **Status:** both delegated WU7 gate blockers are corrected; WU1–WU7 remain complete and WU8 remains next/unstarted.
+- **Runtime boundary:** when `NCODE_RPC_TOKEN` is set, malformed JSON in the first non-empty frame now emits the existing malformed-JSON failure shape and terminates the connection before a later hello can authorize. Token-unset malformed-frame recovery remains unchanged.
+- **Planning boundary:** the tasks order, current boundary, and chain diagram now show WU6 and WU7 complete and WU8 next/unstarted. Every implementation and parent checkbox was preserved.
+- **Native authority:** this correction reused parent-supplied token `sha256:b922f6bb7768cbf8d3481e6b3f4c5a15fc56ad88775831cd7079c5299d9b4cc9`; `gentle-ai` remains unavailable locally, so no acquire or settlement was attempted. Parent owns settlement.
+- **Workload/PR boundary:** correction only; no WU8, extension protocol, commit, push, PR, branch switch, review, or settlement action occurred.
+
+```yaml
+schemaName: spec-driven
+changeName: clean-break-ncode-identity
+artifactStore: both
+artifacts:
+  proposal: done
+  specs: done
+  design: done
+  tasks: done
+  applyProgress: done
+taskProgress:
+  total: 44
+  complete: 25
+  remaining: 19
+deferredParentActions:
+  total: 2
+  complete: 2
+  remaining: 0
+taskArtifactErrors: []
+applyState: ready
+dependencies:
+  apply: ready
+  verify: blocked
+  sync: blocked
+  archive: blocked
+actionContext:
+  mode: repo-local
+  workspaceRoot: /Users/nlf/Projects/nlf/ncode
+  allowedEditRoots: [/Users/nlf/Projects/nlf/ncode]
+  warnings:
+    - native gentle-ai status/attempt CLI unavailable; authoritative OpenSpec state reconstructed from the installed status contract
+nextRecommended: parent-lifecycle
+isNonAuthoritative: false
+```
+
+Ownership recount after the tasks context edit found 44 implementation rows (`25` checked, `19` unchecked), 2 parent rows (both checked), and 0 malformed markers. The exact WU7 rows remain `[x]`; the exact WU8 rows remain `[ ]`.
+
+### TDD Cycle Evidence
+
+| Task | Test file | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|---|---|
+| Reject malformed first token-gated frame | `packages/agent/rpc_env_test.go` | Package/integration | Existing native-token hello, non-hello close, token-unset prompt-first, and optional-hello cases passed | `TestNcodeRPCTokenRejectsMalformedFirstFrameAndCloses` genuinely failed: the server emitted malformed JSON, then accepted the later valid hello and returned nil | Minimal auth-order correction returns after the malformed response while unauthenticated; the focused regression passed | `TestRPCWithoutTokenContinuesAfterMalformedFrame` proves token-unset RPC still emits the malformed response and processes a later neutral ping | No extraction was needed; the three-line production guard is the minimal branch and focused/full tests remained green |
+| Refresh tasks boundary | `tasks.md` structural context | Planning artifact | Checkbox recount was 25/44 implementation complete plus 2/2 parent complete and 0 malformed markers | N/A — no runtime behavior and no checkbox change | Order, boundary, and diagram now agree on WU7 complete/WU8 next | Table and diagram independently state the same boundary | No further planning refactor was needed |
+
+### Exact correction evidence
+
+- Safety net: `go test ./packages/agent -run '^(TestNcodeRPCTokenAuthorizesExistingHelloContract|TestNcodeRPCTokenRejectsNonHelloFirstFrameAndCloses|TestRPCWithoutTokenAcceptsNeutralPromptAsFirstFrame|TestRPCOptionalHelloRemainsNeutralProtocolVersionOne)$' -count=1` — PASS.
+- RED: `go test ./packages/agent -run '^TestNcodeRPCTokenRejectsMalformedFirstFrameAndCloses$' -count=1` — expected FAIL; output contained the malformed failure followed by a successful `hello` response, proving later authorization was possible.
+- GREEN: the same single-test command — PASS after the production guard.
+- TRIANGULATE: `go test ./packages/agent -run '^(TestNcodeRPCTokenRejectsMalformedFirstFrameAndCloses|TestRPCWithoutTokenContinuesAfterMalformedFrame)$' -count=1` — PASS.
+- Focused RPC: `go test ./packages/agent -run 'RPC|HelpOutputStreams' -count=1` — PASS.
+- SDK: `go test ./packages/agent/sdk -count=1` — PASS.
+- Full runner: `make test` (`go test -race ./...`) — PASS.
+- Final hygiene: `git diff --check` — PASS after artifact persistence.
+- Task context/count gate — PASS: WU7 complete, WU8 next/unstarted; implementation `25/44` checked with `19` unchecked; parent `2/2` checked; malformed ownership markers `0`.
+
+### Correction files and stats
+
+- `packages/agent/rpc.go` — 3 added production lines.
+- `packages/agent/rpc_env_test.go` — 50 added test lines across two focused cases.
+- `openspec/changes/clean-break-ncode-identity/tasks.md` — 5 additions and 3 deletions in order/boundary/diagram context; no checkbox changed.
+- `openspec/changes/clean-break-ncode-identity/apply-progress.md` — cumulative correction evidence appended and timestamp refreshed.
+- Correction scope before this cumulative progress text: **61 changed lines** (`58` additions, `3` deletions) across production, tests, and tasks.
+
+### Test summary
+
+- **Tests written:** 2 focused RPC test functions.
+- **Behavioral paths:** token-gated malformed-first-frame close and token-unset malformed-frame continuation.
+- **Pure functions created:** none; the scanner/auth ordering required only a minimal conditional return.
+- **Protocol preservation:** RPC remains v1; response/event/hello shapes and token-unset prompt-first behavior are unchanged.
+- **Live providers/credentials/network:** none used.
+- **Remaining implementation tasks:** unchanged exact 19 unchecked lines already listed cumulatively above, beginning with WU8 RED. WU8 was not started.

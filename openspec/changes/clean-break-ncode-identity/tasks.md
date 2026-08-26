@@ -40,8 +40,8 @@ Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
 | Change | `clean-break-ncode-identity` |
 | Strategy | WU 2–WU 12 remain on `feat/clean-break-ncode-identity-02`; checkpoint pushes are allowed, but no intermediate PRs |
 | Final PR | One PR from `feat/clean-break-ncode-identity-02` to `main`, linked to issue #1 with exactly `type:breaking-change` |
-| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 next/unstarted → WU 7 → WU 8 → WU 9 → WU 10 → WU 11 → WU 12 |
-| Current boundary | WU 5 is complete; WU 6 is next and unstarted |
+| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 complete → WU 7 complete → WU 8 next/unstarted → WU 9 → WU 10 → WU 11 → WU 12 |
+| Current boundary | WU 7 is complete; WU 8 is next and unstarted |
 | Review budget | The user explicitly accepts the combined final-PR size exception; no intermediate PR review budget applies |
 | Verification | Preserve each WU as an independently revertible commit; run focused verification and `make test` before beginning the next WU |
 | Gates | Clone-local bounded review remains disabled; strict TDD, native SDD attempt authority, issue linkage, verification, CI, and final merge gates remain |
@@ -54,7 +54,9 @@ main: WU 1 merged
       ├── WU 3 complete
       ├── WU 4 complete
       ├── WU 5 complete
-     └── 📍 WU 6 next (unstarted) → WU 7 … WU 12 → one final PR to main
+      ├── WU 6 complete
+      ├── WU 7 complete
+     └── 📍 WU 8 next (unstarted) → WU 9 … WU 12 → one final PR to main
 ```
 
 ## Constraints and common evidence
@@ -119,10 +121,10 @@ main: WU 1 merged
 
 **Boundary:** Own `ncode rpc`, `NCODE_RPC_TOKEN`, RPC diagnostics, documentation, and reference clients; keep v1 frames and optional hello exactly neutral. **Commit:** `feat(rpc): publish ncode invocation contract`. **Verification/rollback:** server, clients, and docs are rolled back together before release.
 
-- [ ] RED — add failing RPC tests in `packages/agent/rpc_reasoning_test.go` and adjacent RPC test targets for token-unset prompt-first, `NCODE_RPC_TOKEN` first-frame hello success/failure, `ZOTCORE_RPC_TOKEN` ignored, and unchanged v1 neutral prompt/response/event/optional-hello behavior; run focused tests and `make test` expecting new cases to fail. <!-- sdd-owner: implementation -->
-- [ ] GREEN — update `packages/agent/rpc.go`, command invocation/help, `docs/rpc.md`, and `examples/rpc/{shell,go,python,node}` (renaming `zot-client.js`/`zot_client.py` to ncode names) to invoke `ncode rpc` and use `NCODE_RPC_TOKEN`; do not add RPC v2, product fields, mandatory hello, legacy token read, or frame-shape change; run focused tests, client syntax/build checks, and `make test`. <!-- sdd-owner: implementation -->
-- [ ] TRIANGULATE — add dedicated legacy RPC input coverage proving `ZOTCORE_RPC_TOKEN` alone neither enables nor gates RPC and an unknown explicit Zot-branded extra field has no authorization/configuration meaning; use fakes/local processes only, then run neutral-frame regressions and `make test`. <!-- sdd-owner: implementation -->
-- [ ] REFACTOR — share RPC test transport/setup helpers only if v1 prompt-first and token-required paths remain explicit; rerun RPC tests, all reference-client syntax/build checks, forbidden RPC identity searches, and `make test`. <!-- sdd-owner: implementation -->
+- [x] RED — add failing RPC tests in `packages/agent/rpc_reasoning_test.go` and adjacent RPC test targets for token-unset prompt-first, `NCODE_RPC_TOKEN` first-frame hello success/failure, `ZOTCORE_RPC_TOKEN` ignored, and unchanged v1 neutral prompt/response/event/optional-hello behavior; run focused tests and `make test` expecting new cases to fail. <!-- sdd-owner: implementation -->
+- [x] GREEN — update `packages/agent/rpc.go`, command invocation/help, `docs/rpc.md`, and `examples/rpc/{shell,go,python,node}` (renaming `zot-client.js`/`zot_client.py` to ncode names) to invoke `ncode rpc` and use `NCODE_RPC_TOKEN`; do not add RPC v2, product fields, mandatory hello, legacy token read, or frame-shape change; run focused tests, client syntax/build checks, and `make test`. <!-- sdd-owner: implementation -->
+- [x] TRIANGULATE — add dedicated legacy RPC input coverage proving `ZOTCORE_RPC_TOKEN` alone neither enables nor gates RPC and an unknown explicit Zot-branded extra field has no authorization/configuration meaning; use fakes/local processes only, then run neutral-frame regressions and `make test`. <!-- sdd-owner: implementation -->
+- [x] REFACTOR — share RPC test transport/setup helpers only if v1 prompt-first and token-required paths remain explicit; rerun RPC tests, all reference-client syntax/build checks, forbidden RPC identity searches, and `make test`. <!-- sdd-owner: implementation -->
 
 ## WU 8 — Ship the signaled extension protocol-v2 ncode acknowledgement
 

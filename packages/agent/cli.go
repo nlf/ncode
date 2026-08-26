@@ -231,7 +231,7 @@ func Run(rawArgs []string, version string) error {
 }
 
 func runWithArgsRaw(rawArgs []string, version string) error {
-	// `zot rpc` is shorthand for `zot --rpc` so third-party apps can
+	// `ncode rpc` is shorthand for `ncode --rpc` so third-party apps can
 	// spawn the binary with a clean argv. Strip the leading 'rpc'
 	// token and let the rest flow through the normal arg parser.
 	if len(rawArgs) > 0 && rawArgs[0] == "rpc" {

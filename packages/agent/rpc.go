@@ -174,7 +174,7 @@ type rpcServer struct {
 
 	// inFlight tracks long-running command goroutines so run() can
 	// wait for them before returning when stdin closes. Without this,
-	// piping a single 'prompt' command into 'zot rpc' would race the
+	// piping a single 'prompt' command into 'ncode rpc' would race the
 	// process exit against the agent loop and the prompt would never
 	// produce output.
 	inFlight sync.WaitGroup
@@ -182,7 +182,7 @@ type rpcServer struct {
 
 // run reads NDJSON commands from in and dispatches them. Returns when
 // in is closed AND every in-flight long-running command (prompt /
-// compact) has finished, so a quick `echo cmd | zot rpc` invocation
+// compact) has finished, so a quick `echo cmd | ncode rpc` invocation
 // still produces full output before the process exits.
 func (s *rpcServer) run(in io.Reader) error {
 	requireToken := os.Getenv("NCODE_RPC_TOKEN") != ""
@@ -201,12 +201,15 @@ func (s *rpcServer) run(in io.Reader) error {
 		}
 		if err := json.Unmarshal([]byte(line), &head); err != nil {
 			s.writeError("", "", fmt.Sprintf("malformed json: %v", err))
+			if !s.authed {
+				return fmt.Errorf("rpc: malformed first frame before authentication: %w", err)
+			}
 			continue
 		}
 		if !s.authed {
 			if head.Type != "hello" {
 				s.writeError(head.ID, head.Type, "auth required: send hello with token first")
-				continue
+				return fmt.Errorf("rpc: hello with token required as first frame")
 			}
 			var hello struct {
 				Token string `json:"token"`

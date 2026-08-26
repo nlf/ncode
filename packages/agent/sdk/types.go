@@ -10,7 +10,7 @@ import (
 // Event is the unit emitted by Runtime.Prompt's channel. Type
 // identifies the event kind; remaining fields are populated based on
 // kind. The wire schema is the same as the JSON-RPC stream notifications
-// emitted by `zot rpc`, so consumers can share parsing code.
+// emitted by `ncode rpc`, so consumers can share parsing code.
 type Event struct {
 	Type string `json:"type"`
 

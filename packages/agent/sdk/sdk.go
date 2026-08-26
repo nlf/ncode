@@ -19,7 +19,7 @@
 // Runtime per project / cwd. The Cancel call interrupts the active
 // prompt; subsequent prompts work normally.
 //
-// For a non-Go consumer, run `zot rpc` and speak the same JSON
+// For a non-Go consumer, run `ncode rpc` and speak the same JSON
 // schema over stdin/stdout. See docs/rpc.md.
 package sdk
 
