@@ -15,7 +15,7 @@ import (
 
 // updateCheckTTL is how often we hit the GitHub API to look for a new
 // release. Half a day is frequent enough to notice the same day a
-// release ships without spamming the API on every zot launch.
+// release ships without spamming the API on every ncode launch.
 const updateCheckTTL = 12 * time.Hour
 
 // updateCheckFile is the on-disk cache, keyed to the current binary
@@ -25,7 +25,7 @@ const updateCheckFile = "update-check.json"
 
 // githubReleasesAPI is the REST endpoint we query. Using the API (not
 // the HTML redirect) because the JSON response is stable and small.
-const githubReleasesAPI = "https://api.github.com/repos/patriceckhart/zot/releases/latest"
+const githubReleasesAPI = "https://api.github.com/repos/nlf/ncode/releases/latest"
 
 // UpdateInfo describes the result of an update check. Zero-value means
 // "no update available, no error, don't show anything".
@@ -151,17 +151,21 @@ func normalizedVersion(v string) string {
 // fetchLatestRelease queries the GitHub API for the latest published
 // release. Honours $GITHUB_TOKEN for private repos.
 func fetchLatestRelease(ctx context.Context) (tag, url string, err error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", githubReleasesAPI, nil)
+	return fetchLatestReleaseWithClient(ctx, githubReleasesAPI, &http.Client{Timeout: 4 * time.Second})
+}
+
+func fetchLatestReleaseWithClient(ctx context.Context, endpoint string, client *http.Client) (tag, url string, err error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return "", "", err
 	}
 	req.Header.Set("accept", "application/vnd.github+json")
 	req.Header.Set("x-github-api-version", "2022-11-28")
+	req.Header.Set("user-agent", "ncode-updater")
 	if tok := os.Getenv("GITHUB_TOKEN"); tok != "" {
 		req.Header.Set("authorization", "Bearer "+tok)
 	}
 
-	client := &http.Client{Timeout: 4 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", "", err

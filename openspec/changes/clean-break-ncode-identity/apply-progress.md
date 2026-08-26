@@ -1,6 +1,6 @@
 # Apply progress: clean-break-ncode-identity
 
-Updated: 2026-08-26T20:59:29Z
+Updated: 2026-08-26T21:45:33Z
 
 ## Attempt summary
 
@@ -1175,3 +1175,150 @@ The active change and branch were explicit and unambiguous. Every edit stayed un
 ### Parent lifecycle and next boundary
 
 Parent owns independent gate, native attempt settlement, the independently revertible `feat(runtime): rebrand internal identity` commit, any checkpoint push, and later WU10 delegation. WU10 is the exact next implementation boundary; WU10 was not started.
+
+## WU 10 apply evidence
+
+Updated: 2026-08-26T21:45:33Z
+
+### Attempt summary
+
+- **Status:** WU 10 is complete; WU 1–WU 10 are complete and WU 11 is next/unstarted.
+- **Assigned boundary:** exactly WU 10 — release owner/repository/assets, installers, updater/changelog endpoints and extraction, release workflow validation, clean-break distribution notices, and deletion of the two tracked generated legacy artifacts.
+- **Native authority:** parent supplied active token `sha256:ea4b934a09234ae288085079c6e9b5006517386da4485504a44d7e8d92562ad7`. The `gentle-ai` CLI was unavailable, so no duplicate acquire was possible. No settlement was attempted; parent owns settlement.
+- **Delivery boundary:** one long-lived branch `feat/clean-break-ncode-identity-02`, accepted one-final-PR size exception, and one independently revertible WU10 slice. No commit, push, PR, branch switch, review, settlement, release, publication, or WU11 work occurred.
+- **Scope:** implementation/test text scope is **643 changed lines** (`556` additions, `87` deletions), plus deletion of the tracked 2.8 MiB example executable and 6.7 KiB Python bytecode artifact. This is within the supplied 2,000-line maximum and planned 450–700-line WU10 range.
+- **Network/release boundary:** all HTTP behavior used `httptest`, an intercepted local transport, or fake installer commands. No live GitHub API, release provider, provider API, network service, credential, tag, or upload was used.
+
+### Structured status consumed/produced
+
+```yaml
+schemaName: spec-driven
+changeName: clean-break-ncode-identity
+artifactStore: both
+planningHome:
+  root: /Users/nlf/Projects/nlf/ncode/openspec
+  changesDir: /Users/nlf/Projects/nlf/ncode/openspec/changes
+changeRoot: /Users/nlf/Projects/nlf/ncode/openspec/changes/clean-break-ncode-identity
+artifactPaths:
+  proposal: [openspec/changes/clean-break-ncode-identity/proposal.md]
+  specs: [openspec/changes/clean-break-ncode-identity/specs/ncode-identity/spec.md, sdd/clean-break-ncode-identity/spec]
+  design: [openspec/changes/clean-break-ncode-identity/design.md, sdd/clean-break-ncode-identity/design]
+  tasks: [openspec/changes/clean-break-ncode-identity/tasks.md, sdd/clean-break-ncode-identity/tasks]
+  applyProgress: [openspec/changes/clean-break-ncode-identity/apply-progress.md, sdd/clean-break-ncode-identity/apply-progress]
+artifacts:
+  proposal: done
+  specs: done
+  design: done
+  tasks: done
+  applyProgress: done
+taskProgress:
+  total: 44
+  complete: 37
+  remaining: 7
+deferredParentActions:
+  total: 2
+  complete: 2
+  remaining: 0
+taskArtifactErrors: []
+applyState: ready
+dependencies:
+  apply: ready
+  verify: blocked
+  sync: blocked
+  archive: blocked
+actionContext:
+  mode: repo-local
+  workspaceRoot: /Users/nlf/Projects/nlf/ncode
+  allowedEditRoots: [/Users/nlf/Projects/nlf/ncode]
+  warnings:
+    - native gentle-ai status/attempt CLI unavailable; authoritative OpenSpec status reconstructed from the installed status contract
+nextRecommended: parent-lifecycle
+isNonAuthoritative: false
+```
+
+The active change, branch, and WU10 slice were explicit and unambiguous. Every edit stayed under the authoritative repository root. Ownership recount found 37/44 implementation rows checked, 7 unchecked, 2/2 parent rows checked, and zero malformed markers. The recorded single-feature-branch size exception resolves the workload gate.
+
+### Completed implementation tasks and persisted checkboxes
+
+- [x] WU10 RED — static/unit/distribution tests and genuine focused/full-run failures, persisted in OpenSpec tasks and Engram task observation `117`.
+- [x] WU10 GREEN — ncode-only release/install/update implementation, generated-artifact deletions, clean-break notices, and green focused/full tests, persisted in both task backends.
+- [x] WU10 TRIANGULATE — local `httptest`, mocked shell installer, static PowerShell, checksum/asset agreement, tool availability, and no-network proof, persisted in both task backends.
+- [x] WU10 REFACTOR — one test-local asset expectation helper, exact distribution searches, build/full verification, and generated-output cleanup, persisted in both task backends.
+
+### TDD Cycle Evidence
+
+| Task | Test files | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|---|---|
+| WU10 RED | `distribution_identity_test.go`, `legacy_zot_release_test.go`, `update_test.go`, `updatecmd_test.go`, `changelog_test.go` | Static contract + unit + mocked HTTP | Existing focused update/version tests PASS; `bash -n install.sh` PASS; baseline `make test` PASS | Focused run failed on old GoReleaser owner/build/archive, both installers, workflow source, updater/changelog endpoints and missing user agents, old asset name, and both tracked generated files. RED `make test` failed on the same new contracts while unaffected packages passed. | N/A | N/A | N/A |
+| WU10 GREEN | distribution inputs and release/update production files | Static + unit + intercepted local HTTP | RED above | RED above | Ncode owner/repo/assets/binaries/variables/endpoints/user-agents/notices and deletions passed the focused expression; complete agent tests and `make test` passed. | Existing current-platform asset behavior and distinct latest/tagged release requests remained explicit. | N/A |
+| WU10 TRIANGULATE | same tests plus local-server/mock filesystem cases | `httptest` + local subprocess + static parser/config | GREEN above | New local-client seams initially failed to compile because `fetchLatestReleaseWithClient` and `fetchChangelogWithClient` did not exist. | Minimal client/endpoint seams preserved production defaults and passed local latest/changelog responses. | Linux and Windows asset expectations, local archive download/checksum, shell installer fake curl/tar/hash/filesystem, and PowerShell delimiter/command anchors exercised distinct paths; `make test` passed. | N/A |
+| WU10 REFACTOR | all WU10 tests | Regression/race + distribution audit | TRIANGULATE green | N/A | N/A | Ncode archive/checksum/install/update agreements remained exact. | Repeated expected names use only `expectedReleaseAssetName` in tests; no updater fallback was added. Focused tests, `make build`, forbidden searches, `git diff --check`, final `make test`, and cleanup passed. |
+
+### Exact RED evidence
+
+- Safety net `go test ./packages/agent -run '^(TestVersionLess|TestBuildInfoDoesNotOfferPseudoVersionDowngrade|TestUpdateTempPatternUsesNcodePrefix)$' -count=1` — PASS.
+- Safety net `bash -n install.sh` — PASS.
+- Baseline `make test` (`go test -race ./...`) — PASS.
+- RED focused WU10 expression — expected FAIL: GoReleaser lacked ncode project/build/archive/repository/header; installers lacked ncode owner/repo/binary/env/user-agent/notice; workflow lacked ncode source validation; update/changelog requested the inherited endpoint without product user-agents; updater selected `zot_1.2.3_darwin_arm64.tar.gz`; both generated legacy artifacts still existed.
+- RED `make test` — expected FAIL only in the newly added WU10 tests while unaffected packages remained green.
+- TRIANGULATE RED `go test ./packages/agent -run '^(TestFetchLatestReleaseFromLocalServer|TestFetchChangelogFromLocalServer)$' -count=1` — expected build FAIL with both local-client functions undefined before their minimal seams were added.
+
+### Distribution and no-network proof
+
+- GoReleaser now builds `./cmd/ncode` as `ncode`, names archives `ncode_<version>_<os>_<arch>`, ships `LICENSE` and `README.md`, keeps neutral `checksums.txt`, and targets `nlf/ncode`.
+- GoReleaser's release header and both installers state that ncode is a clean break, does not reuse Zot credentials/settings/sessions/caches/extensions/SDK-RPC-swarm integrations or other state, and provides no migration or compatibility fallback.
+- Shell and PowerShell installers use `NCODE_VERSION`, `NCODE_PREFIX`, `nlf/ncode`, `ncode[.exe]`, `ncode-installer`, ncode archive URLs, and neutral `checksums.txt`.
+- Updater latest-release and changelog tag/latest requests use only `api.github.com/repos/nlf/ncode`; archive downloads use ncode release pages/assets and `ncode-updater`; changelog requests use `ncode-changelog`.
+- `fetchLatestReleaseWithClient` and `fetchChangelogWithClient` were exercised against `httptest` only. `downloadFile` used a local `httptest` asset and verified its matching local checksum entry.
+- The shell installer ran end-to-end with fake `uname`, `curl`, `sha256sum`, and `tar`, installed a local fake `ncode`, logged only expected `nlf/ncode` archive/checksum URLs, and made no network call.
+- Exact forbidden endpoint/asset/env scans over the assigned distribution inputs emitted zero matches. Dedicated legacy fixtures assert non-publication and deletion.
+- `examples/extensions/todo/zot-todo-extension` and `examples/rpc/python/__pycache__/zot_client.cpython-314.pyc` are deleted without replacements.
+
+### Tooling availability and validation
+
+- `goreleaser`: unavailable; no config check or snapshot was attempted, and no publish command ran. Static config/archive-content/asset-template checks passed.
+- `pwsh` / `powershell`: unavailable; no native parser execution was possible. Static delimiter, command-anchor, archive, checksum, user-agent, and variable checks passed.
+- `shellcheck` and `yq`: unavailable.
+- `bash`, `sh`, `tar`, `zip`, `unzip`, and Python 3: available. `bash -n install.sh` and the mocked installer execution passed.
+- `make build` produced `bin/ncode` successfully. It was deleted after validation; no `bin/ncode`, `dist/`, Python cache, snapshot, archive, checksum output, or external temp artifact remains.
+
+### Final verification
+
+- Focused named WU10 expression covering 15 test functions — PASS.
+- `go test ./packages/agent -count=1` — PASS.
+- `bash -n install.sh` — PASS.
+- PowerShell static delimiter/anchor check — PASS.
+- Exact forbidden release endpoint/asset/env scan — zero matches; required ncode distribution scan emitted 34 lines.
+- `make build` — PASS; generated `bin/ncode` removed afterward.
+- Final `make test` (`go test -race ./...`) — PASS.
+- `git diff --check` — PASS.
+- Cleanup checks — `bin/ncode` absent, `dist/` absent, repository Python cache absent, and temporary positive-search output removed.
+
+### Files changed by WU 10
+
+- Release/install/workflow: `.goreleaser.yaml`, `install.sh`, `install.ps1`, `.github/workflows/release.yml`.
+- Update/changelog runtime: `packages/agent/{update.go,updatecmd.go,changelog.go}`.
+- Tests: `packages/agent/{update_test.go,updatecmd_test.go,changelog_test.go,distribution_identity_test.go,legacy_zot_release_test.go}`.
+- Deleted generated artifacts: `examples/extensions/todo/zot-todo-extension`, `examples/rpc/python/__pycache__/zot_client.cpython-314.pyc`.
+- SDD artifacts: `openspec/changes/clean-break-ncode-identity/{tasks.md,apply-progress.md}` plus Engram task/apply-progress observations.
+
+### Deviations, risks, and remaining tasks
+
+- No design deviation occurred. `checksums.txt` remains neutral, command source remains `cmd/ncode` from WU4, WU9 runtime temp identity remains intact, and no updater fallback or compatibility endpoint was added.
+- GoReleaser snapshot/archive inspection and native PowerShell parser execution were unavailable locally; static and mocked validation covered their contracts without downloading tooling or reaching a release service.
+- Existing extension-refresh output in `extupdate.go` is outside the explicitly delegated WU10 production file list and remains for WU11's active communication rewrite; updater release identity itself is ncode-only.
+- WU11 is next and unstarted. Exact remaining implementation rows are the three WU11 rows and four WU12 rows persisted unchecked in `tasks.md`.
+
+### Remaining implementation tasks (exact unchecked lines)
+
+- [ ] Characterize the mechanical communication surface without manufacturing RED: record link/command checks and nested-example builds for `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `docs/{providers,extensions,rpc,skills,themes}.md`, `.github/ISSUE_TEMPLATE/{bug_report,feature_request}.yml`, `examples/**`, `packages/agent/skills/builtin/write-zot-themes/SKILL.md`, and active help/error/log expectations; distinguish exact provenance files from active materials. <!-- sdd-owner: implementation -->
+- [ ] Rename active product prose, commands, imports, state/env/SDK/extension references, test names/expectations, manifests, and example consumers to lowercase ncode; move `write-zot-themes` to `write-ncode-themes`; ensure README Install, installer/install output, and README first-run/authentication prominently state the clean break and no Zot credentials/settings/sessions/caches/extensions/SDK-RPC-swarm reuse, with no migration/prompt instruction. <!-- sdd-owner: implementation -->
+- [ ] Run post-edit evidence: nested example module tests/builds, example shell/Python/Node syntax checks, markdown link/command searches, installer/help snippet checks, `make test`, and a forbidden-active-identity scan; retain Zot wording only in the exact provenance manifest or dedicated `legacy_zot_*` rejection files. <!-- sdd-owner: implementation -->
+- [ ] Add or complete focused no-live-provider retained-capability coverage for provider/auth resolution, print/stream/JSON/RPC v1, sessions, direct permissions/tools, swarm, extensions including idle auto-ready v2 ack, skills, themes, updater via `httptest`, and retained Telegram tests; run the affected packages, `go vet ./...`, and `make test`. <!-- sdd-owner: implementation -->
+- [ ] Update `openspec/changes/clean-break-ncode-identity/identity-inventory.md` before the final search to add this exact `tasks.md` path to the reviewed provenance manifest only if it contains legacy terms solely as historical planning/rejection context; then verify every provenance line and every `legacy_zot_*` line is factual or asserts rejection/non-use, not active support. <!-- sdd-owner: implementation -->
+- [ ] Run the exact final allowlist gates from `identity-inventory.md`: construct `audit_pathspecs` with each exact provenance file plus `openspec/changes/clean-break-ncode-identity/tasks.md` when admitted and only `:(exclude,glob)**/legacy_zot_*`; require zero output from `git grep -nI -i -e zot -- "${audit_pathspecs[@]}"`, old-module, `ZOTCORE_|ZOT_[A-Z0-9_]+`, `.zot(session)?`, and `zot[-_][[:alnum:]_-]+` searches, and from `git ls-files | grep -i zot | grep -vE '(^|/)legacy_zot_[^/]*$'`. <!-- sdd-owner: implementation -->
+- [ ] Run the exact workable-file and mandatory-line reviews from `identity-inventory.md`: build `/tmp/ncode-zot-provenance-files.txt`, `/tmp/ncode-zot-rejection-files.txt`, and `/tmp/ncode-zot-allowed-files.txt`; require `comm -23` against `git grep -Il -i -e zot -- .` to emit no paths; emit and review every line into `/tmp/ncode-zot-provenance-lines.txt` and `/tmp/ncode-zot-rejection-lines.txt`; then run `go mod tidy`, `go list ./...`, `go vet ./...`, `make build`, `make test`, nested example builds, installer/package checks, and the inventory reproduction commands against planning SHA `18325b75cc89c75b5f4842924cb377aa5bef5c4b`. <!-- sdd-owner: implementation -->
+
+### Parent lifecycle and next boundary
+
+Parent owns independent gate, native attempt settlement, the independently revertible `feat(release): distribute ncode only` commit, any checkpoint push, and later WU11 delegation. WU11 is the exact next implementation boundary; WU11 was not started.

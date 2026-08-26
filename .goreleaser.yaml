@@ -1,5 +1,5 @@
 # GoReleaser config — builds cross-platform binaries and GitHub Release
-# artifacts for zot.
+# artifacts for ncode.
 #
 # Triggered by pushing a tag like `v0.1.0`. The release workflow runs
 # `goreleaser release --clean`, which compiles every target, packs
@@ -8,16 +8,16 @@
 
 version: 2
 
-project_name: zot
+project_name: ncode
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - id: zot
-    main: ./cmd/zot
-    binary: zot
+  - id: ncode
+    main: ./cmd/ncode
+    binary: ncode
     env:
       - CGO_ENABLED=0
     goos: [linux, darwin, windows]
@@ -36,8 +36,8 @@ builds:
       - -X main.date={{.Date}}
 
 archives:
-  - id: zot
-    # Human-friendly name: zot_0.1.0_darwin_arm64.tar.gz
+  - id: ncode
+    # Human-friendly name: ncode_0.1.0_darwin_arm64.tar.gz
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
@@ -76,19 +76,24 @@ changelog:
 
 release:
   github:
-    owner: patriceckhart
-    name: zot
+    owner: nlf
+    name: ncode
   draft: false
   prerelease: auto
   # Auto-generated release notes include the changelog groups above plus
   # an install snippet so the release page itself is a landing page.
   header: |
-    ## zot {{ .Tag }}
+    ## ncode {{ .Tag }}
+
+    **ncode is a clean break from Zot.** It does not reuse Zot credentials,
+    settings, sessions, caches, extensions, SDK/RPC/swarm integrations, or
+    other Zot state. Configure ncode fresh; no migration or compatibility
+    fallback is provided.
 
     one-liner install:
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/patriceckhart/zot/main/install.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/nlf/ncode/main/install.sh | bash
     ```
 
     or download a binary below, `chmod +x`, and drop it on your `$PATH`.

@@ -40,8 +40,8 @@ Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
 | Change | `clean-break-ncode-identity` |
 | Strategy | WU 2–WU 12 remain on `feat/clean-break-ncode-identity-02`; checkpoint pushes are allowed, but no intermediate PRs |
 | Final PR | One PR from `feat/clean-break-ncode-identity-02` to `main`, linked to issue #1 with exactly `type:breaking-change` |
-| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 complete → WU 7 complete → WU 8 complete → WU 9 next/unstarted → WU 10 → WU 11 → WU 12 |
-| Current boundary | WU 8 is complete; WU 9 is next and unstarted |
+| Order | WU 1 merged → WU 2 complete → WU 3 complete → WU 4 complete → WU 5 complete → WU 6 complete → WU 7 complete → WU 8 complete → WU 9 complete → WU 10 complete → WU 11 next/unstarted → WU 12 |
+| Current boundary | WU 10 is complete; WU 11 is next and unstarted |
 | Review budget | The user explicitly accepts the combined final-PR size exception; no intermediate PR review budget applies |
 | Verification | Preserve each WU as an independently revertible commit; run focused verification and `make test` before beginning the next WU |
 | Gates | Clone-local bounded review remains disabled; strict TDD, native SDD attempt authority, issue linkage, verification, CI, and final merge gates remain |
@@ -57,7 +57,9 @@ main: WU 1 merged
       ├── WU 6 complete
       ├── WU 7 complete
       ├── WU 8 complete
-     └── 📍 WU 9 next (unstarted) → WU 10 … WU 12 → one final PR to main
+      ├── WU 9 complete
+      ├── WU 10 complete
+     └── 📍 WU 11 next (unstarted) → WU 12 → one final PR to main
 ```
 
 ## Constraints and common evidence
@@ -149,10 +151,10 @@ main: WU 1 merged
 
 **Boundary:** Own release owner/repo/assets, updater/changelog lookup, installers, and tracked generated-artifact deletion; command source remains WU 4. **Commit:** `feat(release): distribute ncode only`. **Verification/rollback:** distribution inputs and their tests revert together before release.
 
-- [ ] RED — add failing static/unit tests or snapshots for `.goreleaser.yaml`, `install.sh`, `install.ps1`, `packages/agent/{update,updatecmd,changelog}_test.go`, and `.github/workflows/release.yml` requiring `nlf/ncode`, `ncode_<version>_<os>_<arch>`, `ncode[.exe]`, `NCODE_VERSION`, `NCODE_PREFIX`, ncode checksums/install URLs, and no legacy endpoint; run local focused tests and `make test` expecting failures. <!-- sdd-owner: implementation -->
-- [ ] GREEN — update `.goreleaser.yaml`, `install.sh`, `install.ps1`, `.github/workflows/release.yml`, and `packages/agent/{update.go,updatecmd.go,changelog.go}` to ncode-only owner/repository/assets/extraction/user-agent/temp identity; delete `examples/extensions/todo/zot-todo-extension` and `examples/rpc/python/__pycache__/zot_client.cpython-314.pyc` without replacements, preserve neutral `checksums.txt`, and add the required clean-break installer/release notice; run tests and `make test`. <!-- sdd-owner: implementation -->
-- [ ] TRIANGULATE — validate GoReleaser config/snapshot and archive contents when tooling is available, installer shell syntax with mocked HTTP/filesystems, PowerShell parser/static checks, updater `httptest` responses, and checksum/asset-name agreement; assert no release call reaches a network provider or live GitHub release, then run `make test`. <!-- sdd-owner: implementation -->
-- [ ] REFACTOR — derive repeated asset-name expectations from one local test helper/config fixture without adding an updater fallback; rerun distribution checks, `make build`, focused updater tests, forbidden asset/endpoint searches, and `make test`. <!-- sdd-owner: implementation -->
+- [x] RED — add failing static/unit tests or snapshots for `.goreleaser.yaml`, `install.sh`, `install.ps1`, `packages/agent/{update,updatecmd,changelog}_test.go`, and `.github/workflows/release.yml` requiring `nlf/ncode`, `ncode_<version>_<os>_<arch>`, `ncode[.exe]`, `NCODE_VERSION`, `NCODE_PREFIX`, ncode checksums/install URLs, and no legacy endpoint; run local focused tests and `make test` expecting failures. <!-- sdd-owner: implementation -->
+- [x] GREEN — update `.goreleaser.yaml`, `install.sh`, `install.ps1`, `.github/workflows/release.yml`, and `packages/agent/{update.go,updatecmd.go,changelog.go}` to ncode-only owner/repository/assets/extraction/user-agent/temp identity; delete `examples/extensions/todo/zot-todo-extension` and `examples/rpc/python/__pycache__/zot_client.cpython-314.pyc` without replacements, preserve neutral `checksums.txt`, and add the required clean-break installer/release notice; run tests and `make test`. <!-- sdd-owner: implementation -->
+- [x] TRIANGULATE — validate GoReleaser config/snapshot and archive contents when tooling is available, installer shell syntax with mocked HTTP/filesystems, PowerShell parser/static checks, updater `httptest` responses, and checksum/asset-name agreement; assert no release call reaches a network provider or live GitHub release, then run `make test`. <!-- sdd-owner: implementation -->
+- [x] REFACTOR — derive repeated asset-name expectations from one local test helper/config fixture without adding an updater fallback; rerun distribution checks, `make build`, focused updater tests, forbidden asset/endpoint searches, and `make test`. <!-- sdd-owner: implementation -->
 
 ## WU 11 — Rewrite active product communication and examples
 

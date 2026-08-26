@@ -36,6 +36,10 @@ func semverOnly(v string) string {
 }
 
 func FetchChangelog(ctx context.Context, version string) (ChangelogInfo, error) {
+	return fetchChangelogWithClient(ctx, version, "https://api.github.com/repos/nlf/ncode", &http.Client{Timeout: 4 * time.Second})
+}
+
+func fetchChangelogWithClient(ctx context.Context, version, apiBase string, client *http.Client) (ChangelogInfo, error) {
 	version = semverOnly(version)
 	if version == "" || version == "dev" {
 		return ChangelogInfo{}, nil
@@ -45,13 +49,13 @@ func FetchChangelog(ctx context.Context, version string) (ChangelogInfo, error) 
 	// of a tagged one so developers always see the newest changelog.
 	var url string
 	if version == "0.0.0" {
-		url = "https://api.github.com/repos/patriceckhart/zot/releases/latest"
+		url = apiBase + "/releases/latest"
 	} else {
 		tag := version
 		if !strings.HasPrefix(tag, "v") {
 			tag = "v" + tag
 		}
-		url = fmt.Sprintf("https://api.github.com/repos/patriceckhart/zot/releases/tags/%s", tag)
+		url = fmt.Sprintf("%s/releases/tags/%s", apiBase, tag)
 	}
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -59,11 +63,11 @@ func FetchChangelog(ctx context.Context, version string) (ChangelogInfo, error) 
 	}
 	req.Header.Set("accept", "application/vnd.github+json")
 	req.Header.Set("x-github-api-version", "2022-11-28")
+	req.Header.Set("user-agent", "ncode-changelog")
 	if tok := os.Getenv("GITHUB_TOKEN"); tok != "" {
 		req.Header.Set("authorization", "Bearer "+tok)
 	}
 
-	client := &http.Client{Timeout: 4 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return ChangelogInfo{}, err
