@@ -37,21 +37,6 @@ func TestParseArgsTemperatureRejectsOutOfRange(t *testing.T) {
 	}
 }
 
-func TestParseArgsYes(t *testing.T) {
-	for _, flag := range []string{"-y", "--yes"} {
-		args, err := ParseArgs([]string{flag, "--print", "hi"})
-		if err != nil {
-			t.Fatalf("ParseArgs(%q): %v", flag, err)
-		}
-		if !args.Yes {
-			t.Fatalf("ParseArgs(%q): Yes = false", flag)
-		}
-		if args.Mode != ModePrint || args.Prompt != "hi" {
-			t.Fatalf("ParseArgs(%q): Mode=%q Prompt=%q", flag, args.Mode, args.Prompt)
-		}
-	}
-}
-
 func TestParseArgsStatsRequiresPrintMode(t *testing.T) {
 	args, err := ParseArgs([]string{"-p", "--stats", "stats.json", "hi"})
 	if err != nil {
@@ -85,6 +70,24 @@ func TestParseArgsStream(t *testing.T) {
 	}
 	if args.Mode != ModeStream || args.Prompt != "hi" {
 		t.Fatalf("Mode=%q Prompt=%q", args.Mode, args.Prompt)
+	}
+}
+
+func TestRemovedPortableAgentCommandsFallThroughToNormalHelp(t *testing.T) {
+	for _, command := range []string{"pack", "inspect", "verify", "run"} {
+		t.Run(command, func(t *testing.T) {
+			if err := Run([]string{command, "--help"}, "test"); err != nil {
+				t.Fatalf("removed command was still routed: %v", err)
+			}
+		})
+	}
+}
+
+func TestRemovedPortableAgentConsentFlagsAreRejected(t *testing.T) {
+	for _, flag := range []string{"-y", "--yes"} {
+		if _, err := ParseArgs([]string{flag}); err == nil {
+			t.Fatalf("ParseArgs accepted removed flag %q", flag)
+		}
 	}
 }
 

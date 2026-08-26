@@ -105,11 +105,6 @@ type Args struct {
 	// freely so automated workflows keep working.
 	NoYolo bool
 
-	// Yes accepts zotfile launch consent without an interactive
-	// Allow? prompt (zot run -y / --yes). Durable consent receipts
-	// are still written for modes other than bash ask.
-	Yes bool
-
 	ListModels bool
 	Help       bool
 	Version    bool
@@ -117,20 +112,12 @@ type Args struct {
 
 	Prompt string // concatenated positional args
 
-	// StartupPre is an optional zotfile entry.pre value. Interactive
-	// mode auto-submits it once at startup before InitialInput handling.
-	StartupPre string
-
 	// SwarmAgent is the inbox-socket path when this process is a
 	// swarm-spawned agent. Empty in every other mode. Set by
 	// --swarm-agent <path>; presence flips Mode to ModeSwarmAgent.
 	SwarmAgent string
 
-	// AgentName/AgentDataDir/PermissionSet are populated by `zot run`
-	// for local zotfile agents. They scope sessions and enforce the
-	// manifest's declared file/bash permissions.
-	AgentName     string
-	AgentDataDir  string
+	// PermissionSet is an optional direct local-runtime permission contract.
 	PermissionSet *tools.PermissionSet
 }
 
@@ -234,8 +221,6 @@ func ParseArgs(in []string) (Args, error) {
 			a.InsecureTLS = true
 		case "--no-yolo":
 			a.NoYolo = true
-		case "-y", "--yes":
-			a.Yes = true
 		case "--reasoning":
 			v, err := want(&i, arg)
 			if err != nil {
@@ -455,7 +440,6 @@ func printHelp(out *os.File, version string) {
 		row{"--no-tools", "disable all tools"},
 		row{"--tools csv", "only enable the listed tools"},
 		row{"--no-yolo", "ask before running every tool call"},
-		row{"-y, --yes", "accept zot run consent without prompting"},
 		row{"--no-ext", "skip extension discovery for this run"},
 		row{"--no-skill", "skip all skill discovery for this run"},
 		row{"--no-context-files, -nc", "skip AGENTS.md discovery for this run"},

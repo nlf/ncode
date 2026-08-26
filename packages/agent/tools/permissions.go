@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// PermissionSet is the local-runtime permission contract for a packaged .zot agent.
+// PermissionSet is the direct local-runtime filesystem and shell permission contract.
 type PermissionSet struct {
 	FS struct {
 		Read  []string `json:"read"`
@@ -24,7 +24,7 @@ type PermissionSet struct {
 	} `json:"env"`
 }
 
-// Expand resolves manifest variables into absolute local paths.
+// Expand resolves permission variables into absolute local paths.
 func (p PermissionSet) Expand(workspace, agentData string) PermissionSet {
 	expand := func(s string) string {
 		s = strings.ReplaceAll(s, "${workspace}", workspace)
@@ -35,8 +35,7 @@ func (p PermissionSet) Expand(workspace, agentData string) PermissionSet {
 		return s
 	}
 	// Clone the slices before expanding them. PermissionSet is copied by value,
-	// but slices otherwise still alias the manifest and repeated expansion (for
-	// example after /cd) would mutate the original declaration.
+	// but slices otherwise still alias the original declaration.
 	p.FS.Read = append([]string(nil), p.FS.Read...)
 	p.FS.Write = append([]string(nil), p.FS.Write...)
 	for i, v := range p.FS.Read {

@@ -40,7 +40,6 @@ type InteractiveConfig struct {
 
 	// Startup resource fields are loaded inputs available to list before the
 	// transcript. They are never sent to the provider or persisted by the view.
-	StartupAgentName      string
 	StartupContextPaths   []string
 	StartupExtensionNames []string
 	StartupSkillNames     []string
@@ -131,21 +130,6 @@ type InteractiveConfig struct {
 
 	InitialInput string
 
-	// StartupPre is auto-submitted once when the interactive session
-	// opens, before InitialInput is applied. Uses the same path as a
-	// typed Enter submit ("!" → shell escape, otherwise a model turn).
-	StartupPre string
-
-	// OnStartupPreDone runs after StartupPre finishes (shell escape or
-	// model turn), before deferred InitialInput is applied. Hosts use
-	// it to rediscover skills / reload extensions installed by pre.
-	OnStartupPreDone func()
-
-	// AutoSubmitInitial, when true, auto-submits InitialInput after
-	// StartupPre completes (or immediately when StartupPre is empty).
-	// When false, InitialInput only pre-fills the editor.
-	AutoSubmitInitial bool
-
 	// Auth is required. When the user runs /login, Interactive talks to
 	// AuthManager to open a browser and wait for the callback.
 	AuthManager *auth.Manager
@@ -190,9 +174,8 @@ type InteractiveConfig struct {
 	// themes, extensions, and other shared configuration.
 	ZotHome string
 
-	// SessionsRoot is the root passed to core session operations. It differs
-	// from ZotHome for Zotfile agents, whose sessions are isolated by agent
-	// name. Empty falls back to ZotHome for embedders and tests.
+	// SessionsRoot is the root passed to core session operations.
+	// Empty falls back to ZotHome for embedders and tests.
 	SessionsRoot string
 
 	// Version is the binary's current version (from main.version).
@@ -401,7 +384,6 @@ type Interactive struct {
 	busy             bool
 	dirty            chan struct{}
 	modelRefresh     chan modelRefreshResult
-	startupPreDone   chan startupPreResult
 	cancelTurn       context.CancelFunc
 	scrollOffset     int // rows from the bottom; 0 = pinned to latest
 	prevScrollOffset int // last value redraw snapped against; tracks intent
@@ -543,12 +525,6 @@ type Interactive struct {
 	// shell escape, updated via BashTool progress for live rendering.
 	shellLive string
 
-	// awaitingStartupPre is true while the zotfile entry.pre auto-submit
-	// is in flight. When it clears, deferredInitialInput is applied.
-	awaitingStartupPre   bool
-	deferredInitialInput string
-	autoSubmitDeferred   bool
-
 	// sessionLoading is true while a /sessions selection is being read
 	// on a background goroutine. Keeping this off the input goroutine
 	// lets ctrl+c/exit remain responsive for very large JSONL sessions.
@@ -586,21 +562,14 @@ const initialResumeTailLimit = 80
 // reveal that would feel jerky.
 const resumeTailExpandStep = 80
 
-type startupPreResult struct {
-	deferred   string
-	autoSubmit bool
-}
-
 // NewInteractive constructs an Interactive from cfg.
 func NewInteractive(cfg InteractiveConfig) *Interactive {
 	renderer := tui.NewRenderer(cfg.Terminal)
 	renderer.SetTheme(cfg.Theme)
-	startupAgentName := ""
 	startupContextPaths := []string(nil)
 	startupExtensionNames := []string(nil)
 	startupSkillNames := []string(nil)
 	if cfg.ShowInstructionsAtStartup != nil && *cfg.ShowInstructionsAtStartup {
-		startupAgentName = cfg.StartupAgentName
 		startupContextPaths = append(startupContextPaths, cfg.StartupContextPaths...)
 		startupExtensionNames = append(startupExtensionNames, cfg.StartupExtensionNames...)
 		startupSkillNames = append(startupSkillNames, cfg.StartupSkillNames...)
@@ -613,7 +582,6 @@ func NewInteractive(cfg InteractiveConfig) *Interactive {
 			FlatTools:             cfg.FlatTools,
 			CompactUser:           cfg.CompactUser,
 			CompactMode:           cfg.CompactMode != nil && *cfg.CompactMode,
-			StartupAgentName:      startupAgentName,
 			StartupContextPaths:   startupContextPaths,
 			StartupExtensionNames: startupExtensionNames,
 			StartupSkillNames:     startupSkillNames,
@@ -627,7 +595,6 @@ func NewInteractive(cfg InteractiveConfig) *Interactive {
 		toolGate:          map[string]int{},
 		dirty:             make(chan struct{}, 8),
 		modelRefresh:      make(chan modelRefreshResult, 1),
-		startupPreDone:    make(chan startupPreResult, 1),
 		dialog:            newLoginDialog(),
 		modelDialog:       newModelDialog(),
 		llamaDialog:       newLlamaDialog(),
@@ -740,14 +707,7 @@ func (i *Interactive) Run(ctx context.Context) error {
 		i.redraw()
 	})
 
-	if i.cfg.StartupPre != "" {
-		i.deferredInitialInput = i.cfg.InitialInput
-		i.autoSubmitDeferred = i.cfg.AutoSubmitInitial
-		i.awaitingStartupPre = true
-		i.Submit(i.cfg.StartupPre)
-	} else if i.cfg.AutoSubmitInitial && i.cfg.InitialInput != "" {
-		i.Submit(i.cfg.InitialInput)
-	} else if i.cfg.InitialInput != "" {
+	if i.cfg.InitialInput != "" {
 		i.ed.SetValue(i.cfg.InitialInput)
 	}
 
@@ -896,9 +856,6 @@ func (i *Interactive) Run(ctx context.Context) error {
 			i.invalidate()
 		case result := <-i.modelRefresh:
 			i.openModelPickerAfterRefresh(result.err)
-			i.invalidate()
-		case result := <-i.startupPreDone:
-			i.applyStartupPreResult(result)
 			i.invalidate()
 		case info, ok := <-updates:
 			if ok && info.Available {
@@ -3048,45 +3005,6 @@ func (i *Interactive) Submit(text string) {
 	i.startTurn(i.runCtx, text)
 }
 
-// completeStartupPre applies deferred InitialInput after entry.pre finishes.
-// When AutoSubmitInitial was set, the deferred prompt is submitted; otherwise
-// it only pre-fills the editor (CLI-supplied prompts).
-func (i *Interactive) completeStartupPre() {
-	i.mu.Lock()
-	if !i.awaitingStartupPre {
-		i.mu.Unlock()
-		return
-	}
-	i.awaitingStartupPre = false
-	deferred := i.deferredInitialInput
-	auto := i.autoSubmitDeferred
-	i.deferredInitialInput = ""
-	i.autoSubmitDeferred = false
-	onDone := i.cfg.OnStartupPreDone
-	i.mu.Unlock()
-	if onDone != nil {
-		onDone()
-	}
-	i.startupPreDone <- startupPreResult{deferred: deferred, autoSubmit: auto}
-	i.invalidate()
-}
-
-// applyStartupPreResult runs on the TUI event loop so the editor remains
-// single-threaded. Input entered while resources were reloading wins over the
-// deferred prefill rather than being overwritten.
-func (i *Interactive) applyStartupPreResult(result startupPreResult) {
-	if result.deferred == "" {
-		return
-	}
-	if result.autoSubmit {
-		i.Submit(result.deferred)
-		return
-	}
-	if i.ed.IsEmpty() {
-		i.ed.SetValue(result.deferred)
-	}
-}
-
 // ApplyChangedCWD is called by hosts after a successful /cd hook that do
 // not provide startup context metadata.
 func (i *Interactive) ApplyChangedCWD(ag *core.Agent, provider, model, cwd string) {
@@ -3924,12 +3842,10 @@ func (i *Interactive) applySettingToggle(key string, value bool) {
 			}
 		}
 		i.mu.Lock()
-		i.view.StartupAgentName = ""
 		i.view.StartupContextPaths = nil
 		i.view.StartupExtensionNames = nil
 		i.view.StartupSkillNames = nil
 		if value {
-			i.view.StartupAgentName = i.cfg.StartupAgentName
 			i.view.StartupContextPaths = append(i.view.StartupContextPaths, i.cfg.StartupContextPaths...)
 			i.view.StartupExtensionNames = append(i.view.StartupExtensionNames, i.cfg.StartupExtensionNames...)
 			i.view.StartupSkillNames = append(i.view.StartupSkillNames, i.cfg.StartupSkillNames...)
@@ -5646,7 +5562,6 @@ func (i *Interactive) startShellEscape(parent context.Context, cmd string) {
 		i.shellLive = ""
 		i.busy = false
 		i.cancelTurn = nil
-		awaitingPre := i.awaitingStartupPre
 		if failed {
 			if cancelled {
 				i.statusErr = "shell command cancelled"
@@ -5660,9 +5575,6 @@ func (i *Interactive) startShellEscape(parent context.Context, cmd string) {
 		}
 		i.mu.Unlock()
 		i.invalidate()
-		if awaitingPre {
-			i.completeStartupPre()
-		}
 	}()
 }
 
@@ -5676,14 +5588,6 @@ func (i *Interactive) startTurnWithImages(parent context.Context, prompt string,
 
 func (i *Interactive) startTurnRequest(parent context.Context, prompt string, images []provider.ImageBlock, overflowRecoveryAttempted bool) {
 	if i.agent == nil {
-		// Text startup pre cannot run without credentials; continue so
-		// deferred InitialInput (pre-fill or auto-submit) still applies.
-		i.mu.Lock()
-		awaitingPre := i.awaitingStartupPre
-		i.mu.Unlock()
-		if awaitingPre {
-			i.completeStartupPre()
-		}
 		return
 	}
 	// Pre-turn safety: if the most recent context measurement is
@@ -5825,11 +5729,10 @@ func (i *Interactive) startTurnRequest(parent context.Context, prompt string, im
 			flush()
 		}
 		i.mu.Lock()
-		awaitingPre := i.awaitingStartupPre
 		// Pop the next queued message, if any, and relaunch.
 		var next string
 		var hasNext bool
-		if !awaitingPre && len(i.queued) > 0 && ctx.Err() == nil && err == nil {
+		if len(i.queued) > 0 && ctx.Err() == nil && err == nil {
 			next, i.queued = i.queued[0], i.queued[1:]
 			hasNext = true
 		}
@@ -5849,16 +5752,12 @@ func (i *Interactive) startTurnRequest(parent context.Context, prompt string, im
 		if i.agent != nil {
 			agentQueued = i.agent.QueuedMessageCount()
 		}
-		shouldAutoCompact := !awaitingPre && !hasNext && agentQueued == 0 && err == nil && ctx.Err() == nil && i.shouldAutoCompactLocked()
+		shouldAutoCompact := !hasNext && agentQueued == 0 && err == nil && ctx.Err() == nil && i.shouldAutoCompactLocked()
 		i.mu.Unlock()
 		i.invalidate()
 		parent := i.runCtx
 		if parent == nil {
 			parent = context.Background()
-		}
-		if awaitingPre {
-			i.completeStartupPre()
-			return
 		}
 		switch {
 		case hasNext:

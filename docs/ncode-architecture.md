@@ -11,7 +11,7 @@ ncode is a **product-owned fork of Zot** with settled capability dispositions an
 |---|---|
 | Product shape | Fork Zot and implement the settled dispositions in the [capability decision register](inherited-capabilities.md) as reviewable changes. Implementation design and sequencing remain open where the register says so. |
 | Runtime | Keep and harden the provider-neutral types and tool loop in [`packages/core`](../packages/core) and [`packages/provider/provider.go`](../packages/provider/provider.go). |
-| Host | Establish one clear ncode-owned composition root while retaining sessions, tools, swarm, extensions, skills, and every headless mode. |
+| Host | Preserve one ncode-owned `Resolve` → `Resolved.NewClient` → `Resolved.NewAgent` construction spine with explicit host composers; do not force distinct lifecycle policy through one generic all-mode constructor. |
 | Interface | Fully replace the inherited interactive TUI and its UI integrations with Bubble Tea/Bubbles; retain the user-facing capabilities being rebuilt. |
 | Providers | Retain and harden every inherited provider, custom/local adapter, and authentication method. Anthropic, Codex, and local OpenAI-compatible contract work remains an early hardening priority, not a scope boundary. |
 | Authentication | Use direct PKCE OAuth and self-managed refresh for subscription access. Refresh and rotated-token persistence remain automatic. Do not delegate the agent loop to ACP or a first-party CLI subprocess. |
@@ -24,7 +24,7 @@ ncode is a **product-owned fork of Zot** with settled capability dispositions an
 
 ### Goals
 
-- Ship a dependency-light Go coding agent with one understandable composition path and one core model/tool loop.
+- Ship a dependency-light Go coding agent with one understandable construction spine, explicit host composers, and one core model/tool loop.
 - Preserve a provider-neutral conversation, tool, event, usage, and stop-reason model.
 - Retain and harden all inherited providers and authentication methods, including direct Claude/Codex subscription access and custom/local OpenAI-compatible endpoints.
 - Preserve headless modes, sessions, tools, swarm, extensions, and skills while giving them explicit ncode-owned boundaries.
@@ -105,7 +105,7 @@ The [inherited capability decision register](inherited-capabilities.md) is autho
 | Inherited interactive TUI and UI integrations | **Replace implementation** | Fully replace the inherited TUI, editor, commands, dialogs, renderers, themes, images, and clipboard integrations with Bubble Tea/Bubbles while retaining their user-facing capabilities. |
 | Headless modes and sessions under [`packages/agent`](../packages/agent) | **Retain and harden** | Keep print, stream, JSON event, RPC, session persistence/resume/branching, and related management surfaces. |
 | [`packages/agent/tools`](../packages/agent/tools) and [`packages/ignore`](../packages/ignore) | **Retain and harden** | Preserve tools, permissions, and Gitignore-aware behavior. Keep sandbox capability, but do not choose or claim a full sandbox implementation until research settles it. |
-| [`packages/agent/build.go`](../packages/agent/build.go) and host callbacks | **Reshape** | Establish one ncode composition root and explicit event/middleware contracts after current behavior is protected. This is composition work, not a second core implementation. |
+| [`packages/agent/build.go`](../packages/agent/build.go) and host callbacks | **Reshape** | Preserve the shared `Resolve` → `Resolved.NewClient` → `Resolved.NewAgent` spine, use explicit host composers, and later replace mutable callbacks with event/middleware contracts. This is composition work, not a second core implementation. |
 | [`packages/agent/swarm`](../packages/agent/swarm) | **Retain and harden** | Keep durable swarm with shared repository/CWD as the default. Optional worktree isolation remains research and may become a general agent tool. |
 | [`packages/agent/extensions`](../packages/agent/extensions) and skills | **Retain and reshape** | Preserve extensions and skills across interactive and headless modes; evolve trust, protocol, metadata, and Bubble Tea integration explicitly. |
 | Telegram bridge | **Retain as-is; defer investment** | Keep the inherited implementation and defer further product investment. |
@@ -336,11 +336,11 @@ These stages describe dependency and delivery order, not the chronology of disco
 
 The first implementation work proceeds as ordered, separately reviewable units:
 
-1. **Characterize only the composition behavior at risk.** Audit existing tests first, then add the smallest missing evidence for retained behavior that the composition-root change can plausibly break. Existing tests count; this is not an exhaustive core test campaign or a second core implementation.
-2. **Establish one ncode composition root.** Move assembly behind one explicit config → credentials → provider → core → host path while the relevant existing and newly added characterization tests stay green.
-3. **Apply ncode identity in mechanical slices.** Rename binary, module/import, state, environment, and internal-protocol identity as a clean break before replacing the interactive UI.
+1. **Characterize only composition behavior at risk — complete.** Existing tests were audited, and one production-shaped print fixture closed the missing credential/provider/prompt/tool/session wiring gap without starting an exhaustive core test campaign.
+2. **Make the shared construction spine explicit — complete for the inherited hosts.** `composeHeadlessAgent` now centralizes print, stream, JSON, and swarm-child assembly over `Resolve` and `Resolved.NewAgent`; RPC, interactive, bot, and SDK remain explicit composers because their lifecycle policies differ.
+3. **Apply ncode identity in planned slices.** The [`clean-break-ncode-identity`](../openspec/changes/clean-break-ncode-identity/) OpenSpec change defines the exact inventory, specification, design, and dependency-ordered work units before production names change.
 
-Keep characterization, composition, each identity slice, the Bubble Tea replacement, and provider hardening separate from one another. Each remains its own reviewable work unit rather than one cross-cutting change.
+Keep characterization, explicit host composition, each identity slice, the Bubble Tea replacement, and provider hardening separate. Do not introduce a generic callback/options container merely to route unlike hosts through one constructor.
 
 ### Stage 0 — Freeze and inventory the baseline
 
@@ -357,13 +357,13 @@ Keep characterization, composition, each identity slice, the Bubble Tea replacem
 
 ### Stage 1 — Characterize composition behavior at risk
 
-- [ ] Inventory existing tests across only the config → credentials → provider → core → host seams that Stage 3 will restructure.
-- [ ] Identify concrete retained behaviors the composition-root change can plausibly break and that existing tests would not detect.
-- [ ] Add the smallest focused fake-provider or headless fixture for each proven gap; do not add speculative coverage for untouched retry, cancellation, compaction, provider, extension, swarm, or session behavior.
-- [ ] Protect inherited prompt/tool attachment and session behavior only where their assembly will move and existing evidence is insufficient.
-- [ ] Keep the existing command building throughout characterization.
+- [x] Inventory existing tests across only the config → credentials → provider → core → host seams that Stage 3 restructures.
+- [x] Identify the concrete retained behavior the composition change could break and existing tests would not detect.
+- [x] Add one focused fake-provider headless fixture for the proven assembled-path gap; add no speculative retry, cancellation, compaction, provider, extension, swarm, or unrelated session coverage.
+- [x] Protect inherited credential/model, prompt/tool attachment, tool continuation, output, session persistence/resume, and credential non-leakage through the real print path.
+- [x] Keep the existing command building throughout characterization.
 
-**Exit:** Existing tests plus the smallest justified additions protect the composition behavior Stage 3 will move, with every new fixture tied to a documented evidence gap and the inherited command still buildable.
+**Exit status:** Complete. Existing tests plus `TestRunPrintModeComposesResolvedProviderCoreToolsAndSession` protect the composition behavior that moved, and the inherited command remains buildable.
 
 ### Stage 2 — Evaluate inherited capabilities
 
@@ -374,18 +374,19 @@ Keep characterization, composition, each identity slice, the Bubble Tea replacem
 
 **Exit status:** Complete. The decision register settles every inherited capability disposition, including retained swarm/extensions boundaries and the isolated removal of Zotfiles. Implementation evidence is added capability by capability as work proceeds.
 
-### Stage 3 — Establish the ncode composition root
+### Stage 3 — Establish the ncode construction spine and host composers
 
-- [ ] Create one ncode composition path for config → credentials → provider → core → host without creating another core loop.
-- [ ] Preserve all retained tools and required permission/filesystem helpers.
-- [ ] Keep the inherited command building throughout this transition.
-- [ ] Keep the Stage 1 characterization and headless E2E fixtures green through the new composition path.
+- [x] Preserve `Resolve` → `Resolved.NewClient` → `Resolved.NewAgent` as the one shared construction spine without creating another core loop.
+- [x] Add `composeHeadlessAgent` for the identical print/stream/JSON/swarm-child assembly while leaving session and output policy with each host.
+- [x] Keep RPC, interactive, bot, and SDK as explicit composers rather than hiding their distinct extension, auth, rebuild, daemon, or persistence policy in a generic options container.
+- [x] Preserve all retained tools and required permission/filesystem helpers and keep the inherited command building.
+- [x] Keep the Stage 1 characterization and full race-enabled suite green through the composition refactor.
 
-**Exit:** The focused characterization fixtures pass through one ncode composition root, retained tools and helpers remain available, and the inherited command remains buildable.
+**Exit status:** Complete. The shared construction spine and explicit host composers are established; focused characterization and `make test` remain green.
 
 ### Stage 4 — Apply ncode identity as a clean break
 
-- [ ] Execute the build-preserving rename sequence as mechanical, separately reviewable slices after the composition root and before the Bubble Tea replacement.
+- [ ] Execute the build-preserving sequence from [`clean-break-ncode-identity`](../openspec/changes/clean-break-ncode-identity/) as separately reviewable functional and mechanical slices before the Bubble Tea replacement.
 - [ ] Rename the binary, Go module and imports, state directory, environment variables, and internal-protocol identifiers from Zot identity to lowercase `ncode` identity.
 - [ ] Provide no compatibility alias, compatibility import, migration, or fallback for the old Zot identity on any renamed surface.
 - [ ] Keep the command building after each slice and add tests proving Zot binary/module/import/state/environment/internal-protocol identity is not accepted or reused.
@@ -440,7 +441,7 @@ Execute the ordered Anthropic roadmap above, one contract at a time.
 
 ### Product and architecture
 
-- [ ] ncode has one composition root, the inherited prompt as its explicit initial baseline, and one core model/tool loop.
+- [x] ncode has one shared construction spine, explicit host composers, the inherited prompt as its explicit initial baseline, and one core model/tool loop.
 - [ ] Bubble Tea/Bubbles fully replaces the inherited interactive TUI and UI integrations while preserving the retained user capabilities.
 - [ ] Print, stream, JSON event, RPC, and management/headless interfaces remain available and independently tested; one-shot persistence is configurable, and RPC supports explicit ephemeral/persistent operation plus its optional token gate.
 - [ ] Core and UI code contain no provider OAuth headers, endpoints, or account bootstrap logic.

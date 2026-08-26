@@ -1,0 +1,27 @@
+project: ncode
+artifact_store: both
+strict_tdd: true
+phase_rules:
+  explore: inspect existing architecture and constraints before proposing changes
+  proposal: define scope, clean-break constraints, and reviewable outcomes
+  spec: express behavior as testable requirements
+  design: preserve provider-neutral boundaries and existing repository conventions
+  tasks: keep work incremental, buildable, and separately reviewable
+testing:
+  runner: make test
+  command: go test -race ./...
+  required: true
+  live_tests: opt-in only
+  credentials_in_fixtures: forbidden
+conventions:
+  product_spelling: ncode
+  repository_root: .
+  architecture_records:
+    - docs/ncode-architecture.md
+    - docs/inherited-capabilities.md
+identity_policy:
+  goal: clean-break rename of Zot identity surfaces to lowercase ncode
+  compatibility_aliases: forbidden
+  state_import: forbidden
+  migration: forbidden
+  fallback: forbidden
