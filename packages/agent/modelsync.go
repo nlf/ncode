@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // ModelCachePath returns the on-disk location of the merged model cache.

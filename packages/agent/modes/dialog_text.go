@@ -3,7 +3,7 @@ package modes
 import (
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 const dialogTextIndent = "    "

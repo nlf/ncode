@@ -1,6 +1,6 @@
 package modes
 
-import "github.com/patriceckhart/zot/packages/tui"
+import "github.com/nlf/ncode/packages/tui"
 
 // welcomeBanner returns the intro text shown at the top of an empty chat.
 // It uses the `zot` label color (same as the assistant) for consistency.

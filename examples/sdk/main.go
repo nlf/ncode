@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/agent/sdk"
+	"github.com/nlf/ncode/packages/agent/sdk"
 )
 
 func main() {

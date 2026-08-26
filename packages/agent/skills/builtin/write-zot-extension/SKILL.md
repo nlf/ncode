@@ -197,7 +197,7 @@ package main
 
 import (
     "encoding/json"
-    "github.com/patriceckhart/zot/packages/agent/ext"
+    "github.com/nlf/ncode/packages/agent/ext"
 )
 
 func main() {

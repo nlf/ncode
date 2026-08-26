@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/ext"
-	"github.com/patriceckhart/zot/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/agent/ext"
+	"github.com/nlf/ncode/packages/agent/extproto"
 )
 
 type bridgeExtensionHarness struct {

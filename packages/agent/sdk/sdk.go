@@ -29,9 +29,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/patriceckhart/zot/packages/agent"
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/agent"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // Config configures a Runtime. All fields are optional; sensible

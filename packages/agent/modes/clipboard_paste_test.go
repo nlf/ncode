@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 func TestResolveClipboardTextConvertsClipboardKeyToPaste(t *testing.T) {

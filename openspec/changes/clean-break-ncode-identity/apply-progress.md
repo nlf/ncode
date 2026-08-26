@@ -1,17 +1,18 @@
 # Apply progress: clean-break-ncode-identity
 
-Updated: 2026-08-25T23:54:09Z
+Updated: 2026-08-26T16:47:59Z
 
 ## Attempt summary
 
-- **Status:** WU 1 complete; the broader change remains in progress.
-- **Assigned boundary:** WU 1 — Remove Zotfiles without replacement.
-- **Delivery:** stacked PRs to `main`; current boundary is WU 1 only.
-- **Review budget:** 2,865 changed lines (165 additions + 2,700 deletions), excluding the pre-existing `docs/ncode-architecture.md` worktree edit and OpenSpec artifacts. The user-approved WU 1-only `size:exception` applies because this slice is deletion-heavy and atomic.
-- **Commits/branches/PRs:** none created, as instructed.
-- **Independent verification:** VERIFIED after correcting the final table-driven test name; focused WU1 tests, `git diff --check`, and `make test` (`go test -race ./...`) passed with no repository mutation.
-- **Review gate:** native ordinary review START was attempted after staging the new rejection test so it entered scope, but returned `review-mode-disabled` with `lineage_created:false`. No review receipt exists; WU2 and publication remain blocked pending explicit review-mode enablement and a completed review.
-- **Engram mirror:** apply progress saved as observation 121; the shared-helper discovery was saved as bugfix observation 122; tasks observation 117 was updated to 4/44.
+- **Status:** WU 1 is merged and WU 2 is complete; the broader change remains in progress, with WU 3 next and not started.
+- **Assigned boundary:** WU 2 — Move the canonical module and import graph atomically — complete; WU 3 is the next boundary.
+- **Delivery:** WU 2–WU 12 remain on the single long-lived branch `feat/clean-break-ncode-identity-02`. Preserve each WU as an independently revertible commit, push checkpoints as appropriate, create no intermediate PRs, and open one final PR to `main` linked to issue #1 with exactly `type:breaking-change`.
+- **Review budget:** WU 2 implementation scope remains 569 changed lines (281 additions + 288 deletions) across 164 files under its approved atomic `size:exception`. The user also explicitly accepts the combined final-PR size exception because they are not reviewing intermediate PRs and see no material benefit in PR overhead.
+- **Commits/branches/PRs:** WU 2 apply created no commit, push, or PR, as instructed at the time. Subsequent parent lifecycle must preserve WU 2 and each later WU as separate commits on `feat/clean-break-ncode-identity-02`; no intermediate PRs are to be created.
+- **Verification:** WU 2 root `go mod tidy`, `go list ./...`, `go test ./...`, and `make test` passed. Both nested modules passed tidy and tests through a transient untracked local-root validation overlay; tracked modules contain no `replace`. Focused verification and `make test` remain required before beginning each next WU.
+- **Review/gates:** clone-local bounded review remains disabled. Strict TDD, native SDD attempt authority, issue linkage, verification, CI, the final PR, and final merge gates remain.
+- **Delivery decision timing:** this single-feature-branch/final-PR decision was made after WU 2 apply; it changes delivery only and does not alter WU 2 evidence or implementation statistics.
+- **Opaque attempt token consumed:** `sha256:52e97c3da60f2abf31baffbceced281078a957b812ef62639342c8779f4f9613`.
 
 ## Structured status consumed/produced
 
@@ -19,9 +20,6 @@ Updated: 2026-08-25T23:54:09Z
 schemaName: spec-driven
 changeName: clean-break-ncode-identity
 artifactStore: both
-planningHome:
-  root: /Users/nlf/Projects/nlf/ncode/openspec
-  changesDir: /Users/nlf/Projects/nlf/ncode/openspec/changes
 changeRoot: /Users/nlf/Projects/nlf/ncode/openspec/changes/clean-break-ncode-identity
 artifacts:
   proposal: done
@@ -29,32 +27,46 @@ artifacts:
   design: done
   tasks: done
   applyProgress: done
-  verifyReport: missing
-  syncReport: missing
 taskProgress:
   total: 44
-  complete: 4
-  remaining: 40
+  complete: 7
+  remaining: 37
 deferredParentActions:
   total: 2
-  complete: 1
-  remaining: 1
-taskArtifactErrors: []
+  complete: 2
+  remaining: 0
 applyState: ready
-dependencies:
-  apply: ready
-  verify: blocked
-  sync: blocked
-  archive: blocked
 actionContext:
   mode: repo-local
   workspaceRoot: /Users/nlf/Projects/nlf/ncode
   allowedEditRoots:
     - /Users/nlf/Projects/nlf/ncode
-  warnings:
-    - Parent omitted a structured actionContext; repo-local scope was reconstructed from the explicit authoritative repository path.
-    - The gentle-ai binary was unavailable, so status used the installed manual fallback contract.
-nextRecommended: parent-lifecycle
+  warnings: []
+workUnit: WU2-complete
+nextWorkUnit: WU3
+nextWorkUnitStarted: false
+maxChangedLines: 1000
+sizeException: approved-for-WU2-only
+deliveryStrategy: single-long-lived-feature-branch
+deliveryBranch: feat/clean-break-ncode-identity-02
+workUnitCommits: independently-revertible
+checkpointPushes: allowed-as-appropriate
+intermediatePRs: disabled
+finalPRBase: main
+finalPRIssue: 1
+finalPRLabels:
+  - type:breaking-change
+finalPRSizeException: explicitly-approved
+cloneLocalBoundedReview: disabled
+retainedGates:
+  - strict-tdd
+  - native-sdd-attempt-authority
+  - issue-linkage
+  - focused-verification
+  - make-test-before-next-work-unit
+  - ci
+  - final-merge
+nextRecommended: parent-lifecycle-then-WU3
 isNonAuthoritative: false
 ```
 
@@ -180,11 +192,222 @@ Two initial REFACTOR search attempts used ineffective `rg` glob exclusions and s
 - **No identity work:** module/import/product/state/protocol names were not renamed. Only Zotfile-specific `ZOT_AGENT_CONSENT` disappeared with the deleted capability.
 - **Provenance:** `docs/inherited-capabilities.md`, `docs/ncode-architecture.md`, and OpenSpec planning artifacts retain factual Zot history.
 
+## WU 2 apply evidence
+
+### Completed implementation tasks and persisted checkboxes
+
+- [x] Characterization/RED evidence — persisted in `tasks.md`.
+- [x] Atomic canonical module/import graph move — persisted in `tasks.md`.
+- [x] Post-move verification — persisted in `tasks.md`.
+
+### TDD Cycle Evidence
+
+| Task | Test layer | Safety Net / RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|
+| WU2 characterize | Approval/structural | Baseline `go list ./...` listed 26 packages and `go test ./...` passed. No RED was manufactured. The dry tidy check honestly found pre-existing WU1 residue: one unused direct requirement and two checksum lines. | N/A | Inventory found 274 old-path lines across 160 Go/module/example files and identified every required anchor; `docs.go` was inspected but contained no canonical import. | Generated tidy edits were restored before production edits began. |
+| WU2 atomic move | Structural/module integration | Characterization above is the approved RED-phase evidence for this mechanical move. | Replaced 281 occurrences across 163 active files; root `go list ./...` passed for 26 packages under the new module. | Root plus both nested module declarations were checked; all tracked `replace` directives and active old imports were absent. | No behavior refactor was appropriate; only exact path substitution and nested module cleanup were performed. |
+| WU2 post evidence | Package/integration/race | Root and nested module state characterized above. | Root tidy, `go list ./...`, and `go test ./...` passed. | Both nested modules passed tidy and `go test ./...` against the current root through a transient untracked validation overlay. | `make test` (`go test -race ./...`) and `git diff --check` passed; construction spine and cycle seam declarations remain. |
+
+### Exact commands and outcomes
+
+- `go list ./...` before move — PASS; 26 packages under the old module identity.
+- `go test ./...` before move — PASS.
+- `go mod tidy` dry-diff characterization — NON-NO-OP: would remove unused `github.com/klauspost/compress v1.19.0` and its two checksums; changes were restored before the move.
+- Old-path inventory over `*.go`, root `go.mod`, and `examples` — 274 lines across 160 files.
+- Root `go mod tidy` after move — PASS; accepted only the characterized unused dependency/checksum cleanup.
+- Plain nested `go mod tidy` — expected bootstrap failure because every currently published `github.com/nlf/ncode` tag still declares the inherited module path.
+- `(cd examples/extensions/<module> && go mod edit -replace=github.com/nlf/ncode=../../.. && go mod tidy && go test ./... && go mod edit -dropreplace=github.com/nlf/ncode)` for `mcp-bridge` and `todo` — PASS; the overlay was transient and no tracked `replace` remains.
+- `go list ./...` after move — PASS; 26 packages under `github.com/nlf/ncode`.
+- `go test ./...` after move — PASS.
+- `make test` — PASS (`go test -race ./...`).
+- Active Go/module/example old-path search — zero matches.
+- Absolute legacy nested path search restricted to module files — zero matches.
+- `git grep -nI -E '^replace[[:space:]]' -- go.mod '**/go.mod'` — zero matches.
+- `git diff --check` — PASS.
+- Spine/seam inspection — `Resolve`, `Resolved.NewClient`, `Resolved.NewAgent`, `composeHeadlessAgent`, and `ExtensionToolSource` remain declared at their existing boundaries.
+
+### Changed-line and path scope
+
+- **Implementation:** 164 files, 281 additions, 288 deletions, **569 changed lines**.
+- **SDD artifacts:** `tasks.md`, `apply-progress.md`, and `identity-inventory.md`; `tasks.md` includes the parent’s pre-existing one-line lifecycle update.
+- **Total worktree changed lines:** 534 additions + 335 deletions = 869 changed lines.
+- **Implementation paths (exact):**
+
+- `README.md`
+- `cmd/zot/main.go`
+- `docs/extensions.md`
+- `examples/extensions/approve/main.go`
+- `examples/extensions/guard/main.go`
+- `examples/extensions/hello/main.go`
+- `examples/extensions/mcp-bridge/bridge.go`
+- `examples/extensions/mcp-bridge/deferred_tools_test.go`
+- `examples/extensions/mcp-bridge/go.mod`
+- `examples/extensions/mcp-bridge/main.go`
+- `examples/extensions/secret/main.go`
+- `examples/extensions/todo/go.mod`
+- `examples/extensions/todo/main.go`
+- `examples/extensions/weather/main.go`
+- `examples/rpc/go/main.go`
+- `examples/sdk/main.go`
+- `go.mod`
+- `go.sum`
+- `packages/agent/args.go`
+- `packages/agent/botcmd.go`
+- `packages/agent/botspec.go`
+- `packages/agent/build.go`
+- `packages/agent/build_test.go`
+- `packages/agent/cli.go`
+- `packages/agent/cli_headless_test.go`
+- `packages/agent/cli_session_test.go`
+- `packages/agent/config.go`
+- `packages/agent/config_command_test.go`
+- `packages/agent/config_gcp_test.go`
+- `packages/agent/confirmation_events.go`
+- `packages/agent/confirmation_events_test.go`
+- `packages/agent/ext/ext.go`
+- `packages/agent/ext/ext_test.go`
+- `packages/agent/extcmd.go`
+- `packages/agent/extcmd_test.go`
+- `packages/agent/extensions/events.go`
+- `packages/agent/extensions/manager.go`
+- `packages/agent/extensions/manager_test.go`
+- `packages/agent/extensions/tool.go`
+- `packages/agent/headless.go`
+- `packages/agent/instruction_context.go`
+- `packages/agent/instruction_context_test.go`
+- `packages/agent/modelsync.go`
+- `packages/agent/modelsync_test.go`
+- `packages/agent/modes/auto_swarm_test.go`
+- `packages/agent/modes/bot/adapter.go`
+- `packages/agent/modes/bot/runner.go`
+- `packages/agent/modes/bot/runner_test.go`
+- `packages/agent/modes/bot/status.go`
+- `packages/agent/modes/btw_dialog.go`
+- `packages/agent/modes/btw_dialog_test.go`
+- `packages/agent/modes/changelog_dialog.go`
+- `packages/agent/modes/changelog_dialog_test.go`
+- `packages/agent/modes/clipboard_images.go`
+- `packages/agent/modes/clipboard_images_test.go`
+- `packages/agent/modes/clipboard_inputs_test.go`
+- `packages/agent/modes/clipboard_paste.go`
+- `packages/agent/modes/clipboard_paste_test.go`
+- `packages/agent/modes/compact_queue_test.go`
+- `packages/agent/modes/confirm_dialog.go`
+- `packages/agent/modes/confirm_dialog_test.go`
+- `packages/agent/modes/dialog_frame.go`
+- `packages/agent/modes/dialog_text.go`
+- `packages/agent/modes/dialog_text_test.go`
+- `packages/agent/modes/ext_notes_test.go`
+- `packages/agent/modes/ext_panel_dialog.go`
+- `packages/agent/modes/file_suggest.go`
+- `packages/agent/modes/help.go`
+- `packages/agent/modes/help_test.go`
+- `packages/agent/modes/input_history_test.go`
+- `packages/agent/modes/interactive.go`
+- `packages/agent/modes/interactive_model_test.go`
+- `packages/agent/modes/interactive_terminal_test.go`
+- `packages/agent/modes/jail_setting_test.go`
+- `packages/agent/modes/json.go`
+- `packages/agent/modes/jump_dialog.go`
+- `packages/agent/modes/llama_dialog.go`
+- `packages/agent/modes/llama_dialog_test.go`
+- `packages/agent/modes/login_dialog.go`
+- `packages/agent/modes/login_dialog_test.go`
+- `packages/agent/modes/logout_dialog.go`
+- `packages/agent/modes/logout_dialog_test.go`
+- `packages/agent/modes/model_dialog.go`
+- `packages/agent/modes/print.go`
+- `packages/agent/modes/print_test.go`
+- `packages/agent/modes/reload_ext.go`
+- `packages/agent/modes/reload_ext_test.go`
+- `packages/agent/modes/rescue_dialog.go`
+- `packages/agent/modes/session_agent_root_test.go`
+- `packages/agent/modes/session_dialog.go`
+- `packages/agent/modes/session_ops_dialog.go`
+- `packages/agent/modes/session_tree_dialog.go`
+- `packages/agent/modes/settings_dialog.go`
+- `packages/agent/modes/shell_escape_test.go`
+- `packages/agent/modes/skill_command.go`
+- `packages/agent/modes/skill_command_test.go`
+- `packages/agent/modes/skills_dialog.go`
+- `packages/agent/modes/slash_suggest.go`
+- `packages/agent/modes/slash_suggest_test.go`
+- `packages/agent/modes/spinner.go`
+- `packages/agent/modes/stream.go`
+- `packages/agent/modes/stream_test.go`
+- `packages/agent/modes/swarm_dialog.go`
+- `packages/agent/modes/swarm_dialog_test.go`
+- `packages/agent/modes/swarm_slash.go`
+- `packages/agent/modes/swarm_slash_test.go`
+- `packages/agent/modes/telegram/adapter.go`
+- `packages/agent/modes/telegram/api_test.go`
+- `packages/agent/modes/telegram/bridge.go`
+- `packages/agent/modes/telegram/commands.go`
+- `packages/agent/modes/telegram/daemon.go`
+- `packages/agent/modes/telegram/status.go`
+- `packages/agent/modes/telegram/status_test.go`
+- `packages/agent/modes/telegram_dialog.go`
+- `packages/agent/modes/timeline_view.go`
+- `packages/agent/modes/timeline_view_test.go`
+- `packages/agent/modes/update_banner.go`
+- `packages/agent/modes/welcome.go`
+- `packages/agent/print_stats_test.go`
+- `packages/agent/rpc.go`
+- `packages/agent/rpc_reasoning_test.go`
+- `packages/agent/sdk/reasoning_test.go`
+- `packages/agent/sdk/sdk.go`
+- `packages/agent/sdk/types.go`
+- `packages/agent/sessionscmd.go`
+- `packages/agent/sessionscmd_test.go`
+- `packages/agent/settings_store.go`
+- `packages/agent/skills/builtin/write-zot-extension/SKILL.md`
+- `packages/agent/skills/tool.go`
+- `packages/agent/swarm_agent.go`
+- `packages/agent/swarm_agent_test.go`
+- `packages/agent/tools/bash.go`
+- `packages/agent/tools/edit.go`
+- `packages/agent/tools/read.go`
+- `packages/agent/tools/swarm_spawn.go`
+- `packages/agent/tools/swarm_spawn_test.go`
+- `packages/agent/tools/telegram_send.go`
+- `packages/agent/tools/tools_test.go`
+- `packages/agent/tools/write.go`
+- `packages/agent/updatecmd.go`
+- `packages/core/agent.go`
+- `packages/core/agent_context_test.go`
+- `packages/core/agent_retry_test.go`
+- `packages/core/compact.go`
+- `packages/core/core_test.go`
+- `packages/core/cost.go`
+- `packages/core/events.go`
+- `packages/core/intercept_test.go`
+- `packages/core/queue_test.go`
+- `packages/core/session.go`
+- `packages/core/session_deferred_tools_test.go`
+- `packages/core/session_portable.go`
+- `packages/core/session_portable_test.go`
+- `packages/core/session_prune_test.go`
+- `packages/core/session_repair_test.go`
+- `packages/core/tool.go`
+- `packages/provider/auth/callback.go`
+- `packages/provider/google_vertex.go`
+- `packages/tui/statusbar_test.go`
+- `packages/tui/view.go`
+- `packages/tui/view_compact_mode_test.go`
+- `packages/tui/view_compact_user_test.go`
+- `packages/tui/view_flat_tools_test.go`
+- `packages/tui/view_tool_overlay_test.go`
+
+### Deviations and discoveries
+
+- Published `github.com/nlf/ncode` tags through v0.3.50 still declare the inherited module path, so a plain nested tidy cannot resolve the new path before this canonical move is published. Transient validation overlays proved both nested examples against the current root without persisting a `replace`.
+- The root tidy characterization was not a no-op because WU1 left `klauspost/compress` unused after Zotfile deletion. The cleanup was restored during characterization and then accepted by the required post-move tidy.
+- Canonical-path references in active README install/repository lines, SDK docs, extension docs, and the extension-authoring skill were updated with WU2 so no active old canonical path remained; broader product prose remains assigned to later WUs.
+- `tasks.md` was admitted early to the exact provenance manifest because its checked characterization/audit commands must retain legacy literals; the final WU12 line review remains unchecked and deferred.
+- No live providers or credentials were used.
+
 ## Remaining implementation tasks (exact unchecked lines)
 
-- [ ] Characterize before the mechanical move without manufacturing RED: capture `go list ./...`, `go test ./...`, `go mod tidy` dry diff, and `git grep -nI -F 'github.com/patriceckhart/zot' -- '*.go' go.mod examples`; identify all repository-owned import sites, `go.mod`, `docs.go`, `cmd/zot`, `examples/sdk`, `examples/extensions/mcp-bridge/go.mod`, and `examples/extensions/todo/go.mod`. <!-- sdd-owner: implementation -->
-- [ ] Atomically change `go.mod` and every repository-owned Go/nested-example import/module declaration from `github.com/patriceckhart/zot` to `github.com/nlf/ncode`; remove the absolute `/Users/pat/Developer/zot` nested replace and do not add a `replace`, compatibility package, or import alias. <!-- sdd-owner: implementation -->
-- [ ] Run post-move evidence: `go mod tidy`, tidy each nested example module, `go list ./...`, `go test ./...`, `make test`, and `git grep -nI -F 'github.com/patriceckhart/zot' -- .` restricted to the inventory’s exact reviewed provenance files; prove no active import or `replace` remains. <!-- sdd-owner: implementation -->
 - [ ] Characterize the mechanical symbol surface without manufacturing RED by recording focused `go test` results for `./packages/agent/... ./packages/core/... ./packages/provider/... ./packages/tui/...` and locating `ZotHome`, `ZotDocsDir`, `ZotVersion`, `zotHome`, `zotVersion`, and package/product comments in `packages/agent/{config,build,cli,extensions,ext,extproto,skills,swarm,sdk}`, `packages/{core,provider,tui}`, and `docs.go`. <!-- sdd-owner: implementation -->
 - [ ] Rename the symbol groups to `NcodeHome`, `NcodeDocsDir`, `NcodeVersion`, and ncode local identifiers at their declarations and all callers; reword active package comments and inherited-parser comments to lowercase ncode or neutral historical wording, preserving exported API shape except the intentional product-symbol rename. <!-- sdd-owner: implementation -->
 - [ ] Run post-move evidence: focused package tests, `go vet ./...`, `make test`, and forbidden-symbol searches for `ZotHome|ZotDocsDir|ZotVersion` outside exact provenance/soon-to-be-dedicated rejection fixtures; inspect imports to preserve the `ExtensionToolSource` and SDK/agent cycle seams. <!-- sdd-owner: implementation -->
@@ -223,13 +446,13 @@ Two initial REFACTOR search attempts used ineffective `rg` glob exclusions and s
 - [ ] Run the exact final allowlist gates from `identity-inventory.md`: construct `audit_pathspecs` with each exact provenance file plus `openspec/changes/clean-break-ncode-identity/tasks.md` when admitted and only `:(exclude,glob)**/legacy_zot_*`; require zero output from `git grep -nI -i -e zot -- "${audit_pathspecs[@]}"`, old-module, `ZOTCORE_|ZOT_[A-Z0-9_]+`, `.zot(session)?`, and `zot[-_][[:alnum:]_-]+` searches, and from `git ls-files | grep -i zot | grep -vE '(^|/)legacy_zot_[^/]*$'`. <!-- sdd-owner: implementation -->
 - [ ] Run the exact workable-file and mandatory-line reviews from `identity-inventory.md`: build `/tmp/ncode-zot-provenance-files.txt`, `/tmp/ncode-zot-rejection-files.txt`, and `/tmp/ncode-zot-allowed-files.txt`; require `comm -23` against `git grep -Il -i -e zot -- .` to emit no paths; emit and review every line into `/tmp/ncode-zot-provenance-lines.txt` and `/tmp/ncode-zot-rejection-lines.txt`; then run `go mod tidy`, `go list ./...`, `go vet ./...`, `make build`, `make test`, nested example builds, installer/package checks, and the inventory reproduction commands against planning SHA `18325b75cc89c75b5f4842924cb377aa5bef5c4b`. <!-- sdd-owner: implementation -->
 
-## Deferred parent lifecycle action (exact unchecked line)
+## Deferred parent lifecycle actions
 
-- [ ] Start or reuse bounded review after each applied work-unit commit, reviewing its stated boundary, focused evidence, rollback isolation, and changed-line count before the next dependent unit proceeds. <!-- sdd-owner: parent -->
+Both parent-owned rows are checked. Clone-local bounded review remains disabled, and WU 2 apply started no review transaction. Parent still owns the independently revertible WU commits, checkpoint pushes, issue linkage, CI, one final PR from `feat/clean-break-ncode-identity-02` to `main` with exactly `type:breaking-change`, final merge, and delegation of WU 3.
 
 ## Risks and next boundary
 
-- WU 1 is intentionally above 400 lines under its narrow approved deletion-heavy exception; that approval does not apply to WU 2 or later.
-- The worktree contains a pre-existing modification to `docs/ncode-architecture.md`; parent delivery must keep ownership clear and avoid accidentally including unrelated changes.
-- The repository is on `main` with no branch or commit created. Parent owns commit/review/PR lifecycle.
-- Do not begin WU 2 until the parent completes the WU 1 lifecycle boundary and explicitly delegates the next stacked slice.
+- The user explicitly accepts the combined final-PR size exception; independently revertible WU commits plus focused verification and `make test` before the next WU remain the delivery controls.
+- Standalone nested-module tidy remains publication-bootstrapped until a released ncode version declares the new module path; transient local-root validation passed and tracked modules remain replace-free.
+- This worktree is on `feat/clean-break-ncode-identity-02`; WU 2 apply performed no commit, push, PR, merge, branch switch, review transaction, or WU 3 work.
+- WU 3 is next but has not started. Parent must first preserve WU 2 as its own revertible commit and complete the applicable checkpoint lifecycle without opening an intermediate PR.

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // StatusSnapshot is the small cross-host state bundle rendered for

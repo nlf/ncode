@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // TestSessionExportImportRoundTrip writes a few messages to a live

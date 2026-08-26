@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/patriceckhart/zot/packages/agent/ext"
+	"github.com/nlf/ncode/packages/agent/ext"
 )
 
 const (

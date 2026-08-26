@@ -10,8 +10,8 @@ import (
 
 	"github.com/sahilm/fuzzy"
 
-	"github.com/patriceckhart/zot/packages/ignore"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/ignore"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // recursiveScanLimits bound the recursive walk so the picker stays

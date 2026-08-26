@@ -1,6 +1,6 @@
 package core
 
-import "github.com/patriceckhart/zot/packages/provider"
+import "github.com/nlf/ncode/packages/provider"
 
 // CostTracker accumulates usage across turns in a session.
 //

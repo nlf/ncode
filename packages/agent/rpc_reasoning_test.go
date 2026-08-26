@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/core"
+	"github.com/nlf/ncode/packages/core"
 )
 
 func TestRPCSetReasoningMax(t *testing.T) {

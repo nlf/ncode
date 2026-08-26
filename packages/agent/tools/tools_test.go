@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 func mustJSON(t *testing.T, v any) json.RawMessage {

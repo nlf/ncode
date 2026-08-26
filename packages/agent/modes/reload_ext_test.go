@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/agent/extensions"
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/extensions"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 func TestFormatReloadStatusIncludesErrorDetails(t *testing.T) {

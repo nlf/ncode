@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/agent/extensions"
+	"github.com/nlf/ncode/packages/agent/extensions"
 )
 
 // TestExtInstallDotSource verifies that `zot ext install .` derives the

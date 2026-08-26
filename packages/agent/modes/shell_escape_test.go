@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/core"
+	"github.com/nlf/ncode/packages/core"
 )
 
 func TestShellEscapeAddsOutputToAgentContext(t *testing.T) {

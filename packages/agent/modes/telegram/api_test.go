@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/modes/bot"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/agent/modes/bot"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 type roundTripFunc func(*http.Request) (*http.Response, error)

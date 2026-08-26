@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/agent/tools"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/tools"
+	"github.com/nlf/ncode/packages/tui"
 	"golang.org/x/term"
 )
 

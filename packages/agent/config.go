@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	providerpkg "github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/provider/auth"
+	providerpkg "github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/provider/auth"
 )
 
 // QuickModelShortcut is one configured keyboard shortcut slot.

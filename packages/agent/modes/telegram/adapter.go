@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/modes/bot"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/agent/modes/bot"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // Adapter implements bot.BotAdapter for Telegram.

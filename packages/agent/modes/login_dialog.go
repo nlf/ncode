@@ -6,9 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/provider/auth"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/provider/auth"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // loginStep is the current node in the login dialog state machine.

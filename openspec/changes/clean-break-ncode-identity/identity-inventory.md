@@ -74,6 +74,7 @@ The binary `.pyc` path contributes to both filename counts but is excluded from 
 | `openspec/changes/clean-break-ncode-identity/specs/ncode-identity/spec.md` | Corrected normative specification names legacy inputs only to require rejection/non-use and names factual provenance. |
 | `openspec/changes/clean-break-ncode-identity/design.md` | Technical design records baseline mappings, removals, negative cases, and exact rollout constraints. |
 | `openspec/changes/clean-break-ncode-identity/identity-inventory.md` | This reviewed inventory necessarily records baseline literals, mappings, audit expressions, and allowed-evidence rules. |
+| `openspec/changes/clean-break-ncode-identity/tasks.md` | Approved implementation planning records old-path characterization commands, clean-break rejection constraints, and final audit expressions; it does not document active compatibility. |
 
 `LICENSE` remains byte-for-byte MIT legal attribution and currently contains no Zot literal, so it is not excluded from the final search. Any future source notice containing a Zot literal must be added as an exact reviewed manifest entry rather than admitted through a wildcard. Local `.git/refs/tags/zot-baseline` is untracked repository metadata identifying the frozen baseline; `.git/` is outside tracked-file audits and is not rewritten.
 
@@ -216,7 +217,7 @@ Standard/provider variables are **not applicable** and remain unchanged: `XDG_ST
 | Examples and manifests | rename/remove | All `examples/rpc`, `examples/sdk`, `examples/extensions`, `examples/themes`; nested modules/Makefiles; manifest descriptions. Use ncode imports/process/env/project paths/handshakes; neutral manifest fields remain. |
 | Current production/test source matches | rename/remove | Every current `git grep -nI -i zot -- packages cmd docs.go` result. Existing behavior test helpers/data are renamed; Zotfile tests are deleted; production source has no provenance exception. |
 | New rejection fixtures | not applicable | Keep legacy literals only in dedicated test/fixture files whose basename begins `legacy_zot_`, such as `legacy_zot_home_test.go` or `legacy_zot_hello.json`. Each file must state and assert rejection/non-use and never document support; a merely Zot-named test function inside a generic file is insufficient. |
-| Exact frozen architecture/planning records | retain as provenance | Only the ten exact tracked files in the reviewed provenance manifest may retain contextual Zot lines. No `openspec/**` or `docs/superpowers/**` wildcard is allowed. |
+| Exact frozen architecture/planning records | retain as provenance | Only the eleven exact tracked files in the reviewed provenance manifest may retain contextual Zot lines. No `openspec/**` or `docs/superpowers/**` wildcard is allowed. |
 | MIT attribution | retain as provenance but not a search exception | `LICENSE` remains byte-for-byte unless legal review requires an additive notice; it currently has no Zot literal and is included in the zero-active scan. |
 
 ## Zotfile capability removal boundary
@@ -233,7 +234,7 @@ The following shared capabilities are protected and therefore **not applicable t
 
 ## Final reviewed manifest and audit
 
-At final audit, every remaining case-insensitive Zot line must be either (a) contextual evidence in one of the ten exact provenance files or (b) rejection/non-use evidence in a dedicated `legacy_zot_*` test/fixture. The audit is intentionally two-part: the active-surface commands must emit no lines, then reviewers inspect **every** allowed line emitted by the provenance and rejection-evidence commands.
+At final audit, every remaining case-insensitive Zot line must be either (a) contextual evidence in one of the eleven exact provenance files or (b) rejection/non-use evidence in a dedicated `legacy_zot_*` test/fixture. The audit is intentionally two-part: the active-surface commands must emit no lines, then reviewers inspect **every** allowed line emitted by the provenance and rejection-evidence commands.
 
 ```sh
 # Exact exclusions; do not replace any entry with openspec/**, docs/superpowers/**,
@@ -250,6 +251,7 @@ audit_pathspecs=(
   ':(exclude)openspec/changes/clean-break-ncode-identity/specs/ncode-identity/spec.md'
   ':(exclude)openspec/changes/clean-break-ncode-identity/design.md'
   ':(exclude)openspec/changes/clean-break-ncode-identity/identity-inventory.md'
+  ':(exclude)openspec/changes/clean-break-ncode-identity/tasks.md'
   ':(exclude,glob)**/legacy_zot_*'
 )
 
@@ -274,6 +276,7 @@ printf '%s\n' \
   openspec/changes/clean-break-ncode-identity/specs/ncode-identity/spec.md \
   openspec/changes/clean-break-ncode-identity/design.md \
   openspec/changes/clean-break-ncode-identity/identity-inventory.md \
+  openspec/changes/clean-break-ncode-identity/tasks.md \
   > /tmp/ncode-zot-provenance-files.txt
 git ls-files -- ':(glob)**/legacy_zot_*' > /tmp/ncode-zot-rejection-files.txt
 cat /tmp/ncode-zot-provenance-files.txt /tmp/ncode-zot-rejection-files.txt \
@@ -294,6 +297,7 @@ git grep -nI -i -e zot -- \
   openspec/changes/clean-break-ncode-identity/specs/ncode-identity/spec.md \
   openspec/changes/clean-break-ncode-identity/design.md \
   openspec/changes/clean-break-ncode-identity/identity-inventory.md \
+  openspec/changes/clean-break-ncode-identity/tasks.md \
   | tee /tmp/ncode-zot-provenance-lines.txt
 git grep -nI -i -e zot -- ':(glob)**/legacy_zot_*' \
   | tee /tmp/ncode-zot-rejection-lines.txt

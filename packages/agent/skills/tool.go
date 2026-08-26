@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // Tool implements core.Tool, exposing a `skill` tool the LLM can call

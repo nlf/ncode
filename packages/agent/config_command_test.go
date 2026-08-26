@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/provider/auth"
+	"github.com/nlf/ncode/packages/provider/auth"
 )
 
 func TestAgentAPIKeyCommandHelperProcess(t *testing.T) {

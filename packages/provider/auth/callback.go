@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/provider/auth/assets"
+	"github.com/nlf/ncode/packages/provider/auth/assets"
 )
 
 // CallbackResult is what an OAuth callback server returns once the

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/modes/bot"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/agent/modes/bot"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // Host is the small interface the Bridge calls back into the TUI

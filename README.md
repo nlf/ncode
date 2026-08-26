@@ -52,7 +52,7 @@ Drops `zot.exe` into `$HOME\bin` and adds it to the user PATH if missing. Open a
 ### go install
 
 ```bash
-go install github.com/patriceckhart/zot/cmd/zot@latest
+go install github.com/nlf/ncode/cmd/zot@latest
 ```
 
 The installed binary reports the tagged module version and supports `zot update`.
@@ -60,7 +60,7 @@ The installed binary reports the tagged module version and supports `zot update`
 ### From source
 
 ```bash
-git clone https://github.com/patriceckhart/zot
+git clone https://github.com/nlf/ncode
 cd zot
 make build        # produces ./bin/zot
 make install      # into $GOPATH/bin
@@ -68,7 +68,7 @@ make install      # into $GOPATH/bin
 
 ### Prebuilt binaries
 
-Every release on the [releases page](https://github.com/patriceckhart/zot/releases) ships archives for Linux, macOS, and Windows on amd64 and arm64 (except windows/arm64), plus a `checksums.txt` file. Download, verify, `chmod +x`, and drop on your `$PATH`.
+Every release on the [releases page](https://github.com/nlf/ncode/releases) ships archives for Linux, macOS, and Windows on amd64 and arm64 (except windows/arm64), plus a `checksums.txt` file. Download, verify, `chmod +x`, and drop on your `$PATH`.
 
 ## Authenticate
 
@@ -261,7 +261,7 @@ When the sandbox is on (see `/jail`), all four tools refuse paths outside the se
 
 Two ways to drive zot from another program:
 
-- **Go in-process**: import `github.com/patriceckhart/zot/packages/agent/sdk`. One `Runtime` per project; `Prompt(ctx, text, images)` returns a channel of `Event`. Small example in `examples/sdk/`.
+- **Go in-process**: import `github.com/nlf/ncode/packages/agent/sdk`. One `Runtime` per project; `Prompt(ctx, text, images)` returns a channel of `Event`. Small example in `examples/sdk/`.
 - **Any language, out-of-process**: spawn `zot rpc` as a subprocess and exchange newline-delimited JSON over its stdin/stdout. Wire format and event schema in [docs/rpc.md](docs/rpc.md). Reference clients live under `examples/rpc/`.
 
 Both interfaces share the same event schema, so transcripts captured by one can be replayed through the other.
@@ -1049,7 +1049,7 @@ packages/agent/ext/                   public Go SDK for writing extensions (pack
 ```
 
 Downstream consumers can depend on individual packages:
-`go get github.com/patriceckhart/zot/packages/core` pulls only `core` and its transitive deps (today: `provider`), no agent or TUI code.
+`go get github.com/nlf/ncode/packages/core` pulls only `core` and its transitive deps (today: `provider`), no agent or TUI code.
 
 ## License
 

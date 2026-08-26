@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/agent/skills"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/skills"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // skillsDialog lists every discovered skill and lets the user view

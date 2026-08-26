@@ -3,7 +3,7 @@ package modes
 import (
 	"fmt"
 
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // UpdateInfo mirrors agent.UpdateInfo without the import cycle. The

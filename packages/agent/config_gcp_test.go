@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	providerauth "github.com/patriceckhart/zot/packages/provider/auth"
+	providerauth "github.com/nlf/ncode/packages/provider/auth"
 )
 
 func isolateGoogleVertexADC(t *testing.T) string {

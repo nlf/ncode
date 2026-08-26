@@ -8,11 +8,11 @@ import (
 	"runtime"
 	"strings"
 
-	zotdocs "github.com/patriceckhart/zot"
-	"github.com/patriceckhart/zot/packages/agent/skills"
-	"github.com/patriceckhart/zot/packages/agent/tools"
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	zotdocs "github.com/nlf/ncode"
+	"github.com/nlf/ncode/packages/agent/skills"
+	"github.com/nlf/ncode/packages/agent/tools"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // ContextFile is an instruction file loaded into the system prompt.

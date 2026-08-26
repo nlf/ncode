@@ -3,9 +3,9 @@ package agent
 import (
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/agent/modes"
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/agent/modes"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 func TestLiveInteractiveAgentUsesReplacementAgentForSessionResume(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/swarm"
+	"github.com/nlf/ncode/packages/agent/swarm"
 )
 
 // newInteractiveForSwarmTest builds the minimal Interactive scaffolding

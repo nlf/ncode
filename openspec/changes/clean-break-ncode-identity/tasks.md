@@ -8,15 +8,15 @@ Implementation targets the pre-rename planning SHA `18325b75cc89c75b5f4842924cb3
 |-------|-------|
 | Estimated changed lines | 4,550–7,450 total; estimates by work unit below |
 | 400-line budget risk | High |
-| Chained PRs recommended | Yes |
-| Approved split | Stacked-to-main delivery in dependency order: WU 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12; subdivide a WU only where each slice remains buildable and independently deliverable |
-| Delivery strategy | ask-on-risk — resolved by user approval |
-| Chain strategy | stacked-to-main |
+| Chained PRs recommended | No; the user explicitly accepted the combined final-PR size exception |
+| Approved split | WU 1 is merged; preserve WU 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 as independently revertible commits on `feat/clean-break-ncode-identity-02` |
+| Delivery strategy | One long-lived feature branch with checkpoint pushes as appropriate, no intermediate PRs, and one final PR to `main` |
+| Final PR | Link issue #1 and apply exactly `type:breaking-change` |
 
-Decision needed before apply: No for chain strategy. The user approved a narrow WU 1 `size:exception` for the deletion-heavy Zotfile removal; every later atomic or deletion-heavy slice still requires separate approval if it cannot satisfy 400 changed lines without an artificial/non-buildable split.
-Chained PRs recommended: Yes — approved
-Chain strategy: stacked-to-main
-400-line budget risk: High
+Decision needed before apply: No. After WU 2 apply, the user chose single-feature-branch delivery and explicitly accepted the combined final-PR size exception because they are not reviewing intermediate PRs and see no material benefit in PR overhead. Complete focused verification and `make test` for each independently revertible WU commit before beginning the next WU.
+Chained PRs recommended: No — superseded by the approved final-PR delivery
+Branch strategy: `feat/clean-break-ncode-identity-02` through WU 12
+400-line budget risk: High — accepted for the combined final PR
 
 | WU | Reviewable work unit | Estimated changed lines | Over 400? |
 |---:|---|---:|---|
@@ -37,20 +37,21 @@ Chain strategy: stacked-to-main
 
 | Field | Value |
 |---|---|
-| Chain | `clean-break-ncode-identity` |
-| Strategy | Stacked PRs to `main` |
-| Tracker PR | Not needed |
-| Order | WU 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 |
-| Current boundary | WU 1 — remove Zotfiles without replacement |
-| Review budget | 400 additions + deletions per PR; exceptions require explicit approval |
-| Verification | Focused unit checks plus `make test`; each successor is rebased/retargeted after its predecessor lands so its diff contains only the current slice |
-| Rollback | Revert one landed work-unit PR without reverting unrelated successors; after release, use an ncode-only corrective release |
+| Change | `clean-break-ncode-identity` |
+| Strategy | WU 2–WU 12 remain on `feat/clean-break-ncode-identity-02`; checkpoint pushes are allowed, but no intermediate PRs |
+| Final PR | One PR from `feat/clean-break-ncode-identity-02` to `main`, linked to issue #1 with exactly `type:breaking-change` |
+| Order | WU 1 merged → WU 2 complete → WU 3 → WU 4 → WU 5 → WU 6 → WU 7 → WU 8 → WU 9 → WU 10 → WU 11 → WU 12 |
+| Current boundary | WU 2 is complete; WU 3 is next and has not started |
+| Review budget | The user explicitly accepts the combined final-PR size exception; no intermediate PR review budget applies |
+| Verification | Preserve each WU as an independently revertible commit; run focused verification and `make test` before beginning the next WU |
+| Gates | Clone-local bounded review remains disabled; strict TDD, native SDD attempt authority, issue linkage, verification, CI, and final merge gates remain |
+| Rollback | Revert one work-unit commit without reverting unrelated work units; after release, use an ncode-only corrective release |
 
 ```text
-main
- └── 📍 WU 1: remove Zotfiles
-      └── WU 2: module/import graph
-           └── WU 3 … WU 12
+main: WU 1 merged
+ └── feat/clean-break-ncode-identity-02
+      ├── WU 2 complete
+      └── 📍 WU 3 next → WU 4 … WU 12 → one final PR to main
 ```
 
 ## Constraints and common evidence
@@ -71,11 +72,11 @@ main
 
 ## WU 2 — Move the canonical module and import graph atomically
 
-**Boundary:** Start after WU 1 with all imports at the old canonical path; finish with one buildable `github.com/nlf/ncode` graph and no compatibility import/replace. **Commit:** `refactor(module): move canonical imports to ncode`. **Verification/rollback:** atomic graph move; revert the entire commit, never a subset.
+**Boundary:** Start after WU 1 with all imports at the old canonical path; finish with one buildable `github.com/nlf/ncode` graph and no compatibility import/replace. **Commit:** `refactor(module): move canonical imports to ncode`. **Verification/rollback:** atomic graph move; revert the entire commit, never a subset. **Review budget:** user-approved WU 2-only implementation `size:exception` because the build-preserving module/import graph move is atomic and cannot be split honestly below 400 changed lines; the separate combined final-PR size exception covers delivery of WU 2–WU 12 on the long-lived feature branch.
 
-- [ ] Characterize before the mechanical move without manufacturing RED: capture `go list ./...`, `go test ./...`, `go mod tidy` dry diff, and `git grep -nI -F 'github.com/patriceckhart/zot' -- '*.go' go.mod examples`; identify all repository-owned import sites, `go.mod`, `docs.go`, `cmd/zot`, `examples/sdk`, `examples/extensions/mcp-bridge/go.mod`, and `examples/extensions/todo/go.mod`. <!-- sdd-owner: implementation -->
-- [ ] Atomically change `go.mod` and every repository-owned Go/nested-example import/module declaration from `github.com/patriceckhart/zot` to `github.com/nlf/ncode`; remove the absolute `/Users/pat/Developer/zot` nested replace and do not add a `replace`, compatibility package, or import alias. <!-- sdd-owner: implementation -->
-- [ ] Run post-move evidence: `go mod tidy`, tidy each nested example module, `go list ./...`, `go test ./...`, `make test`, and `git grep -nI -F 'github.com/patriceckhart/zot' -- .` restricted to the inventory’s exact reviewed provenance files; prove no active import or `replace` remains. <!-- sdd-owner: implementation -->
+- [x] Characterize before the mechanical move without manufacturing RED: capture `go list ./...`, `go test ./...`, `go mod tidy` dry diff, and `git grep -nI -F 'github.com/patriceckhart/zot' -- '*.go' go.mod examples`; identify all repository-owned import sites, `go.mod`, `docs.go`, `cmd/zot`, `examples/sdk`, `examples/extensions/mcp-bridge/go.mod`, and `examples/extensions/todo/go.mod`. <!-- sdd-owner: implementation -->
+- [x] Atomically change `go.mod` and every repository-owned Go/nested-example import/module declaration from `github.com/patriceckhart/zot` to `github.com/nlf/ncode`; remove the absolute `/Users/pat/Developer/zot` nested replace and do not add a `replace`, compatibility package, or import alias. <!-- sdd-owner: implementation -->
+- [x] Run post-move evidence: `go mod tidy`, tidy each nested example module, `go list ./...`, `go test ./...`, `make test`, and `git grep -nI -F 'github.com/patriceckhart/zot' -- .` restricted to the inventory’s exact reviewed provenance files; prove no active import or `replace` remains. <!-- sdd-owner: implementation -->
 
 ## WU 3 — Rename Go product symbols and package comments
 
@@ -215,5 +216,5 @@ git grep -nI -i -e zot -- ':(glob)**/legacy_zot_*' \
 
 ## Parent delivery and review gates
 
-- [x] Record the user's approved stacked-to-main chained delivery strategy; keep individual PRs within 400 changed lines where a buildable, independently deliverable split exists, and request a narrow `size:exception` before any atomic or deletion-heavy slice that cannot meet the budget honestly. <!-- sdd-owner: parent -->
-- [ ] Start or reuse bounded review after each applied work-unit commit, reviewing its stated boundary, focused evidence, rollback isolation, and changed-line count before the next dependent unit proceeds. <!-- sdd-owner: parent -->
+- [x] Record the user's approved single-feature-branch delivery strategy: WU 1 is merged; keep WU 2–WU 12 as independently revertible commits on `feat/clean-break-ncode-identity-02`, push checkpoints as appropriate without intermediate PRs, and open one final PR to `main` linked to issue #1 with exactly `type:breaking-change`; the user accepts the combined final-PR size exception. <!-- sdd-owner: parent -->
+- [x] Bounded review was explicitly disabled for this clone by the user after a committed-only controller defect; continue each work unit under strict TDD and native SDD attempt authority through focused verification and `make test`, retaining issue linkage, CI, final PR, and merge gates without starting review transactions unless the user re-enables them. <!-- sdd-owner: parent -->

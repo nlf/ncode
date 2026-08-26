@@ -3,8 +3,8 @@ package sdk
 import (
 	"encoding/json"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // Event is the unit emitted by Runtime.Prompt's channel. Type

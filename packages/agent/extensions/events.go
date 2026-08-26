@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/agent/extproto"
 )
 
 // EmitEvent fires a one-way lifecycle event to every extension that

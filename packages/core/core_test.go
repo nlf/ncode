@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 func TestSessionRoundTrip(t *testing.T) {

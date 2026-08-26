@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // RunJSON runs the agent to completion, writing one JSON object per

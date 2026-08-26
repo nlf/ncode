@@ -9,7 +9,7 @@
 //
 //	package main
 //
-//	import "github.com/patriceckhart/zot/packages/agent/ext"
+//	import "github.com/nlf/ncode/packages/agent/ext"
 //
 //	func main() {
 //	    ext := ext.New("hello", "1.0.0")
@@ -40,7 +40,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/patriceckhart/zot/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/agent/extproto"
 )
 
 func base64Encode(b []byte) string { return base64.StdEncoding.EncodeToString(b) }

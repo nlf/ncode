@@ -110,7 +110,7 @@ func runUpdateCheck(version string) error {
 // runUpdate is the meat of `zot update`.
 func runUpdate(version string) error {
 	if version == "" || version == "dev" || version == "0.0.0" {
-		return errors.New("dev build (version 0.0.0): `zot update` is disabled. Build a release tag or download from https://github.com/patriceckhart/zot/releases")
+		return errors.New("dev build (version 0.0.0): `zot update` is disabled. Build a release tag or download from https://github.com/nlf/ncode/releases")
 	}
 	current := versionOnly(version)
 

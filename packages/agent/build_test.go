@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/agent/tools"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/agent/tools"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 func TestReadAgentsContextLoadsGlobalAndAncestors(t *testing.T) {

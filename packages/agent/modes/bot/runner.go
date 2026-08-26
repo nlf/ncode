@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // stderr is a tiny hook so tests can redirect bot logging.

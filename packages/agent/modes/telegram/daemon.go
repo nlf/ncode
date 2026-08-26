@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/modes/bot"
+	"github.com/nlf/ncode/packages/agent/modes/bot"
 )
 
 // PIDPath returns the location of the bot's pid file.

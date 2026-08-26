@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/mattn/go-runewidth"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // helpKeyRows is the list of keybindings shown by /help.
