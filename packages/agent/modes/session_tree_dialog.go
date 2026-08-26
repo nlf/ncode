@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // sessionTreeDialog renders a compact outline of the current session family.
@@ -301,7 +301,7 @@ func sessionTreeRoleLabel(role provider.Role) string {
 	case provider.RoleUser:
 		return "you"
 	case provider.RoleAssistant:
-		return "zot"
+		return "ncode"
 	case provider.RoleTool:
 		return "tool"
 	default:
@@ -345,7 +345,7 @@ func colorSessionTreeLine(th tui.Theme, line string) string {
 	switch {
 	case strings.HasPrefix(plain, "you:"):
 		return th.FG256(th.FG, line)
-	case strings.HasPrefix(plain, "zot:"):
+	case strings.HasPrefix(plain, "ncode:"):
 		return th.FG256(th.Muted, line)
 	case strings.HasPrefix(plain, "tool:"):
 		return th.FG256(th.ToolOut, line)

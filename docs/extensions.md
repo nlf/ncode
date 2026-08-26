@@ -1,6 +1,6 @@
-# zot extensions
+# ncode extensions
 
-zot can be extended with custom slash commands by running an external
+ncode can be extended with custom slash commands by running an external
 program as a subprocess and exchanging newline-delimited JSON over
 its stdin/stdout. Extensions can be written in **any language** that
 can read and write JSON lines from stdio — Go, TypeScript, Python,
@@ -12,7 +12,7 @@ Four phases shipped so far:
 - **Phase 2**: tools the LLM can call.
 - **Phase 3**: lifecycle event subscriptions + tool-call interception
   for guardrail extensions.
-- **Phase 4**: interactive extension-owned panels rendered inside zot.
+- **Phase 4**: interactive extension-owned panels rendered inside ncode.
 - **Theme-only extensions**: ship `theme.json` without launching a
   subprocess. See [themes.md](themes.md).
 
@@ -24,7 +24,7 @@ no SDK required:
 
 ```python
 #!/usr/bin/env python3
-# $ZOT_HOME/extensions/hello-py/hello.py
+# $NCODE_HOME/extensions/hello-py/hello.py
 import json, sys
 
 def emit(obj):
@@ -36,6 +36,9 @@ emit({"type":"hello","name":"hello-py","version":"1.0.0","capabilities":["comman
 for line in sys.stdin:
     msg = json.loads(line)
     if msg["type"] == "hello_ack":
+        if (msg.get("product") != "ncode" or msg.get("protocol_version") != 2
+                or not msg.get("ncode_version")):
+            raise SystemExit("ncode extension protocol v2 acknowledgement required")
         emit({"type":"register_command","name":"hellopy","description":"say hi (python)"})
         emit({"type":"ready"})
     elif msg["type"] == "command_invoked":
@@ -59,47 +62,47 @@ Drop it in a directory with this `extension.json`:
 ```
 
 `exec` is required for protocol extensions. If an extension only ships
-`theme.json` or `themes/theme.json`, no `exec` is required and zot does
+`theme.json` or `themes/theme.json`, no `exec` is required and ncode does
 not spawn a subprocess.
 
 `chmod +x hello.py`, install:
 
 ```bash
-zot ext install ./hello-py
+ncode ext install ./hello-py
 ```
 
-Restart `zot`, type `/hellopy`, the agent greets you. Done.
+Restart `ncode`, type `/hellopy`, the agent greets you. Done.
 
 ## Built-in extensions
 
-**zot ships with no extensions installed by default.** A fresh `zot install` (or `go install`) gives you a clean agent. Extensions are entirely opt-in: you install (or `--ext` for one run) only the ones you want.
+**ncode ships with no extensions installed by default.** A fresh `ncode install` (or `go install`) gives you a clean agent. Extensions are entirely opt-in: you install (or `--ext` for one run) only the ones you want.
 
 The `examples/extensions/` directory in the repo is reference code, not a default install set. To use any of those:
 
 ```bash
 # go-based examples need a build first
-cd path/to/zot/examples/extensions/hello && go build -o hello .
+cd path/to/ncode/examples/extensions/hello && go build -o hello .
 
-# install (copies to $ZOT_HOME/extensions/hello/)
-zot ext install path/to/zot/examples/extensions/hello
+# install (copies to $NCODE_HOME/extensions/hello/)
+ncode ext install path/to/ncode/examples/extensions/hello
 
-# or load straight from the repo for one zot session
-zot --ext path/to/zot/examples/extensions/hello
+# or load straight from the repo for one ncode session
+ncode --ext path/to/ncode/examples/extensions/hello
 ```
 
 Nothing is auto-installed and nothing reaches out to the network without your explicit action.
 
 ## Layout & discovery
 
-zot scans two directories on startup, in this order:
+ncode scans two directories on startup, in this order:
 
-1. **Project-local**: `./.zot/extensions/<name>/extension.json`
-2. **Global**: `$ZOT_HOME/extensions/<name>/extension.json`
+1. **Project-local**: `./.ncode/extensions/<name>/extension.json`
+2. **Global**: `$NCODE_HOME/extensions/<name>/extension.json`
 
 A project-local extension with the same name wins over a global one.
-When `XDG_STATE_HOME` is set on any platform, `$ZOT_HOME` defaults to
-`$XDG_STATE_HOME/zot`. Otherwise it defaults to `~/Library/Application Support/zot/`
-on macOS, `~/.local/state/zot` on Linux, or `%LOCALAPPDATA%\zot` on Windows.
+When `XDG_STATE_HOME` is set on any platform, `$NCODE_HOME` defaults to
+`$XDG_STATE_HOME/ncode`. Otherwise it defaults to `~/Library/Application Support/ncode/`
+on macOS, `~/.local/state/ncode` on Linux, or `%LOCALAPPDATA%\ncode` on Windows.
 
 Because each extension owns its own directory, the recommended place
 for extension state is inside that directory itself (for example
@@ -108,7 +111,7 @@ extension). The host also passes this path back in `hello_ack` as
 `extension_dir` / `data_dir` so runtime code does not need to guess it.
 
 Each extension owns its own subdirectory. The `extension.json`
-manifest tells zot how to launch it:
+manifest tells ncode how to launch it:
 
 ```json
 {
@@ -124,22 +127,22 @@ manifest tells zot how to launch it:
 
 | field | meaning |
 |---|---|
-| `name` | required. how zot identifies the extension; must match what's sent in the `hello` frame. |
-| `version` | optional. shown in `zot ext list`. |
+| `name` | required. how ncode identifies the extension; must match what's sent in the `hello` frame. |
+| `version` | optional. shown in `ncode ext list`. |
 | `exec` | required. path to the executable (relative to the manifest). |
 | `args` | optional. extra argv passed to `exec`. |
 | `language` | optional. informational only (`go`, `python`, `typescript`, ...). |
-| `description` | optional. shown in `zot ext list`. |
+| `description` | optional. shown in `ncode ext list`. |
 | `enabled` | optional, defaults to `true`. set to `false` to disable without removing. |
 
 ## Lifecycle
 
-1. **Discovery**: zot reads every `extension.json` in the search dirs.
+1. **Discovery**: ncode reads every `extension.json` in the search dirs.
 2. **Spawn**: enabled extensions are launched as subprocesses. stderr
-   redirects to `$ZOT_HOME/logs/ext-<name>.log` (one file per
+   redirects to `$NCODE_HOME/logs/ext-<name>.log` (one file per
    extension, append-mode).
 3. **Hello handshake**: the extension's first stdout frame must be
-   `hello`; zot replies with `hello_ack` containing the protocol
+   `hello`; ncode replies with `hello_ack` containing the protocol
    version, the active provider/model/cwd, and the extension's own
    data directory so it can persist files beside its manifest.
 4. **Registration**: after receiving `hello_ack`, the extension sends
@@ -147,18 +150,18 @@ manifest tells zot how to launch it:
    sends `ready`. First-come-first-served: a name already taken by a
    built-in or by a previously-loaded extension is silently shadowed
    (logged in the extension's own log file).
-5. **Runtime**: after `ready`, zot dispatches `command_invoked` frames
+5. **Runtime**: after `ready`, ncode dispatches `command_invoked` frames
    when the user runs a registered command; the extension responds
    with `command_response`. Extensions can also push `notify` frames
    during runtime. Panel-capable extensions may open an interactive
    panel, receive key events, and push redraws while the panel is
    focused.
-6. **Shutdown**: when zot exits, it sends `shutdown` and waits up to
+6. **Shutdown**: when ncode exits, it sends `shutdown` and waits up to
    2s for the extension to send `shutdown_ack`. Holdouts are
    SIGTERM'd, then SIGKILL'd.
 
-A crashing extension does not bring down zot. The slash command it
-owned simply stops working until the extension is fixed and zot is
+A crashing extension does not bring down ncode. The slash command it
+owned simply stops working until the extension is fixed and ncode is
 restarted.
 
 ## Wire format
@@ -185,7 +188,7 @@ other stdout frame before `hello`.
  "description":"current weather for a city"}
 ```
 
-Command names are matched case-insensitively. zot sends `command_invoked.name` using the canonical spelling registered here. Registrations that differ only by case conflict, and the first registration remains active.
+Command names are matched case-insensitively. ncode sends `command_invoked.name` using the canonical spelling registered here. Registrations that differ only by case conflict, and the first registration remains active.
 
 #### `register_tool`
 
@@ -214,11 +217,11 @@ Set `"deferred": true` to register a tool without advertising its definition ini
  "activate_tools":["weather"]}
 ```
 
-On Kimi K3's OpenAI-compatible routes, zot places newly activated schemas at the tool-result position using Kimi's native deferred-tool format. Other models receive the complete active tool list on the next request. Unknown names are ignored. The Go extension SDK exposes `DeferredTool` and `ToolResult.ActivateTools` for the same protocol.
+On Kimi K3's OpenAI-compatible routes, ncode places newly activated schemas at the tool-result position using Kimi's native deferred-tool format. Other models receive the complete active tool list on the next request. Unknown names are ignored. The Go extension SDK exposes `DeferredTool` and `ToolResult.ActivateTools` for the same protocol.
 
 #### `ready`
 
-Sentinel telling zot "all initial registrations are flushed". Send it
+Sentinel telling ncode "all initial registrations are flushed". Send it
 right after your last `register_*` frame so the host can build the
 agent's tool registry without racing the registration window.
 
@@ -253,7 +256,7 @@ which it wants to intercept. Send once after `hello`, before `ready`.
 Recognised event names: `session_start`, `turn_start`, `turn_end`,
 `tool_call`, `tool_confirmation_requested`, `assistant_message`.
 
-`tool_confirmation_requested` fires only when zot is about to wait for
+`tool_confirmation_requested` fires only when ncode is about to wait for
 interactive approval. Calls running in yolo mode, calls covered by a
 remembered approval, and calls blocked before confirmation do not emit it.
 The event includes `tool_id`, `tool_name`, and the short `tool_preview`
@@ -316,9 +319,9 @@ subsequent interceptor sees the previous one's output.
 - `"display"` — appends `display` to the chat as a one-shot styled
   note. No model call, nothing written to the transcript.
 - `"open_panel"` — opens an extension-owned interactive panel inside
-  zot. The panel content lives in `open_panel`.
+  ncode. The panel content lives in `open_panel`.
 - `"noop"` — the extension handled it itself (e.g. it pushed
-  `notify` frames or kicked off background work). zot doesn't change
+  `notify` frames or kicked off background work). ncode doesn't change
   the UI in response.
 
 Example:
@@ -333,13 +336,13 @@ Example:
  }}
 ```
 
-If `error` is non-empty, zot renders it as a red status line
+If `error` is non-empty, ncode renders it as a red status line
 regardless of `action`.
 
 #### `submit` (one-way, any time)
 
 Submits text as a user prompt in the interactive host. If the agent is
-idle, zot starts a turn immediately. If a turn is already running, zot
+idle, ncode starts a turn immediately. If a turn is already running, ncode
 queues the prompt behind it using the same queue path as typed input.
 Empty or whitespace-only text is ignored.
 
@@ -403,15 +406,19 @@ Sent in response to `shutdown`. Extension should exit promptly after.
 #### `hello_ack`
 
 ```json
-{"type":"hello_ack","protocol_version":1,
- "zot_version":"0.0.7","provider":"anthropic",
- "model":"claude-opus-4-7","cwd":"/Users/pat/Developer/zot",
- "extension_dir":"/Users/pat/Developer/zot/.zot/extensions/todos",
- "data_dir":"/Users/pat/Developer/zot/.zot/extensions/todos"}
+{"type":"hello_ack","product":"ncode","protocol_version":2,
+ "ncode_version":"0.0.7","provider":"anthropic",
+ "model":"claude-opus-4-7","cwd":"/Users/pat/Developer/ncode",
+ "extension_dir":"/Users/pat/Developer/ncode/.ncode/extensions/todos",
+ "data_dir":"/Users/pat/Developer/ncode/.ncode/extensions/todos"}
 ```
 
-Sent immediately after `hello`. Wait for this frame before sending
-registrations if they depend on host metadata. The extension can use
+Sent immediately after `hello`. This is the signaled extension protocol v2
+acknowledgement: clients must require `product:"ncode"`,
+`protocol_version:2`, and a non-empty `ncode_version`; acknowledgements
+missing those exact fields are rejected, and no dual acknowledgement is
+accepted. Wait for this frame before sending registrations if they depend on
+host metadata. The extension can use
 these fields to decide which commands to register (e.g. only register
 a Python tool on macOS, only register a model-specific shortcut for
 opus, etc.). `cwd` is the user's project directory; the extension
@@ -461,7 +468,7 @@ Lifecycle notification for events the extension subscribed to via
 
 #### `event_intercept`
 
-Sent when zot wants to give the extension a chance to block, modify,
+Sent when ncode wants to give the extension a chance to block, modify,
 or annotate a lifecycle event before it happens. Reply with
 `event_intercept_response` within 5s; missing the deadline is
 treated as "allow".
@@ -497,7 +504,7 @@ name (`up`, `down`, `left`, `right`, `enter`, `esc`, `tab`, `pageup`,
 
 #### `panel_close`
 
-Sent when the user closes the focused panel from zot (for example with
+Sent when the user closes the focused panel from ncode (for example with
 Esc or Ctrl+C). The extension should treat this as the panel lifetime
 ending and stop sending `panel_render` updates for that `panel_id`.
 
@@ -507,45 +514,45 @@ ending and stop sending `panel_render` updates for that `panel_id`.
 
 #### `shutdown`
 
-Sent during graceful zot exit (or `/reload-ext` once that lands).
+Sent during graceful ncode exit (or `/reload-ext` once that lands).
 Reply with `shutdown_ack` and then exit.
 
 ## Managing extensions from the CLI
 
 ```
-zot ext list                    list installed extensions and their state
-zot ext doctor                  diagnose load, registration, and conflict issues
-zot ext install <path|git-url>  copy / clone into $ZOT_HOME/extensions/
-zot ext remove <name>           delete an extension directory
-zot ext enable <name>           re-enable a disabled extension
-zot ext disable <name>          disable without removing
-zot ext logs <name> [-f]        cat / tail the extension's stderr
+ncode ext list                    list installed extensions and their state
+ncode ext doctor                  diagnose load, registration, and conflict issues
+ncode ext install <path|git-url>  copy / clone into $NCODE_HOME/extensions/
+ncode ext remove <name>           delete an extension directory
+ncode ext enable <name>           re-enable a disabled extension
+ncode ext disable <name>          disable without removing
+ncode ext logs <name> [-f]        cat / tail the extension's stderr
 ```
 
-`zot ext doctor` runs the same discovery path as zot startup, but reports
+`ncode ext doctor` runs the same discovery path as ncode startup, but reports
 what happened instead of changing the fail-soft runtime behavior. It shows
 manifest errors, disabled or shadowed extensions, subprocess load errors,
 ready/auto-ready status, registered commands/tools, registration conflicts,
 warnings, and each extension's stderr log path.
 
-`zot ext install <path>` does a recursive copy; `<git-url>` does a
+`ncode ext install <path>` does a recursive copy; `<git-url>` does a
 shallow clone. Both validate that the destination contains an
 `extension.json` and roll back if not.
 
 ## Loading an extension for one run
 
 For iteration on a working copy, skip the install + reload cycle
-and load straight from disk for one zot session:
+and load straight from disk for one ncode session:
 
 ```
-zot --ext ./my-extension        # short form: -e ./my-extension
-zot --ext ./a -e ./b            # repeatable
+ncode --ext ./my-extension        # short form: -e ./my-extension
+ncode --ext ./a -e ./b            # repeatable
 ```
 
 `--ext` paths take precedence over installed extensions of the same
 name, so you can shadow an installed copy with a work-in-progress
 version without uninstalling first. Nothing is copied or persisted;
-the extension dies with zot like any other subprocess.
+the extension dies with ncode like any other subprocess.
 
 ## SDKs
 
@@ -559,7 +566,7 @@ package main
 
 import (
     "encoding/json"
-    "github.com/patriceckhart/zot/packages/agent/ext"
+    "github.com/nlf/ncode/packages/agent/ext"
 )
 
 func main() {
@@ -593,10 +600,10 @@ func main() {
 ```
 
 Build with `go build -o hello .`, drop the binary + an `extension.json`
-into `$ZOT_HOME/extensions/hello/`.
+into `$NCODE_HOME/extensions/hello/`.
 
 `OnHello` is optional. Use it when configuration or registrations need
-host metadata such as `HostInfo.CWD`, `Provider`, `Model`, `ZotVersion`,
+host metadata such as `HostInfo.CWD`, `Provider`, `Model`, `NcodeVersion`,
 `ExtensionDir`, or `DataDir`. The SDK sends `hello`, waits for
 `hello_ack`, runs `OnHello`, announces registrations, then sends `ready`.
 
@@ -647,7 +654,7 @@ See:
 Type `/reload-ext` in the TUI to tear down every running extension
 subprocess, re-read the manifests from disk, and respawn the set.
 The agent's tool registry is rebuilt automatically, so freshly-
-registered extension tools become callable without restarting zot.
+registered extension tools become callable without restarting ncode.
 Useful while developing an extension: edit, save, `/reload-ext`,
 done. Explicit `--ext` paths are remembered and reloaded alongside
 discovered extensions. The temporary reload status reports each load
@@ -672,9 +679,9 @@ Extensions run with **the user's full filesystem and network
 permissions**. Treat installing an extension the same as installing
 any other binary on your machine.
 
-`zot ext install <git-url>` clones from any URL you give it. There's
+`ncode ext install <git-url>` clones from any URL you give it. There's
 no sandbox in v1; if you need isolation, install only extensions you
-trust or run zot under your platform's sandboxing tool (`bwrap` /
+trust or run ncode under your platform's sandboxing tool (`bwrap` /
 `sandbox-exec` / AppContainer).
 
 ## Roadmap
@@ -683,7 +690,7 @@ Phase 1 (shipped):
 - [x] subprocess lifecycle + hello handshake
 - [x] `register_command` + `command_invoked`
 - [x] `notify` + `clear_notes`
-- [x] `zot ext` CLI
+- [x] `ncode ext` CLI
 
 Phase 2 (shipped):
 - [x] `register_tool` + `tool_call` + `tool_result`
@@ -700,7 +707,7 @@ Phase 4 (shipped):
       addition to `tool_call`)
 - [x] modify tool args mid-flight via `modified_args`
 - [x] rewrite user-visible assistant text via `replace_text`
-- [x] `/reload-ext` slash command (hot-reload without restarting zot)
+- [x] `/reload-ext` slash command (hot-reload without restarting ncode)
 
 Future (no firm timeline):
 - [ ] TypeScript and Python SDK packages (currently the wire format

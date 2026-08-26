@@ -14,11 +14,12 @@ import (
 	"time"
 )
 
-// execRunner spawns `zot --swarm-agent <inbox> --session <path>` in
-// the host's working directory (Agent.Dir, which is always the parent
-// zot's RepoRoot) and consumes its JSONL event stream on stdout.
+// execRunner spawns the current ncode executable with
+// `--swarm-agent <inbox> --session <path>` in the host's working directory
+// (Agent.Dir, which is always the parent ncode's RepoRoot) and consumes its
+// JSONL event stream on stdout.
 //
-// Why a long-lived daemon and not `zot --print`: the supervisor and
+// Why a long-lived daemon and not `ncode --print`: the supervisor and
 // the user expect agents to keep accepting follow-up prompts. A
 // one-shot subprocess can't do that; this design gives each swarm
 // agent a persistent session file plus an inbox socket the parent
@@ -31,13 +32,13 @@ import (
 //
 // The on-disk log is the durable record. The Sink updates are an
 // in-memory mirror so the dashboard doesn't have to tail the file
-// for the parent's own agents. /swarm open in a separate zot would
+// for the parent's own agents. /swarm open in a separate ncode would
 // read the log directly.
 type execRunner struct {
 	agent             *Agent
 	resolveCredential func(context.Context, string) (Credential, error)
 
-	// Command overrides the default `zot --swarm-agent ...`
+	// Command overrides the default current-executable swarm invocation.
 	// invocation. Tests set this to a fake binary (or `go run`
 	// against a tiny stub program) so the supervisor logic can be
 	// tested without a real child. Production code leaves it nil.
@@ -48,7 +49,7 @@ type execRunner struct {
 	// with <swarm-root>/agents/<id>/session.json. Tests that
 	// hand-build an Agent without going through Spawn must set
 	// one of the two; the runner refuses to invent a fallback
-	// because the only plausible one (<Dir>/.zot/session.json)
+	// because the only plausible one (<Dir>/.ncode/session.json)
 	// would litter the user's repo — every agent's Dir points
 	// at it directly.
 	SessionPath string
@@ -58,7 +59,7 @@ type execRunner struct {
 // so future per-agent overrides (e.g. tools, reasoning) can be added
 // without churning the signature. The fields map 1:1 onto child CLI
 // flags; empty values omit the flag entirely and let the child
-// resolve a default the same way a normal `zot` invocation does.
+// resolve a default the same way a normal `ncode` invocation does.
 type swarmAgentArgsOpts struct {
 	Exe         string
 	Dir         string
@@ -131,7 +132,7 @@ func (r *execRunner) Run(ctx context.Context, sink Sink) error {
 	//      <swarm-root>/agents/<id>/session.json so the per-
 	//      agent state is entirely outside the working tree.
 	//      Crucial because Agent.Dir points at the user's repo;
-	//      any .zot/ scratch directory under Dir would litter
+	//      any .ncode/ scratch directory under Dir would litter
 	//      their source tree.
 	//
 	// There is no third fallback. If neither path is set we
@@ -173,8 +174,8 @@ func (r *execRunner) Run(ctx context.Context, sink Sink) error {
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 	cmd.Dir = r.agent.Dir
 	cmd.Env = append(os.Environ(),
-		"ZOT_SWARM_AGENT_ID="+r.agent.ID,
-		"ZOT_SWARM_EVENT_LOG="+logPath,
+		"NCODE_SWARM_AGENT_ID="+r.agent.ID,
+		"NCODE_SWARM_EVENT_LOG="+logPath,
 	)
 	if r.resolveCredential != nil {
 		credential, resolveErr := r.resolveCredential(ctx, r.agent.Provider)
@@ -187,7 +188,7 @@ func (r *execRunner) Run(ctx context.Context, sink Sink) error {
 				return fmt.Errorf("encode swarm credential: %w", encodeErr)
 			}
 			cmd.Stdin = bytes.NewReader(encoded)
-			cmd.Env = append(cmd.Env, "ZOT_SWARM_CREDENTIAL_STDIN=1")
+			cmd.Env = append(cmd.Env, "NCODE_SWARM_CREDENTIAL_STDIN=1")
 		}
 	}
 

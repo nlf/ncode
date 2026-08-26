@@ -92,10 +92,10 @@ func TestRemovedPortableAgentConsentFlagsAreRejected(t *testing.T) {
 }
 
 func TestRunHelpHelperProcess(t *testing.T) {
-	if os.Getenv("ZOT_HELP_HELPER") == "" {
+	if os.Getenv("NCODE_HELP_HELPER") == "" {
 		return
 	}
-	if err := runWithArgsRaw(strings.Fields(os.Getenv("ZOT_HELP_HELPER")), "test"); err != nil {
+	if err := runWithArgsRaw(strings.Fields(os.Getenv("NCODE_HELP_HELPER")), "test"); err != nil {
 		os.Exit(1)
 	}
 	os.Exit(0)
@@ -105,7 +105,7 @@ func TestHelpOutputStreams(t *testing.T) {
 	run := func(args string) (stdout, stderr string, err error) {
 		t.Helper()
 		cmd := exec.Command(os.Args[0], "-test.run=^TestRunHelpHelperProcess$")
-		cmd.Env = append(os.Environ(), "ZOT_HELP_HELPER="+args)
+		cmd.Env = append(os.Environ(), "NCODE_HELP_HELPER="+args)
 		var outBuf, errBuf bytes.Buffer
 		cmd.Stdout = &outBuf
 		cmd.Stderr = &errBuf
@@ -117,8 +117,15 @@ func TestHelpOutputStreams(t *testing.T) {
 	if err != nil {
 		t.Fatalf("--help returned %v; stderr:\n%s", err, stderr)
 	}
-	if !strings.Contains(stdout, "zot. yet another coding agent harness.") {
-		t.Fatalf("stdout does not contain help text:\n%s", stdout)
+	for _, want := range []string{
+		"ncode. yet another coding agent harness.",
+		"  ncode\n    interactive tui",
+		"  ncode rpc\n    json-rpc loop on stdin/stdout",
+		"  ncode update\n    download and install the latest release",
+	} {
+		if !strings.Contains(stdout, want) {
+			t.Fatalf("stdout does not contain ncode help text %q:\n%s", want, stdout)
+		}
 	}
 	if stderr != "" {
 		t.Fatalf("stderr = %q, want empty", stderr)
@@ -134,7 +141,23 @@ func TestHelpOutputStreams(t *testing.T) {
 	if stdout != "" {
 		t.Fatalf("stdout = %q, want empty for an argument error", stdout)
 	}
-	if !strings.Contains(stderr, "zot. yet another coding agent harness.") {
-		t.Fatalf("stderr does not contain help text:\n%s", stderr)
+	for _, want := range []string{
+		"ncode. yet another coding agent harness.",
+		"  ncode\n    interactive tui",
+	} {
+		if !strings.Contains(stderr, want) {
+			t.Fatalf("stderr does not contain ncode help text %q:\n%s", want, stderr)
+		}
+	}
+
+	stdout, stderr, err = run("--version")
+	if err != nil {
+		t.Fatalf("--version returned %v; stderr:\n%s", err, stderr)
+	}
+	if stdout != "ncode test\n" {
+		t.Fatalf("--version stdout = %q, want %q", stdout, "ncode test\\n")
+	}
+	if stderr != "" {
+		t.Fatalf("--version stderr = %q, want empty", stderr)
 	}
 }

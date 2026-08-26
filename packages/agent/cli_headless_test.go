@@ -13,8 +13,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 type headlessOpenAIRequest struct {
@@ -65,11 +65,11 @@ func TestRunPrintModeComposesResolvedProviderCoreToolsAndSession(t *testing.T) {
 		toolCallID      = "call-read-fixture"
 	)
 
-	zotHome := t.TempDir()
+	ncodeHome := t.TempDir()
 	cwd := t.TempDir()
-	t.Setenv("ZOT_HOME", zotHome)
+	t.Setenv("NCODE_HOME", ncodeHome)
 	t.Setenv("OPENAI_API_KEY", "")
-	if err := os.WriteFile(filepath.Join(zotHome, "SYSTEM.md"), []byte(inheritedSystem), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(ncodeHome, "SYSTEM.md"), []byte(inheritedSystem), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(cwd, fixtureName), []byte(fixtureContent+"\n"), 0o644); err != nil {

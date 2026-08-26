@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	providerpkg "github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/provider/auth"
+	providerpkg "github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/provider/auth"
 )
 
 // QuickModelShortcut is one configured keyboard shortcut slot.
@@ -33,13 +33,13 @@ type Config struct {
 	// ToolRender selects how tool calls are drawn in interactive mode.
 	// "box" (default, or empty) wraps each call in a bordered panel;
 	// "flat" drops the frame for a quiet header line plus indented,
-	// frameless output. The ZOT_FLAT_TOOLS env var overrides this when
+	// frameless output. The NCODE_FLAT_TOOLS env var overrides this when
 	// set ("1"/"true" forces flat, "0"/"false" forces box).
 	ToolRender string `json:"tool_render,omitempty"`
 
 	// CompactInput renders sent user messages as a single quiet gutter
 	// line instead of a padded, background-tinted bubble. nil/false
-	// (the default) keeps the bubble. The ZOT_COMPACT_INPUT env var
+	// (the default) keeps the bubble. The NCODE_COMPACT_INPUT env var
 	// overrides this when set.
 	CompactInput *bool `json:"compact_input,omitempty"`
 
@@ -47,7 +47,7 @@ type Config struct {
 	// Ctrl+1..9. Cmd+1..9 may also work on terminals that forward Super.
 	QuickModelShortcuts []QuickModelShortcut `json:"quick_model_shortcuts,omitempty"`
 
-	// InlineImagesEnabled controls whether zot draws screenshots inline
+	// InlineImagesEnabled controls whether ncode draws screenshots inline
 	// when the terminal supports an image protocol. nil/missing means
 	// auto (enabled when supported); false disables; true forces the
 	// detected protocol when available.
@@ -120,43 +120,47 @@ type Config struct {
 	LastChangelogShown string `json:"last_changelog_shown,omitempty"`
 }
 
-// ZotHome returns $ZOT_HOME or the OS-default data dir.
+// NcodeHome returns $NCODE_HOME or the OS-default state directory.
 //
-// All zot state (config.json, auth.json, sessions/, logs/) lives under
-// this directory.
-func ZotHome() string {
-	if v := os.Getenv("ZOT_HOME"); v != "" {
+// All ncode state (config.json, auth.json, sessions/, logs/) lives under
+// this directory. Resolving the path does not create it.
+func NcodeHome() string {
+	return resolveNcodeHome(runtime.GOOS, os.Getenv, os.UserHomeDir)
+}
+
+func resolveNcodeHome(goos string, getenv func(string) string, userHome func() (string, error)) string {
+	if v := getenv("NCODE_HOME"); v != "" {
 		return v
 	}
-	if v := os.Getenv("XDG_STATE_HOME"); v != "" {
-		return filepath.Join(v, "zot")
+	if v := getenv("XDG_STATE_HOME"); v != "" {
+		return filepath.Join(v, "ncode")
 	}
-	switch runtime.GOOS {
-	case "darwin":
-		if home, err := os.UserHomeDir(); err == nil {
-			return filepath.Join(home, "Library", "Application Support", "zot")
-		}
-	case "windows":
-		if v := os.Getenv("LOCALAPPDATA"); v != "" {
-			return filepath.Join(v, "zot")
+	if goos == "darwin" {
+		if home, err := userHome(); err == nil && home != "" {
+			return filepath.Join(home, "Library", "Application Support", "ncode")
 		}
 	}
-	if home, err := os.UserHomeDir(); err == nil {
-		return filepath.Join(home, ".local", "state", "zot")
+	if goos == "windows" {
+		if v := getenv("LOCALAPPDATA"); v != "" {
+			return filepath.Join(v, "ncode")
+		}
 	}
-	return ".zot"
+	if home, err := userHome(); err == nil && home != "" {
+		return filepath.Join(home, ".local", "state", "ncode")
+	}
+	return ".ncode"
 }
 
 // ConfigPath returns the path to config.json.
-func ConfigPath() string { return filepath.Join(ZotHome(), "config.json") }
+func ConfigPath() string { return filepath.Join(NcodeHome(), "config.json") }
 
 // FlatToolRender reports whether tool calls should render flat (no
-// bordered panel). The ZOT_FLAT_TOOLS env var takes precedence over
+// bordered panel). The NCODE_FLAT_TOOLS env var takes precedence over
 // the config when set: "1"/"true"/"yes"/"on" force flat, "0"/"false"/
 // "no"/"off" force box. Otherwise the config's tool_render is
 // consulted; "flat" is flat, anything else (including empty) is box.
 func (c Config) FlatToolRender() bool {
-	if v := strings.TrimSpace(strings.ToLower(os.Getenv("ZOT_FLAT_TOOLS"))); v != "" {
+	if v := strings.TrimSpace(strings.ToLower(os.Getenv("NCODE_FLAT_TOOLS"))); v != "" {
 		switch v {
 		case "1", "true", "yes", "on", "flat":
 			return true
@@ -169,12 +173,12 @@ func (c Config) FlatToolRender() bool {
 
 // CompactUserInput reports whether sent user messages should render as
 // a single quiet gutter line instead of a padded, background-tinted
-// bubble. The ZOT_COMPACT_INPUT env var takes precedence over the
+// bubble. The NCODE_COMPACT_INPUT env var takes precedence over the
 // config when set: "1"/"true"/"yes"/"on" force compact, "0"/"false"/
 // "no"/"off" force the bubble. Otherwise the config's compact_input
 // is consulted (nil/false means the bubble).
 func (c Config) CompactUserInput() bool {
-	if v := strings.TrimSpace(strings.ToLower(os.Getenv("ZOT_COMPACT_INPUT"))); v != "" {
+	if v := strings.TrimSpace(strings.ToLower(os.Getenv("NCODE_COMPACT_INPUT"))); v != "" {
 		switch v {
 		case "1", "true", "yes", "on", "compact":
 			return true
@@ -186,19 +190,19 @@ func (c Config) CompactUserInput() bool {
 }
 
 // AuthPath returns the path to auth.json.
-func AuthPath() string { return filepath.Join(ZotHome(), "auth.json") }
+func AuthPath() string { return filepath.Join(NcodeHome(), "auth.json") }
 
 // KimiCLIFallbackDisabledPath returns a sentinel that disables falling
-// back to the official Kimi Code CLI token after `zot /logout kimi`.
+// back to the official Kimi Code CLI token after `ncode /logout kimi`.
 func KimiCLIFallbackDisabledPath() string {
-	return filepath.Join(ZotHome(), "kimi-cli-fallback-disabled")
+	return filepath.Join(NcodeHome(), "kimi-cli-fallback-disabled")
 }
 
 // SessionsPath returns the directory holding session files.
-func SessionsPath() string { return filepath.Join(ZotHome(), "sessions") }
+func SessionsPath() string { return filepath.Join(NcodeHome(), "sessions") }
 
 // LogsPath returns the directory holding log files.
-func LogsPath() string { return filepath.Join(ZotHome(), "logs") }
+func LogsPath() string { return filepath.Join(NcodeHome(), "logs") }
 
 // LoadConfig reads the config file, returning defaults if missing.
 func LoadConfig() (Config, error) {
@@ -218,7 +222,7 @@ func LoadConfig() (Config, error) {
 
 // SaveConfig writes the config file, creating parent dirs.
 func SaveConfig(c Config) error {
-	if err := os.MkdirAll(ZotHome(), 0o755); err != nil {
+	if err := os.MkdirAll(NcodeHome(), 0o755); err != nil {
 		return err
 	}
 	b, err := json.MarshalIndent(c, "", "  ")

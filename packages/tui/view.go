@@ -10,7 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // expandTabs replaces tab characters with 4 spaces so code from
@@ -193,7 +193,7 @@ type msgCacheKey struct {
 	expandAll bool
 	// turnOpen is true when the previous rendered message belongs to
 	// the same agent turn (assistant tool_use, or tool result). The
-	// header ("▍ zot") is suppressed in that case so a single turn
+	// header ("▍ ncode") is suppressed in that case so a single turn
 	// — even one that spans many assistant/tool message round-trips
 	// in the underlying API — renders under one header instead of a
 	// new one per assistant message.
@@ -401,7 +401,7 @@ func (v *View) BuildWithAnchors(width int) ([]string, []MessageAnchor) {
 		// to the most recent user prompt. Walk back over consecutive
 		// assistant/tool messages: if any non-user message precedes
 		// this one without a user message in between, we're inside
-		// the same turn and should not draw a new "▍ zot" header.
+		// the same turn and should not draw a new "▍ ncode" header.
 		turnOpen := false
 		if m.Role == provider.RoleAssistant {
 			for j := idx - 1; j >= 0; j-- {
@@ -444,7 +444,7 @@ func (v *View) BuildWithAnchors(width int) ([]string, []MessageAnchor) {
 	// text to show. An empty streaming block (streamOn=true,
 	// Streaming="") appears when a turn starts with a tool_use
 	// block instead of text — in that case the live tool-call
-	// overlay below is the real content and a naked "zot" bar
+	// overlay below is the real content and a naked "ncode" bar
 	// above it reads as a stray empty message.
 	if v.StreamingActive && strings.TrimSpace(v.Streaming) != "" {
 		// Stream the partial assistant text through the same markdown
@@ -737,7 +737,7 @@ func (v *View) renderMessage(m provider.Message, width int, turnOpen bool) []str
 	case provider.RoleAssistant:
 		// Assistant rows: no speaker label either. Prose still gets a
 		// small left indent so it visually aligns with tool box body
-		// content, but no "zot" header.
+		// content, but no "ncode" header.
 		_ = turnOpen
 		const indent = "  "
 		inner := assistantBodyWidth(width - len(indent))
@@ -863,7 +863,7 @@ func (v *View) renderToolCall(tc ToolCallView, width int) []string {
 
 	// Live body (write/edit): keep the streamed preview visible until
 	// a proposed or real tool result arrives. The provider can finish the
-	// tool_use JSON before zot has executed the tool, so keying this on
+	// tool_use JSON before ncode has executed the tool, so keying this on
 	// tc.Streaming makes write/edit boxes collapse for a moment between
 	// EvToolUseEnd and confirmation or EvToolResult.
 	if tc.Preview == "" && tc.Result == "" {
@@ -1754,7 +1754,7 @@ func wrapCodeLine(line string, width int) []string {
 
 // renderImageBlock returns the lines for one image, inline if possible.
 //
-// Inline image escapes paint into multiple terminal rows but the zot
+// Inline image escapes paint into multiple terminal rows but the ncode
 // renderer treats each slice entry as a single row. To prevent chat
 // content from being drawn on top of the image, we pad with blank rows
 // so the image's real footprint is reflected in the frame height.
@@ -2216,19 +2216,19 @@ func toolResultBlock(th Theme, text string, width int, color int) []string {
 
 // defaultToolArgWidth is the number of cells the tool-call header
 // truncates the primary argument (path/command/query) to when the
-// ZOT_TOOL_ARG_WIDTH environment variable is unset or invalid.
+// NCODE_TOOL_ARG_WIDTH environment variable is unset or invalid.
 const defaultToolArgWidth = 60
 
 // toolArgWidth returns the maximum cell width for the truncated
 // primary argument shown in a tool-call header. It defaults to
 // defaultToolArgWidth but can be raised or lowered with the
-// ZOT_TOOL_ARG_WIDTH environment variable, which is useful for wide
+// NCODE_TOOL_ARG_WIDTH environment variable, which is useful for wide
 // terminals where the default clips long queries too aggressively.
 // Values outside the sane range [20, 500] are ignored so a stray or
 // malformed setting can never produce an unreadable header or an
 // out-of-range slice.
 func toolArgWidth() int {
-	v := strings.TrimSpace(os.Getenv("ZOT_TOOL_ARG_WIDTH"))
+	v := strings.TrimSpace(os.Getenv("NCODE_TOOL_ARG_WIDTH"))
 	if v == "" {
 		return defaultToolArgWidth
 	}
@@ -2248,7 +2248,7 @@ func toolArgWidth() int {
 // the legacy "path or command, truncated" shape.
 //
 // The truncation width defaults to 60 cells but can be tuned via
-// the ZOT_TOOL_ARG_WIDTH environment variable (see toolArgWidth).
+// the NCODE_TOOL_ARG_WIDTH environment variable (see toolArgWidth).
 //
 // Exported because the interactive mode pre-populates the
 // ToolCallView.Args field with this value as soon as the tool
@@ -2494,7 +2494,7 @@ func StatusBar(p StatusBarParams) []string {
 	}
 
 	// Layout uses exactly 2 spaces of horizontal padding everywhere:
-	//   2 spaces  (openai) gpt-5.4  $0.000 (sub) 0.0%/400k  ~/Sites/zot
+	//   2 spaces  (openai) gpt-5.4  $0.000 (sub) 0.0%/400k  ~/Sites/ncode
 	// matches the editor prompt's left inset so the bar lines up
 	// vertically with the conversation column.
 	const pad = "  " // 2 spaces
@@ -2529,7 +2529,7 @@ func StatusBar(p StatusBarParams) []string {
 	} else {
 		// Idle path: a single pad of left inset so the line
 		// aligns with the conversation column on its left edge
-		// ("  you" / "  zot" message markers). Without the busy
+		// ("  you" / "  ncode" message markers). Without the busy
 		// prefix there's no trailing separator to double-pad.
 		leftBuilder.WriteString(pad)
 	}

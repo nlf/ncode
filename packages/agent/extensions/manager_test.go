@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/patriceckhart/zot/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/agent/extproto"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -60,6 +60,25 @@ func (s *stubHooks) OpenPanel(extName string, spec extproto.PanelSpec) {
 }
 func (s *stubHooks) UpdatePanel(string, string, string, []string, string) {}
 func (s *stubHooks) ClosePanel(string, string)                            {}
+
+func TestManagerSearchDirsUseNcodeProjectPath(t *testing.T) {
+	home := t.TempDir()
+	cwd := t.TempDir()
+	mgr := New(home, cwd, "0.0.0-test", "", "", nil)
+	got := mgr.searchDirs()
+	want := []string{
+		filepath.Join(cwd, ".ncode", "extensions"),
+		filepath.Join(home, "extensions"),
+	}
+	if len(got) != len(want) {
+		t.Fatalf("searchDirs() = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("searchDirs()[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
 
 // writeMockExtension creates a minimal extension on disk that uses a
 // shell script (or batch file on windows) to drive the protocol. The
@@ -116,6 +135,66 @@ done
 	mfb, _ := json.Marshal(manifest)
 	if err := os.WriteFile(filepath.Join(dir, "extension.json"), mfb, 0o644); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestManagerEmitsNcodeProtocolV2AckAndIdleExtensionAutoReadies(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("mock extension uses /bin/sh; skip on windows")
+	}
+
+	home := t.TempDir()
+	extDir := filepath.Join(home, "extensions", "idle")
+	if err := os.MkdirAll(extDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	script := `#!/bin/sh
+printf '%s\n' '{"type":"hello","name":"idle","version":"1.0.0","capabilities":["commands"]}'
+IFS= read -r ack
+printf '%s\n' "$ack" > ack.json
+while IFS= read -r line; do
+  case "$line" in
+    *'"type":"shutdown"'*) printf '%s\n' '{"type":"shutdown_ack"}'; exit 0 ;;
+  esac
+done
+`
+	if err := os.WriteFile(filepath.Join(extDir, "run.sh"), []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(extDir, "extension.json"), []byte(`{"name":"idle","version":"1.0.0","exec":"./run.sh"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	mgr := New(home, "", "0.4.0-test", "anthropic", "claude-test", &stubHooks{})
+	if errs := mgr.Discover(context.Background()); len(errs) > 0 {
+		t.Fatalf("discover errors: %v", errs)
+	}
+	defer mgr.Stop(2 * time.Second)
+	mgr.WaitForReady(2 * time.Second)
+
+	raw, err := os.ReadFile(filepath.Join(extDir, "ack.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var ack map[string]any
+	if err := json.Unmarshal(raw, &ack); err != nil {
+		t.Fatal(err)
+	}
+	if ack["type"] != "hello_ack" || ack["product"] != "ncode" || ack["protocol_version"] != float64(2) || ack["ncode_version"] != "0.4.0-test" {
+		t.Fatalf("hello_ack = %#v", ack)
+	}
+	assertNoLegacyAckField(t, ack, raw)
+
+	diags := mgr.Diagnostics()
+	if len(diags) != 1 || !diags[0].Ready || !diags[0].AutoReady || diags[0].ReadyTimedOut {
+		t.Fatalf("idle diagnostics = %#v", diags)
+	}
+	logData, err := os.ReadFile(diags[0].LogPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(logData), "[ncode] no ready frame; auto-readying after idle") {
+		t.Fatalf("idle auto-ready diagnostic not ncode-branded: %s", logData)
 	}
 }
 

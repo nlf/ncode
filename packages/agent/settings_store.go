@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 type configSettingsStore struct{}

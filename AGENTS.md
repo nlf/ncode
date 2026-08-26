@@ -1,10 +1,10 @@
-# Working Agreement for zot
+# Working Agreement for ncode
 
 This file defines how automated coding assistants should work in this repository. Treat it as a practical operating manual, not a substitute for reading the code.
 
 ## Product intent
 
-zot is a compact Go coding-agent harness. Changes should preserve its defining properties:
+ncode is a compact Go coding-agent harness. Changes should preserve its defining properties:
 
 - one portable binary
 - a provider-neutral agent engine
@@ -51,7 +51,7 @@ Provider quirks must not leak into `packages/core`. Terminal escape handling and
 
 ## Correctness contracts
 
-Some parts of zot require extra care because small mistakes corrupt state or weaken user protections.
+Some parts of ncode require extra care because small mistakes corrupt state or weaken user protections.
 
 ### Agent events and sessions
 
@@ -154,7 +154,7 @@ Examples must match real flags and schemas. State limitations plainly, especiall
 
 ## Dependency policy
 
-zot's single-binary design and small footprint are product requirements.
+ncode's single-binary design and small footprint are product requirements.
 
 - Prefer the standard library or existing dependencies.
 - Explain why a new dependency is necessary before adding it.

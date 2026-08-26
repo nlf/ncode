@@ -3,7 +3,7 @@ package core
 import (
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // TestRepairToolUseResultPairsAppendsStub covers the most common

@@ -52,7 +52,7 @@ import (
 	"sync"
 	"time"
 
-	providerauth "github.com/patriceckhart/zot/packages/provider/auth"
+	providerauth "github.com/nlf/ncode/packages/provider/auth"
 )
 
 type vertexConfig struct {

@@ -6,16 +6,16 @@ LDFLAGS := -s -w -X main.version=$(VERSION)
 .PHONY: build install test lint fmt clean release run
 
 build:
-	go build -trimpath -ldflags "$(LDFLAGS)" -o bin/zot ./cmd/zot
+	go build -trimpath -ldflags "$(LDFLAGS)" -o bin/ncode ./cmd/ncode
 
 install:
-	go install -ldflags "$(LDFLAGS)" ./cmd/zot
+	go install -ldflags "$(LDFLAGS)" ./cmd/ncode
 
 test:
 	go test -race ./...
 
 run: build
-	./bin/zot
+	./bin/ncode
 
 lint:
 	go vet ./...
@@ -29,8 +29,8 @@ clean:
 
 release:
 	@mkdir -p bin
-	GOOS=linux   GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/zot-linux-amd64   ./cmd/zot
-	GOOS=linux   GOARCH=arm64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/zot-linux-arm64   ./cmd/zot
-	GOOS=darwin  GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/zot-darwin-amd64  ./cmd/zot
-	GOOS=darwin  GOARCH=arm64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/zot-darwin-arm64  ./cmd/zot
-	GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/zot-windows-amd64.exe ./cmd/zot
+	GOOS=linux   GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/ncode-linux-amd64   ./cmd/ncode
+	GOOS=linux   GOARCH=arm64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/ncode-linux-arm64   ./cmd/ncode
+	GOOS=darwin  GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/ncode-darwin-amd64  ./cmd/ncode
+	GOOS=darwin  GOARCH=arm64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/ncode-darwin-arm64  ./cmd/ncode
+	GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/ncode-windows-amd64.exe ./cmd/ncode

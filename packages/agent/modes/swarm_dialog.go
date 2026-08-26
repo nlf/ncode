@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/swarm"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/swarm"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // swarmDialog is the dashboard shown by /swarm (no argument) and
@@ -117,10 +117,10 @@ func newSwarmDialog() *swarmDialog { return &swarmDialog{} }
 
 // SetCurrentModel pins the model + provider every fresh spawn will
 // inherit. The host wires this to the same Model / Provider the rest
-// of zot is currently using, so agents started from the dashboard
+// of ncode is currently using, so agents started from the dashboard
 // run on whatever the user last picked via /model. Pass empty
 // strings to clear the override (the child then resolves its own
-// default the same way a bare `zot` invocation does).
+// default the same way a bare `ncode` invocation does).
 func (d *swarmDialog) SetCompactMode(enabled bool) {
 	d.compactMode = enabled
 }

@@ -1,16 +1,16 @@
-# zot installer for Windows (PowerShell).
+# ncode installer for Windows (PowerShell).
 #
 # Usage (in PowerShell):
-#   iwr -useb https://raw.githubusercontent.com/patriceckhart/zot/main/install.ps1 | iex
+#   iwr -useb https://raw.githubusercontent.com/nlf/ncode/main/install.ps1 | iex
 #
 # Or with arguments:
-#   $env:ZOT_VERSION = "v0.0.1"
-#   $env:ZOT_PREFIX  = "$HOME\bin"
-#   iwr -useb https://raw.githubusercontent.com/patriceckhart/zot/main/install.ps1 | iex
+#   $env:NCODE_VERSION = "v0.0.1"
+#   $env:NCODE_PREFIX  = "$HOME\bin"
+#   iwr -useb https://raw.githubusercontent.com/nlf/ncode/main/install.ps1 | iex
 #
 # Detects architecture, downloads the matching .zip from the GitHub
-# release, verifies the sha256 against checksums.txt, extracts zot.exe,
-# and moves it into $ZOT_PREFIX (defaults to $HOME\bin, added to PATH
+# release, verifies the sha256 against checksums.txt, extracts ncode.exe,
+# and moves it into $NCODE_PREFIX (defaults to $HOME\bin, added to PATH
 # via the User environment if missing).
 #
 # $env:GITHUB_TOKEN is optional for the public repo. Set it to a PAT
@@ -21,19 +21,19 @@
 
 [CmdletBinding()]
 param(
-  [string]$Version = $env:ZOT_VERSION,
-  [string]$Prefix  = $env:ZOT_PREFIX
+  [string]$Version = $env:NCODE_VERSION,
+  [string]$Prefix  = $env:NCODE_PREFIX
 )
 
 $ErrorActionPreference = "Stop"
 
-$owner  = "patriceckhart"
-$repo   = "zot"
-$binary = "zot"
+$owner  = "nlf"
+$repo   = "ncode"
+$binary = "ncode"
 
 # Build Authorization header list once; used on every HTTP call so the
 # script works against private repos when $env:GITHUB_TOKEN is set.
-$headers = @{}
+$headers = @{ "User-Agent" = "ncode-installer" }
 if ($env:GITHUB_TOKEN) { $headers["Authorization"] = "Bearer $($env:GITHUB_TOKEN)" }
 
 if (-not $Version) { $Version = "latest" }
@@ -73,7 +73,6 @@ if ($Version -eq "latest") {
   # GitHub's API wants a User-Agent; Invoke-RestMethod sets one, but be
   # explicit so corporate proxies that strip it don't trip a 403.
   $apiHeaders = @{} + $headers
-  if (-not $apiHeaders.ContainsKey("User-Agent")) { $apiHeaders["User-Agent"] = "zot-installer" }
   $apiHeaders["Accept"] = "application/vnd.github+json"
 
   try {
@@ -106,9 +105,10 @@ $baseUrl     = "https://github.com/$owner/$repo/releases/download/$Version"
 $archiveUrl  = "$baseUrl/$archive"
 $checksumUrl = "$baseUrl/checksums.txt"
 
-$tmp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP ("zot-install-" + [System.Guid]::NewGuid().ToString("N").Substring(0,8)))
+$tmp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP ("ncode-install-" + [System.Guid]::NewGuid().ToString("N").Substring(0,8)))
 
 try {
+  Msg "ncode is a clean break: predecessor credentials, settings, sessions, caches, extensions, SDK/RPC/swarm integrations, and other state are not reused. Configure ncode fresh; no importer, conversion prompt, or compatibility fallback is provided."
   Msg "downloading $archive"
   Invoke-WebRequest -UseBasicParsing -Headers $headers -Uri $archiveUrl -OutFile (Join-Path $tmp $archive)
 
@@ -152,7 +152,7 @@ try {
     Warn "  `$env:Path = `"$Prefix;`$env:Path`""
   }
 
-  Msg "installed. run:  zot --help"
+  Msg "installed. run:  ncode --help"
 }
 finally {
   Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue

@@ -252,7 +252,7 @@ func TestAnthropicBuildRequestStripsAssistantImages(t *testing.T) {
 			{Role: RoleAssistant, Content: []Content{
 				TextBlock{Text: "done"},
 				ImageBlock{MimeType: "image/png", Data: []byte("png")},
-				TextBlock{Text: "Saved image: `zot-gemini-image-x.png`"},
+				TextBlock{Text: "Saved image: `ncode-gemini-image-x.png`"},
 			}},
 			{Role: RoleUser, Content: []Content{TextBlock{Text: "hello"}}},
 		},

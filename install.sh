@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# zot installer.
+# ncode installer.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/patriceckhart/zot/main/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/patriceckhart/zot/main/install.sh | bash -s -- v0.0.1 ~/bin
+#   curl -fsSL https://raw.githubusercontent.com/nlf/ncode/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/nlf/ncode/main/install.sh | bash -s -- v0.0.1 ~/bin
 #
 # Positional arguments:
 #   $1  version    — release tag (e.g. v0.0.1). Defaults to "latest".
@@ -14,11 +14,11 @@
 #                    if it isn't already.
 #
 # Environment overrides:
-#   ZOT_VERSION    same as $1
-#   ZOT_PREFIX     same as $2
+#   NCODE_VERSION  same as $1
+#   NCODE_PREFIX   same as $2
 #   GITHUB_TOKEN   personal access token — required while the repo is
 #                  private, ignored once it goes public. Must have at
-#                  least `contents:read` scope on the zot repository.
+#                  least `contents:read` scope on the ncode repository.
 #
 # The script detects your OS and architecture, downloads the matching
 # archive from the GitHub release, verifies the sha256 against the
@@ -28,12 +28,12 @@
 
 set -euo pipefail
 
-OWNER="patriceckhart"
-REPO="zot"
-BINARY="zot"
+OWNER="nlf"
+REPO="ncode"
+BINARY="ncode"
 
-VERSION="${1:-${ZOT_VERSION:-latest}}"
-PREFIX="${2:-${ZOT_PREFIX:-}}"
+VERSION="${1:-${NCODE_VERSION:-latest}}"
+PREFIX="${2:-${NCODE_PREFIX:-}}"
 
 msg()  { printf "\033[1m==>\033[0m %s\n" "$*"; }
 warn() { printf "\033[33mwarn:\033[0m %s\n" "$*" >&2; }
@@ -84,11 +84,11 @@ if [ "$VERSION" = "latest" ]; then
   # Private-repo friendly: hit the api, grab tag_name. Falls back to
   # following the /releases/latest redirect on public repos.
   if [ ${#CURL_AUTH[@]} -gt 0 ]; then
-    VERSION=$(curl -fsSL "${CURL_AUTH[@]+"${CURL_AUTH[@]}"}" \
+    VERSION=$(curl -A "ncode-installer" -fsSL "${CURL_AUTH[@]+"${CURL_AUTH[@]}"}" \
       "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" \
       | sed -nE 's/.*"tag_name": *"([^"]+)".*/\1/p' | head -n1)
   else
-    VERSION=$(curl -fsSLI -o /dev/null -w '%{url_effective}' \
+    VERSION=$(curl -A "ncode-installer" -fsSLI -o /dev/null -w '%{url_effective}' \
       "https://github.com/${OWNER}/${REPO}/releases/latest" \
       | sed -E 's|.*/tag/([^/]+).*|\1|')
   fi
@@ -133,12 +133,13 @@ CHECKSUMS_URL="${BASE_URL}/checksums.txt"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
+msg "ncode is a clean break: predecessor credentials, settings, sessions, caches, extensions, SDK/RPC/swarm integrations, and other state are not reused. Configure ncode fresh; no importer, conversion prompt, or compatibility fallback is provided."
 msg "downloading ${ARCHIVE}"
-curl -fsSL "${CURL_AUTH[@]+"${CURL_AUTH[@]}"}" -o "$TMP/$ARCHIVE" "$ARCHIVE_URL" \
+curl -A "ncode-installer" -fsSL "${CURL_AUTH[@]+"${CURL_AUTH[@]}"}" -o "$TMP/$ARCHIVE" "$ARCHIVE_URL" \
   || die "download failed: $ARCHIVE_URL (set GITHUB_TOKEN if the repo is private)"
 
 msg "verifying checksum"
-curl -fsSL "${CURL_AUTH[@]+"${CURL_AUTH[@]}"}" -o "$TMP/checksums.txt" "$CHECKSUMS_URL" \
+curl -A "ncode-installer" -fsSL "${CURL_AUTH[@]+"${CURL_AUTH[@]}"}" -o "$TMP/checksums.txt" "$CHECKSUMS_URL" \
   || die "download failed: $CHECKSUMS_URL"
 
 expected=$(grep " ${ARCHIVE}\$" "$TMP/checksums.txt" | awk '{print $1}' || true)
@@ -175,6 +176,6 @@ case ":$PATH:" in
     ;;
 esac
 
-msg "installed $("$PREFIX/$BINARY" --version 2>/dev/null || echo zot)"
-msg "run:  zot          (interactive tui)"
-msg "run:  zot --help   (all flags and subcommands)"
+msg "installed $("$PREFIX/$BINARY" --version 2>/dev/null || echo ncode)"
+msg "run:  ncode          (interactive tui)"
+msg "run:  ncode --help   (all flags and subcommands)"

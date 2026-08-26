@@ -92,6 +92,16 @@ jobs:
           go-version: "1.23"
           cache: true
 
+      - name: validate ncode release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(go list -m)" = "github.com/nlf/ncode"
+          test -f cmd/ncode/main.go
+          test ! -e cmd/ncode
+          grep -q '^project_name: ncode$' .goreleaser.yaml
+          grep -q '^    main: ./cmd/ncode$' .goreleaser.yaml
+
       - name: run goreleaser
         uses: goreleaser/goreleaser-action@v6
         with:

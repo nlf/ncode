@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/swarm"
-	"github.com/patriceckhart/zot/packages/core"
+	"github.com/nlf/ncode/packages/agent/swarm"
+	"github.com/nlf/ncode/packages/core"
 )
 
 func TestAutoSwarmSummaryIncludesCompleteFinalResponseAfterLongTask(t *testing.T) {

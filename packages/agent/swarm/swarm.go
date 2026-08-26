@@ -1,12 +1,12 @@
-// Package swarm implements zot's multi-agent supervisor.
+// Package swarm implements ncode's multi-agent supervisor.
 //
-// A Swarm manages a set of headless zot subprocesses ("agents")
+// A Swarm manages a set of headless ncode subprocesses ("agents")
 // that share the host's working directory. The interactive TUI
 // exposes the supervisor through the /swarm slash command and a
 // dashboard dialog; non-TUI code can drive it directly through
 // this package.
 //
-// Every agent runs with cwd == the parent zot's RepoRoot — the
+// Every agent runs with cwd == the parent ncode's RepoRoot — the
 // same files the user sees, the same files the main agent edits.
 // There is no git worktree, no per-agent branch, no isolation. If
 // you want parallel edits on a separate branch, use normal git
@@ -19,7 +19,7 @@
 //
 // The Runner abstraction means tests can swap a fake in instead of
 // really spawning a subprocess; the production Runner shells out to
-// `zot --swarm-agent ...` so we reuse zot's own model resolution
+// the current executable’s hidden swarm-agent mode so we reuse ncode’s model resolution
 // and tooling without re-implementing the agent loop.
 package swarm
 
@@ -50,16 +50,16 @@ const (
 // Config configures a Swarm.
 type Config struct {
 	// Root is the directory under which per-agent state files live.
-	// Typically <ZotHome>/swarm, but tests pass a tempdir.
+	// Typically <NcodeHome>/swarm, but tests pass a tempdir.
 	Root string
 
 	// RepoRoot is the working directory every spawned agent runs
-	// in — the same cwd the parent zot is using. There is no
+	// in — the same cwd the parent ncode is using. There is no
 	// per-agent isolation: agents edit the host's files directly.
 	RepoRoot string
 
 	// NewRunner produces the Runner for an Agent. If nil, the default
-	// `zot --swarm-agent ...` exec runner is used. Tests inject a fake
+	// `ncode --swarm-agent ...` exec runner is used. Tests inject a fake
 	// here.
 	NewRunner func(a *Agent) Runner
 
@@ -140,7 +140,7 @@ func New(cfg Config) *Swarm {
 }
 
 // SetActiveSession scopes the dashboard view (and Spawn stamping)
-// to a particular host zot session id. Pass empty to clear the
+// to a particular host ncode session id. Pass empty to clear the
 // scope and revert to "show every agent" (the original behaviour).
 //
 // Existing in-memory agents keep their SessionID; only the filter
@@ -217,7 +217,7 @@ func (f *Swarm) SpawnReq(ctx context.Context, req SpawnRequest) (*Agent, error) 
 	logPath := filepath.Join(stateDir, "events.jsonl")
 	sessionPath := filepath.Join(stateDir, "session.json")
 	// Keep the transient unix socket outside the durable state root.
-	// ZOT_HOME may live on a shared or network filesystem that supports
+	// NCODE_HOME may live on a shared or network filesystem that supports
 	// regular state files but cannot host unix socket nodes.
 	inboxPath, err := inboxSocketPath(f.cfg.Root, id)
 	if err != nil {
@@ -255,7 +255,7 @@ func (f *Swarm) SpawnReq(ctx context.Context, req SpawnRequest) (*Agent, error) 
 	f.order = append(f.order, id)
 	f.mu.Unlock()
 
-	// Persist the agent's identity so a later `zot` invocation can
+	// Persist the agent's identity so a later `ncode` invocation can
 	// reload it from disk via Swarm.Reload. Best-effort: if the disk
 	// is read-only we still let the runner start, the user just won't
 	// see this agent on the next launch.

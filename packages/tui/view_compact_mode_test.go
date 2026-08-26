@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 func compactModeUserMsg(text string) provider.Message {

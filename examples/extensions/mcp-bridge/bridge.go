@@ -1,11 +1,11 @@
-// bridge.go — MCP tool → zot tool registration and routing.
+// bridge.go — MCP tool → ncode tool registration and routing.
 //
-// Converts MCP tools into zot-registered tools with namespaced names:
+// Converts MCP tools into ncode-registered tools with namespaced names:
 //
 //	mcp__<server>__<tool>
 //
 // The double underscore separates the server name from the tool name,
-// avoiding collisions with zot's built-in tools (read, write, edit, bash, skill).
+// avoiding collisions with ncode's built-in tools (read, write, edit, bash, skill).
 package main
 
 import (
@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/patriceckhart/zot/packages/agent/ext"
+	"github.com/nlf/ncode/packages/agent/ext"
 )
 
 const (
@@ -48,14 +48,14 @@ var mcpSearchToolSchema = json.RawMessage(`{
   "additionalProperties": false
 }`)
 
-// toolMapping tracks which zot tool name maps to which MCP server + tool.
+// toolMapping tracks which ncode tool name maps to which MCP server + tool.
 type toolMapping struct {
 	serverName  string // e.g. "filesystem"
 	mcpTool     string // e.g. "read_file"
 	description string
 }
 
-// bridge connects MCP servers to zot's extension protocol.
+// bridge connects MCP servers to ncode's extension protocol.
 type bridge struct {
 	e   *ext.Extension
 	cwd string
@@ -64,14 +64,14 @@ type bridge struct {
 	// the lock-free reads in handleToolCall and the idle reaper safe.
 	// Do not add or remove entries after startup.
 	servers map[string]*managedServer
-	mapping map[string]toolMapping // zot tool name → MCP server + tool; guarded by mu
+	mapping map[string]toolMapping // ncode tool name → MCP server + tool; guarded by mu
 	logger  *log.Logger
 
 	mu               sync.Mutex // guards mapping and searchRegistered
 	searchRegistered bool
 }
 
-// newBridge creates a new MCP→zot bridge.
+// newBridge creates a new MCP→ncode bridge.
 func newBridge(e *ext.Extension, cwd string, logger *log.Logger) *bridge {
 	return &bridge{
 		e:       e,
@@ -82,8 +82,8 @@ func newBridge(e *ext.Extension, cwd string, logger *log.Logger) *bridge {
 	}
 }
 
-// sanitizeName converts a string into a valid zot tool name component.
-// Zot tool names must match [a-zA-Z][a-zA-Z0-9_]*.
+// sanitizeName converts a string into a valid ncode tool name component.
+// ncode tool names must match [a-zA-Z][a-zA-Z0-9_]*.
 var invalidChars = regexp.MustCompile(`[^a-zA-Z0-9]`)
 
 func sanitizeName(s string) string {
@@ -98,7 +98,7 @@ func sanitizeName(s string) string {
 	return s
 }
 
-// toolName builds the namespaced zot tool name for an MCP tool.
+// toolName builds the namespaced ncode tool name for an MCP tool.
 func toolName(serverName, mcpToolName string) string {
 	return fmt.Sprintf("mcp__%s__%s", sanitizeName(serverName), sanitizeName(mcpToolName))
 }
@@ -222,29 +222,29 @@ func (b *bridge) refreshToolCache(ctx context.Context, path string) (bool, error
 }
 
 func (b *bridge) registerCachedTool(serverName string, tool cachedTool) {
-	zotName := toolName(serverName, tool.Name)
+	ncodeName := toolName(serverName, tool.Name)
 
 	b.mu.Lock()
-	if existing, exists := b.mapping[zotName]; exists {
+	if existing, exists := b.mapping[ncodeName]; exists {
 		b.mu.Unlock()
 		if existing.serverName != serverName || existing.mcpTool != tool.Name {
 			b.logger.Printf("tool name collision: %s already maps to %s/%s; skipping %s/%s",
-				zotName, existing.serverName, existing.mcpTool, serverName, tool.Name)
+				ncodeName, existing.serverName, existing.mcpTool, serverName, tool.Name)
 		}
 		return
 	}
-	b.mapping[zotName] = toolMapping{
+	b.mapping[ncodeName] = toolMapping{
 		serverName:  serverName,
 		mcpTool:     tool.Name,
 		description: tool.Description,
 	}
 	b.mu.Unlock()
 
-	b.e.DeferredTool(zotName, tool.Description, json.RawMessage(tool.Schema), func(args json.RawMessage) ext.ToolResult {
-		return b.handleToolCall(zotName, args)
+	b.e.DeferredTool(ncodeName, tool.Description, json.RawMessage(tool.Schema), func(args json.RawMessage) ext.ToolResult {
+		return b.handleToolCall(ncodeName, args)
 	})
 
-	b.logger.Printf("registered deferred cached tool: %s → %s/%s", zotName, serverName, tool.Name)
+	b.logger.Printf("registered deferred cached tool: %s → %s/%s", ncodeName, serverName, tool.Name)
 }
 
 type toolSearchArgs struct {
@@ -326,8 +326,8 @@ func (b *bridge) findTools(query string, limit int) []toolSearchMatch {
 	return matches
 }
 
-func scoreToolMatch(terms []string, zotName string, mapping toolMapping) int {
-	name := strings.ToLower(zotName)
+func scoreToolMatch(terms []string, ncodeName string, mapping toolMapping) int {
+	name := strings.ToLower(ncodeName)
 	server := strings.ToLower(mapping.serverName)
 	mcpName := strings.ToLower(mapping.mcpTool)
 	description := strings.ToLower(mapping.description)
@@ -408,17 +408,17 @@ func mcpToolSchema(tool mcp.Tool) any {
 	return schema
 }
 
-// handleToolCall routes a zot tool call to the appropriate MCP server.
-func (b *bridge) handleToolCall(zotName string, args json.RawMessage) ext.ToolResult {
+// handleToolCall routes an ncode tool call to the appropriate MCP server.
+func (b *bridge) handleToolCall(ncodeName string, args json.RawMessage) ext.ToolResult {
 	b.mu.Lock()
-	mapping, ok := b.mapping[zotName]
+	mapping, ok := b.mapping[ncodeName]
 	b.mu.Unlock()
 
 	if !ok {
 		return ext.TextErrorResult(fmt.Sprintf(
 			"Tool '%s' not found. This tool was registered but is no longer available. "+
 				"The MCP server may have been stopped. Try running '/mcp' to check server status.",
-			zotName))
+			ncodeName))
 	}
 
 	srv, ok := b.servers[mapping.serverName]
@@ -449,8 +449,8 @@ func (b *bridge) handleToolCall(zotName string, args json.RawMessage) ext.ToolRe
 			err, mapping.serverName, mapping.mcpTool, mapping.serverName))
 	}
 
-	// Convert MCP result to zot ToolResult
-	return mcpResultToZot(result)
+	// Convert MCP result to ncode ToolResult
+	return mcpResultToNcode(result)
 }
 
 // timeoutErrorMessage formats the user-facing text for a deadline error.
@@ -461,8 +461,8 @@ func timeoutErrorMessage(serverName string, requestTimeout int) string {
 		requestTimeout, serverName)
 }
 
-// mcpResultToZot converts an MCP CallToolResult to a zot ToolResult.
-func mcpResultToZot(result *mcp.CallToolResult) ext.ToolResult {
+// mcpResultToNcode converts an MCP CallToolResult to an ncode ToolResult.
+func mcpResultToNcode(result *mcp.CallToolResult) ext.ToolResult {
 	if result == nil {
 		return ext.TextResult("(no result)")
 	}
@@ -492,7 +492,7 @@ func mcpResultToZot(result *mcp.CallToolResult) ext.ToolResult {
 	return tr
 }
 
-// startAll starts all configured servers without re-registering their tools with zot.
+// startAll starts all configured servers without re-registering their tools with ncode.
 func (b *bridge) startAll(ctx context.Context) error {
 	var wg sync.WaitGroup
 	errCh := make(chan error, len(b.servers))
@@ -523,7 +523,7 @@ func (b *bridge) startAll(ctx context.Context) error {
 
 // startIdleReaper runs a background goroutine that kills idle servers.
 // It has no shutdown mechanism by design: it lives exactly as long as
-// the extension process, and zot reaps the whole process on exit.
+// the extension process, and ncode reaps the whole process on exit.
 func (b *bridge) startIdleReaper() {
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)

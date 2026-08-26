@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/extensions"
-	"github.com/patriceckhart/zot/packages/agent/extproto"
-	"github.com/patriceckhart/zot/packages/agent/modes"
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/agent/extensions"
+	"github.com/nlf/ncode/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/agent/modes"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // runRPCMode implements the JSON-over-stdin/stdout RPC protocol.
@@ -38,7 +38,7 @@ import (
 // Responses (stdout): {"type":"response","id":"1","command":"prompt","success":true}
 // Events (stdout): one JSON object per AgentEvent (same schema as --json mode).
 //
-// Auth: if $ZOTCORE_RPC_TOKEN is set, the first command must be
+// Auth: if $NCODE_RPC_TOKEN is set, the first command must be
 // {"type":"hello","token":"..."} or the connection is closed.
 func runRPCMode(ctx context.Context, args Args, version string) error {
 	if args.NoYolo {
@@ -53,7 +53,7 @@ func runRPCMode(ctx context.Context, args Args, version string) error {
 	// host-hooks integration. Notify/Display calls from extensions
 	// emit RPC events instead of TUI lines so any consumer can react.
 	extHooks := &rpcExtHooks{}
-	extMgr := extensions.New(ZotHome(), r.CWD, version, r.Provider, r.Model, extHooks)
+	extMgr := extensions.New(NcodeHome(), r.CWD, version, r.Provider, r.Model, extHooks)
 	for _, e := range extMgr.LoadExplicit(ctx, args.Exts) {
 		fmt.Fprintln(os.Stderr, "extension load:", e)
 	}
@@ -174,7 +174,7 @@ type rpcServer struct {
 
 	// inFlight tracks long-running command goroutines so run() can
 	// wait for them before returning when stdin closes. Without this,
-	// piping a single 'prompt' command into 'zot rpc' would race the
+	// piping a single 'prompt' command into 'ncode rpc' would race the
 	// process exit against the agent loop and the prompt would never
 	// produce output.
 	inFlight sync.WaitGroup
@@ -182,10 +182,10 @@ type rpcServer struct {
 
 // run reads NDJSON commands from in and dispatches them. Returns when
 // in is closed AND every in-flight long-running command (prompt /
-// compact) has finished, so a quick `echo cmd | zot rpc` invocation
+// compact) has finished, so a quick `echo cmd | ncode rpc` invocation
 // still produces full output before the process exits.
 func (s *rpcServer) run(in io.Reader) error {
-	requireToken := os.Getenv("ZOTCORE_RPC_TOKEN") != ""
+	requireToken := os.Getenv("NCODE_RPC_TOKEN") != ""
 	s.authed = !requireToken
 
 	sc := bufio.NewScanner(in)
@@ -201,18 +201,21 @@ func (s *rpcServer) run(in io.Reader) error {
 		}
 		if err := json.Unmarshal([]byte(line), &head); err != nil {
 			s.writeError("", "", fmt.Sprintf("malformed json: %v", err))
+			if !s.authed {
+				return fmt.Errorf("rpc: malformed first frame before authentication: %w", err)
+			}
 			continue
 		}
 		if !s.authed {
 			if head.Type != "hello" {
 				s.writeError(head.ID, head.Type, "auth required: send hello with token first")
-				continue
+				return fmt.Errorf("rpc: hello with token required as first frame")
 			}
 			var hello struct {
 				Token string `json:"token"`
 			}
 			_ = json.Unmarshal([]byte(line), &hello)
-			if hello.Token != os.Getenv("ZOTCORE_RPC_TOKEN") {
+			if hello.Token != os.Getenv("NCODE_RPC_TOKEN") {
 				s.writeError(head.ID, head.Type, "invalid token")
 				return fmt.Errorf("rpc: bad auth token")
 			}

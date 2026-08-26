@@ -3,7 +3,7 @@ package modes
 import (
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/agent/tools"
+	"github.com/nlf/ncode/packages/agent/tools"
 )
 
 func TestJailByDefaultSettingUpdatesLiveSandbox(t *testing.T) {

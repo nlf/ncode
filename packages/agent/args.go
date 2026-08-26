@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/agent/tools"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/tools"
+	"github.com/nlf/ncode/packages/tui"
 	"golang.org/x/term"
 )
 
@@ -75,18 +75,18 @@ type Args struct {
 	// NoSkill disables ALL skill discovery for this run, including
 	// the built-in skills compiled into the binary. The system
 	// prompt loses its "Available skills" manifest and the `skill`
-	// tool isn't registered. Useful for running zot without any
+	// tool isn't registered. Useful for running ncode without any
 	// extra context biasing the model.
 	NoSkill bool
 
 	// WithSkills controls loading user-installed skills from
-	// $ZOT_HOME/skills/, .zot/skills/, .claude/skills/, and
+	// $NCODE_HOME/skills/, .ncode/skills/, .claude/skills/, and
 	// .agents/skills/. It defaults to true; --no-skill disables all
 	// skill discovery, including built-ins.
 	WithSkills bool
 
 	// NoContextFiles disables discovery and loading of AGENTS.md files
-	// from $ZOT_HOME and the cwd's ancestor directories.
+	// from $NCODE_HOME and the cwd's ancestor directories.
 	NoContextFiles bool
 
 	// InsecureTLS skips TLS verification for custom inference endpoints.
@@ -316,7 +316,7 @@ func PrintHelp(version string) {
 }
 
 // printHelp writes help to out. When out is a TTY it uses the same palette as
-// zot's TUI; when redirected it falls back to plain text with no ANSI escapes.
+// ncode's TUI; when redirected it falls back to plain text with no ANSI escapes.
 func printHelp(out *os.File, version string) {
 	th := tui.Dark
 	fd := int(out.Fd())
@@ -375,47 +375,47 @@ func printHelp(out *os.File, version string) {
 	fmt.Fprintln(out)
 	var headline string
 	if useColor {
-		headline = th.AccentBar(th.Assistant) + assistant(tui.Bold("zot. yet another coding agent harness."))
+		headline = th.AccentBar(th.Assistant) + assistant(tui.Bold("ncode. yet another coding agent harness."))
 	} else {
-		headline = "zot. yet another coding agent harness."
+		headline = "ncode. yet another coding agent harness."
 	}
 	fmt.Fprintln(out, headline)
 	fmt.Fprintln(out, muted("ask anything, or type /help inside the tui to see commands."))
 	fmt.Fprintf(out, "%s %s\n", muted("version:"), fg(version))
 
 	section("modes",
-		row{"zot", "interactive tui"},
-		row{"zot \"prompt\"", "interactive, pre-filled prompt"},
-		row{"zot -p \"prompt\"", "print final text, exit"},
-		row{"echo \"prompt\" | zot", "piped stdin implies print mode"},
-		row{"zot --stream \"prompt\"", "stream assistant text live, exit"},
-		row{"zot --json \"prompt\"", "newline-delimited json events, exit"},
-		row{"zot rpc", "json-rpc loop on stdin/stdout (see docs/rpc.md)"},
+		row{"ncode", "interactive tui"},
+		row{"ncode \"prompt\"", "interactive, pre-filled prompt"},
+		row{"ncode -p \"prompt\"", "print final text, exit"},
+		row{"echo \"prompt\" | ncode", "piped stdin implies print mode"},
+		row{"ncode --stream \"prompt\"", "stream assistant text live, exit"},
+		row{"ncode --json \"prompt\"", "newline-delimited json events, exit"},
+		row{"ncode rpc", "json-rpc loop on stdin/stdout (see docs/rpc.md)"},
 	)
 	section("extensions",
-		row{"zot ext list", "list installed extensions"},
-		row{"zot ext install <path|url>", "install into $ZOT_HOME/extensions/"},
-		row{"zot --ext ./path/to/ext", "load an extension for this run only"},
-		row{"zot ext help", "show all extension subcommands"},
+		row{"ncode ext list", "list installed extensions"},
+		row{"ncode ext install <path|url>", "install into $NCODE_HOME/extensions/"},
+		row{"ncode --ext ./path/to/ext", "load an extension for this run only"},
+		row{"ncode ext help", "show all extension subcommands"},
 	)
 	section("self-update",
-		row{"zot update", "download and install the latest release"},
-		row{"zot update --check", "show whether a new release is available"},
+		row{"ncode update", "download and install the latest release"},
+		row{"ncode update --check", "show whether a new release is available"},
 	)
 	section("session management",
-		row{"zot sessions prune", "select sessions for directories that no longer exist"},
-		row{"zot sessions prune --older-than 30d", "select sessions by time since last activity"},
-		row{"zot sessions prune --dry-run", "list matching session groups without deleting them"},
+		row{"ncode sessions prune", "select sessions for directories that no longer exist"},
+		row{"ncode sessions prune --older-than 30d", "select sessions by time since last activity"},
+		row{"ncode sessions prune --dry-run", "list matching session groups without deleting them"},
 	)
 	section("telegram",
-		row{"zot telegram-bot setup", "configure a telegram bot (from BotFather)"},
-		row{"zot telegram-bot run", "foreground bridge (ctrl+c to stop)"},
-		row{"zot telegram-bot start", "background bridge (detached)"},
-		row{"zot telegram-bot stop", "stop the background bridge"},
-		row{"zot telegram-bot logs [-f]", "tail the background bridge log"},
-		row{"zot telegram-bot status", "config + running state"},
-		row{"zot telegram-bot reset", "forget saved token"},
-		row{"zot tg ...", "short alias for telegram-bot"},
+		row{"ncode telegram-bot setup", "configure a telegram bot (from BotFather)"},
+		row{"ncode telegram-bot run", "foreground bridge (ctrl+c to stop)"},
+		row{"ncode telegram-bot start", "background bridge (detached)"},
+		row{"ncode telegram-bot stop", "stop the background bridge"},
+		row{"ncode telegram-bot logs [-f]", "tail the background bridge log"},
+		row{"ncode telegram-bot status", "config + running state"},
+		row{"ncode telegram-bot reset", "forget saved token"},
+		row{"ncode tg ...", "short alias for telegram-bot"},
 	)
 	section("provider and model flags",
 		row{"--provider", "provider to use (anthropic|openai|openai-codex|kimi|deepseek|google|ollama|llama.cpp)"},

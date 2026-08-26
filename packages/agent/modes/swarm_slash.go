@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/agent/swarm"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/swarm"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // runSwarm dispatches /swarm subcommands. Layout:

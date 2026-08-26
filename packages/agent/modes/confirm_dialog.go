@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // confirmRequest is one pending confirmation. The agent goroutine

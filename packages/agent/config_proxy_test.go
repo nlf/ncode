@@ -6,7 +6,7 @@ import (
 )
 
 func TestApplyConfiguredHTTPProxy(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	for _, key := range []string{"HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"} {
 		t.Setenv(key, "")
 	}
@@ -25,7 +25,7 @@ func TestApplyConfiguredHTTPProxy(t *testing.T) {
 }
 
 func TestApplyConfiguredHTTPProxyPreservesUppercaseEnvironment(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	// Set lowercase first because environment variable names are
 	// case-insensitive on Windows.
 	t.Setenv("http_proxy", "")
@@ -47,7 +47,7 @@ func TestApplyConfiguredHTTPProxyPreservesUppercaseEnvironment(t *testing.T) {
 }
 
 func TestApplyConfiguredHTTPProxyPreservesLowercaseEnvironment(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	// Set uppercase first because environment variable names are
 	// case-insensitive on Windows.
 	t.Setenv("HTTP_PROXY", "")
@@ -69,7 +69,7 @@ func TestApplyConfiguredHTTPProxyPreservesLowercaseEnvironment(t *testing.T) {
 }
 
 func TestApplyConfiguredHTTPProxyIgnoresEmptySetting(t *testing.T) {
-	t.Setenv("ZOT_HOME", t.TempDir())
+	t.Setenv("NCODE_HOME", t.TempDir())
 	for _, key := range []string{"HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"} {
 		t.Setenv(key, "")
 	}

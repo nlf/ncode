@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // recordingTool captures the args it was invoked with so the test

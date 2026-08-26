@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// runUpdateCommand dispatches `zot update`. Returns (handled=true, err)
+// runUpdateCommand dispatches `ncode update`. Returns (handled=true, err)
 // if rawArgs starts with "update"; otherwise (handled=false, nil) so
 // the main router falls through to the regular flag parser. Mirrors
 // the shape of runBotCommand / runExtCommand on purpose: identical
@@ -31,12 +31,14 @@ import (
 //     name template defined in .goreleaser.yaml.
 //  3. Downloads checksums.txt and the asset to a temp directory.
 //  4. Verifies the asset's sha256 against checksums.txt.
-//  5. Extracts the zot binary from the archive.
+//  5. Extracts the ncode binary from the archive.
 //  6. Atomically replaces the running binary with the new one.
 //
 // Refuses to operate on dev builds (version == "0.0.0") because there
 // is no meaningful "is newer" comparison and we'd happily downgrade a
 // freshly-compiled local binary back to whatever's on GitHub.
+func updateTempPattern() string { return "ncode-update-" }
+
 func runUpdateCommand(rawArgs []string, version string) (handled bool, err error) {
 	if len(rawArgs) == 0 || rawArgs[0] != "update" {
 		return false, nil
@@ -58,26 +60,26 @@ func runUpdateCommand(rawArgs []string, version string) (handled bool, err error
 }
 
 func printUpdateHelp() {
-	fmt.Fprintln(os.Stderr, `zot update — replace the current zot binary with the latest release
+	fmt.Fprintln(os.Stderr, `ncode update — replace the current ncode binary with the latest release
 
 usage:
-  zot update           download and install the newest release
-  zot update --check   show what update is available; install nothing
-  zot update --help    show this help
+  ncode update           download and install the newest release
+  ncode update --check   show what update is available; install nothing
+  ncode update --help    show this help
 
 notes:
   * The binary must be writable by the current user. On a system-wide
-    install (e.g. /usr/local/bin/zot owned by root) re-run with sudo.
+    install (e.g. /usr/local/bin/ncode owned by root) re-run with sudo.
   * Dev builds (version 0.0.0) are refused. They typically come from
     a local source build and shouldn't be silently replaced with a
     release binary.
   * Honours $GITHUB_TOKEN if set, so private-repo releases work.
   * After the binary is installed, every extension under
-    $ZOT_HOME/extensions/ that is a git checkout is fast-forward
+    $NCODE_HOME/extensions/ that is a git checkout is fast-forward
     pulled (no merge, no rebase). Dirty worktrees are stashed and
     restored. Extensions without a .git directory, disabled
     extensions, and pulls that fail (offline, diverged, etc.) are
-    skipped per-extension and never abort the overall update. zot
+    skipped per-extension and never abort the overall update. ncode
     does NOT run any build step after pulling — authors are expected
     to commit a working binary, or you can rebuild manually and
     /reload-ext.`)
@@ -88,7 +90,7 @@ notes:
 // pipe into scripts.
 func runUpdateCheck(version string) error {
 	if version == "" || version == "dev" || version == "0.0.0" {
-		fmt.Println("zot: dev build (version 0.0.0) — `zot update` is disabled")
+		fmt.Println("ncode: dev build (version 0.0.0) — `ncode update` is disabled")
 		return nil
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -100,24 +102,24 @@ func runUpdateCheck(version string) error {
 	latest := strings.TrimPrefix(tag, "v")
 	current := versionOnly(version)
 	if !versionLess(current, latest) {
-		fmt.Printf("zot %s is up to date (latest: %s)\n", current, latest)
+		fmt.Printf("ncode %s is up to date (latest: %s)\n", current, latest)
 		return nil
 	}
-	fmt.Printf("zot %s -> %s available\n  release: %s\n  run 'zot update' to install\n", current, latest, url)
+	fmt.Printf("ncode %s -> %s available\n  release: %s\n  run 'ncode update' to install\n", current, latest, url)
 	return nil
 }
 
-// runUpdate is the meat of `zot update`.
+// runUpdate is the meat of `ncode update`.
 func runUpdate(version string) error {
 	if version == "" || version == "dev" || version == "0.0.0" {
-		return errors.New("dev build (version 0.0.0): `zot update` is disabled. Build a release tag or download from https://github.com/patriceckhart/zot/releases")
+		return errors.New("dev build (version 0.0.0): `ncode update` is disabled. Build a release tag or download from https://github.com/nlf/ncode/releases")
 	}
 	current := versionOnly(version)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
-	fmt.Println("zot update: querying latest release...")
+	fmt.Println("ncode update: querying latest release...")
 	tag, releaseURL, err := fetchLatestRelease(ctx)
 	if err != nil {
 		return fmt.Errorf("query latest release: %w", err)
@@ -125,18 +127,18 @@ func runUpdate(version string) error {
 	latest := strings.TrimPrefix(tag, "v")
 
 	if !versionLess(current, latest) {
-		fmt.Printf("zot %s is already up to date.\n", current)
+		fmt.Printf("ncode %s is already up to date.\n", current)
 		return nil
 	}
-	fmt.Printf("zot update: %s -> %s\n", current, latest)
-	fmt.Printf("zot update: release page %s\n", releaseURL)
+	fmt.Printf("ncode update: %s -> %s\n", current, latest)
+	fmt.Printf("ncode update: release page %s\n", releaseURL)
 
 	// Pick the archive matching this platform.
 	assetName, archiveFmt, err := releaseAssetName(latest)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("zot update: target asset %s\n", assetName)
+	fmt.Printf("ncode update: target asset %s\n", assetName)
 
 	// We assume the standard GoReleaser layout: assets live under
 	//   https://github.com/<owner>/<repo>/releases/download/<tag>/<file>
@@ -147,7 +149,7 @@ func runUpdate(version string) error {
 	assetURL := base + "/" + assetName
 	sumsURL := base + "/checksums.txt"
 
-	tmp, err := os.MkdirTemp("", "zot-update-")
+	tmp, err := os.MkdirTemp("", updateTempPattern())
 	if err != nil {
 		return fmt.Errorf("create temp dir: %w", err)
 	}
@@ -156,7 +158,7 @@ func runUpdate(version string) error {
 	// users can clear /tmp themselves.
 	defer func() { _ = os.RemoveAll(tmp) }()
 
-	fmt.Println("zot update: downloading checksums.txt...")
+	fmt.Println("ncode update: downloading checksums.txt...")
 	sumsPath := filepath.Join(tmp, "checksums.txt")
 	if err := downloadFile(ctx, sumsURL, sumsPath); err != nil {
 		return fmt.Errorf("download checksums: %w", err)
@@ -166,13 +168,13 @@ func runUpdate(version string) error {
 		return err
 	}
 
-	fmt.Println("zot update: downloading archive...")
+	fmt.Println("ncode update: downloading archive...")
 	archivePath := filepath.Join(tmp, assetName)
 	if err := downloadFile(ctx, assetURL, archivePath); err != nil {
 		return fmt.Errorf("download archive: %w", err)
 	}
 
-	fmt.Println("zot update: verifying checksum...")
+	fmt.Println("ncode update: verifying checksum...")
 	gotSum, err := sha256File(archivePath)
 	if err != nil {
 		return fmt.Errorf("hash archive: %w", err)
@@ -181,7 +183,7 @@ func runUpdate(version string) error {
 		return fmt.Errorf("checksum mismatch for %s: got %s, want %s", assetName, gotSum, wantSum)
 	}
 
-	fmt.Println("zot update: extracting...")
+	fmt.Println("ncode update: extracting...")
 	extractDir := filepath.Join(tmp, "extracted")
 	if err := os.MkdirAll(extractDir, 0o755); err != nil {
 		return fmt.Errorf("mkdir extract: %w", err)
@@ -190,35 +192,35 @@ func runUpdate(version string) error {
 		return fmt.Errorf("extract archive: %w", err)
 	}
 
-	newBin := filepath.Join(extractDir, "zot")
+	newBin := filepath.Join(extractDir, "ncode")
 	if runtime.GOOS == "windows" {
-		newBin = filepath.Join(extractDir, "zot.exe")
+		newBin = filepath.Join(extractDir, "ncode.exe")
 	}
 	if st, err := os.Stat(newBin); err != nil || st.IsDir() {
-		return fmt.Errorf("extracted archive does not contain a zot binary at %s", newBin)
+		return fmt.Errorf("extracted archive does not contain an ncode binary at %s", newBin)
 	}
 
 	curBin, err := os.Executable()
 	if err != nil {
 		return fmt.Errorf("resolve current binary path: %w", err)
 	}
-	// Resolve symlinks so 'zot' on $PATH that points at /usr/local/bin
+	// Resolve symlinks so 'ncode' on $PATH that points at /usr/local/bin
 	// gets actually replaced rather than us writing into the symlink
 	// target's directory while leaving the link stale.
 	if resolved, err := filepath.EvalSymlinks(curBin); err == nil {
 		curBin = resolved
 	}
 
-	fmt.Printf("zot update: replacing %s\n", curBin)
+	fmt.Printf("ncode update: replacing %s\n", curBin)
 	if err := replaceBinary(curBin, newBin); err != nil {
 		return fmt.Errorf("replace binary: %w", err)
 	}
-	fmt.Printf("zot update: installed %s\n", latest)
+	fmt.Printf("ncode update: installed %s\n", latest)
 
 	// Best-effort: also refresh installed extensions that live in
 	// git checkouts. Failures here are advisory and never abort the
 	// overall update — the binary swap already succeeded.
-	updateAllExtensions(ZotHome())
+	updateAllExtensions(NcodeHome())
 
 	return nil
 }
@@ -237,13 +239,13 @@ func releaseAssetName(version string) (name, format string, err error) {
 	case "windows":
 		// supported
 	default:
-		return "", "", fmt.Errorf("unsupported OS for zot update: %s (download manually from the release page)", goos)
+		return "", "", fmt.Errorf("unsupported OS for ncode update: %s (download manually from the release page)", goos)
 	}
 	switch goarch {
 	case "amd64", "arm64":
 		// supported
 	default:
-		return "", "", fmt.Errorf("unsupported CPU arch for zot update: %s", goarch)
+		return "", "", fmt.Errorf("unsupported CPU arch for ncode update: %s", goarch)
 	}
 	if goos == "windows" && goarch == "arm64" {
 		return "", "", errors.New("windows/arm64 release artifacts are not published; download manually")
@@ -252,7 +254,7 @@ func releaseAssetName(version string) (name, format string, err error) {
 	if goos == "windows" {
 		ext = "zip"
 	}
-	return fmt.Sprintf("zot_%s_%s_%s.%s", version, goos, goarch, ext), ext, nil
+	return fmt.Sprintf("ncode_%s_%s_%s.%s", version, goos, goarch, ext), ext, nil
 }
 
 // downloadFile fetches url to dst, streaming through io.Copy so big
@@ -262,6 +264,7 @@ func downloadFile(ctx context.Context, url, dst string) error {
 	if err != nil {
 		return err
 	}
+	req.Header.Set("user-agent", "ncode-updater")
 	if tok := os.Getenv("GITHUB_TOKEN"); tok != "" {
 		req.Header.Set("authorization", "Bearer "+tok)
 	}
@@ -326,7 +329,7 @@ func sha256File(path string) (string, error) {
 }
 
 // extractArchive shells out to the system tar / unzip rather than
-// pulling in a Go archive lib. Reasoning: zot already depends on
+// pulling in a Go archive lib. Reasoning: ncode already depends on
 // system tar implicitly in a few places, every supported platform
 // ships tar (BSD tar on macOS handles gzip natively, GNU tar on
 // Linux, bsdtar on Windows 10+), and the dependency-free release
@@ -386,7 +389,7 @@ func replaceBinary(cur, newBin string) error {
 			return fmt.Errorf("install new binary: %w", err)
 		}
 		// The .old file is locked until this process exits; leave
-		// it behind. Next `zot update` cleans it up via the
+		// it behind. Next `ncode update` cleans it up via the
 		// os.Remove(bak) above.
 		return nil
 	}

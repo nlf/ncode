@@ -6,9 +6,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // btwTurn is one user/assistant pair within a side chat. Kept

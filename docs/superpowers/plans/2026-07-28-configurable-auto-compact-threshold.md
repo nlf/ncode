@@ -1,5 +1,7 @@
 # Configurable Auto-Compact Threshold Implementation Plan
 
+> **Historical record:** This inherited-era plan preserves its original product terminology and paths as provenance; it is not current ncode setup guidance.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add persisted auto-compaction threshold presets to the interactive TUI settings.

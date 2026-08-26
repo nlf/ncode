@@ -21,7 +21,7 @@ import (
 // Wire protocol notes:
 //   - Endpoint: POST https://chatgpt.com/backend-api/codex/responses
 //   - Headers: Authorization: Bearer <access_token>, chatgpt-account-id: <id>,
-//     OpenAI-Beta: responses=experimental, originator: zot
+//     OpenAI-Beta: responses=experimental, originator: ncode
 //   - Body: OpenAI Responses API shape (not chat/completions).
 //     input: [{role, content: [{type: "input_text" | "input_image" | ... }]}]
 //     instructions: <system prompt>
@@ -75,7 +75,7 @@ func NewOpenAICodex(token, accountID, baseURL string) Client {
 
 func (c *codexClient) Name() string { return "openai-codex" }
 
-// ---- Responses API wire types (subset needed for zot's surface) ----
+// ---- Responses API wire types (subset needed for ncode's surface) ----
 
 type codexInputText struct {
 	Type string `json:"type"` // "input_text"
@@ -350,10 +350,12 @@ func usesCodexCLIRouting(model string) bool {
 	}
 }
 
+var codexRandomRead = rand.Read
+
 func newCodexSessionID() string {
 	var b [16]byte
-	if _, err := rand.Read(b[:]); err != nil {
-		return fmt.Sprintf("zot-%d", time.Now().UnixNano())
+	if _, err := codexRandomRead(b[:]); err != nil {
+		return fmt.Sprintf("ncode-%d", time.Now().UnixNano())
 	}
 	return strings.Join([]string{
 		hex.EncodeToString(b[0:4]),
@@ -402,13 +404,13 @@ func (c *codexClient) Stream(ctx context.Context, req Request) (<-chan Event, er
 			}
 			if cliRouting {
 				// The ChatGPT Codex backend normally requires the Codex CLI
-				// request identity. A narrow fallback below uses zot's identity
+				// request identity. A narrow fallback below uses ncode's identity
 				// when that compatibility shape selects unsupported cache policy.
 				httpReq.Header.Set("originator", "codex_cli_rs")
 				httpReq.Header.Set("user-agent", "codex_cli_rs/0.0.0")
 			} else {
-				httpReq.Header.Set("originator", "zot")
-				httpReq.Header.Set("user-agent", fmt.Sprintf("zot (%s %s)", runtime.GOOS, runtime.GOARCH))
+				httpReq.Header.Set("originator", "ncode")
+				httpReq.Header.Set("user-agent", fmt.Sprintf("ncode (%s %s)", runtime.GOOS, runtime.GOARCH))
 			}
 			return httpReq, nil
 		}

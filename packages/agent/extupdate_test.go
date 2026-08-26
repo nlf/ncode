@@ -66,8 +66,8 @@ func mustRun(t *testing.T, dir, name string, args ...string) {
 	}
 }
 
-// makeFakeZotHome scaffolds $ZOT_HOME/extensions/ and returns the path.
-func makeFakeZotHome(t *testing.T) string {
+// makeFakeNcodeHome scaffolds $NCODE_HOME/extensions/ and returns the path.
+func makeFakeNcodeHome(t *testing.T) string {
 	t.Helper()
 	home := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(home, "extensions"), 0o755); err != nil {
@@ -95,19 +95,19 @@ func extWithManifest(t *testing.T, root, name, content string) string {
 // ----- tests -----
 
 func TestUpdateAllExtensions_NoExtensionsDirectory(t *testing.T) {
-	// Brand new $ZOT_HOME with no extensions/ directory at all.
+	// Brand new $NCODE_HOME with no extensions/ directory at all.
 	// Must not panic and must print nothing alarming.
 	home := t.TempDir()
 	updateAllExtensions(home) // no-op
 }
 
 func TestUpdateAllExtensions_EmptyDirectory(t *testing.T) {
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 	updateAllExtensions(home) // no-op, no panic
 }
 
 func TestUpdateOneExtension_NoManifest(t *testing.T) {
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 	dir := filepath.Join(home, "extensions", "noman")
 	_ = os.MkdirAll(dir, 0o755)
 	got := updateOneExtension(dir, "noman")
@@ -117,7 +117,7 @@ func TestUpdateOneExtension_NoManifest(t *testing.T) {
 }
 
 func TestUpdateOneExtension_Disabled(t *testing.T) {
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 	dir := extWithManifest(t, home, "off",
 		`{"name":"off","version":"1.0.0","exec":"./x","enabled":false}`)
 	got := updateOneExtension(dir, "off")
@@ -127,7 +127,7 @@ func TestUpdateOneExtension_Disabled(t *testing.T) {
 }
 
 func TestUpdateOneExtension_NotAGitCheckout(t *testing.T) {
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 	dir := extWithManifest(t, home, "plain", "")
 	got := updateOneExtension(dir, "plain")
 	if got != "skipped" {
@@ -138,7 +138,7 @@ func TestUpdateOneExtension_NotAGitCheckout(t *testing.T) {
 func TestUpdateOneExtension_UpToDate(t *testing.T) {
 	gitAvailable(t)
 	tmp := t.TempDir()
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 
 	// Set up a remote and clone it as the "installed" extension.
 	remote := filepath.Join(tmp, "remote.git")
@@ -165,7 +165,7 @@ func TestUpdateOneExtension_UpToDate(t *testing.T) {
 func TestUpdateOneExtension_PullsNewCommit(t *testing.T) {
 	gitAvailable(t)
 	tmp := t.TempDir()
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 
 	remote := filepath.Join(tmp, "remote.git")
 	initBareRepo(t, remote)
@@ -201,7 +201,7 @@ func TestUpdateOneExtension_PullsNewCommit(t *testing.T) {
 func TestUpdateOneExtension_StashesDirtyWorktree(t *testing.T) {
 	gitAvailable(t)
 	tmp := t.TempDir()
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 
 	remote := filepath.Join(tmp, "remote.git")
 	initBareRepo(t, remote)
@@ -244,7 +244,7 @@ func TestUpdateOneExtension_StashesDirtyWorktree(t *testing.T) {
 func TestUpdateOneExtension_DivergedFails(t *testing.T) {
 	gitAvailable(t)
 	tmp := t.TempDir()
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 
 	remote := filepath.Join(tmp, "remote.git")
 	initBareRepo(t, remote)
@@ -281,7 +281,7 @@ func TestUpdateOneExtension_DivergedFails(t *testing.T) {
 func TestUpdateOneExtension_BadRemoteFails(t *testing.T) {
 	gitAvailable(t)
 	tmp := t.TempDir()
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 
 	// Init a repo with an "origin" that points at a non-existent path.
 	extDir := filepath.Join(home, "extensions", "bad")
@@ -312,7 +312,7 @@ func TestUpdateOneExtension_BadRemoteFails(t *testing.T) {
 func TestUpdateAllExtensions_MixedSet(t *testing.T) {
 	gitAvailable(t)
 	tmp := t.TempDir()
-	home := makeFakeZotHome(t)
+	home := makeFakeNcodeHome(t)
 
 	// 1 plain non-git extension (skipped)
 	extWithManifest(t, home, "plain", "")
@@ -336,6 +336,28 @@ func TestUpdateAllExtensions_MixedSet(t *testing.T) {
 
 	// Must not panic, must not propagate any error to the caller.
 	updateAllExtensions(home)
+}
+
+func TestGitStashUsesNcodeRuntimeName(t *testing.T) {
+	gitAvailable(t)
+	dir := filepath.Join(t.TempDir(), "extension")
+	initWorkRepo(t, dir)
+	writeFile(t, filepath.Join(dir, "runtime.json"), `{"state":"dirty"}`)
+
+	ref, stashed, err := gitStash(context.Background(), dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !stashed || ref == "" {
+		t.Fatalf("gitStash = (%q, %v), want a named stash", ref, stashed)
+	}
+	out, err := runGit(context.Background(), dir, "stash", "list")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, "ncode-update-") {
+		t.Fatalf("stash list = %q, want ncode-update prefix", out)
+	}
 }
 
 func TestSummariseGitError_PrefersErrorOverHint(t *testing.T) {

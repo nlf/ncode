@@ -453,29 +453,32 @@ func parseManualCodeInput(s string) (code, state string) {
 // (containers, SSH without display forwarding, etc.) instead of
 // trying to bind a callback port the user can never reach.
 func HasBrowser() bool {
-	if os.Getenv("ZOT_NO_BROWSER") != "" {
-		return false
-	}
-	if os.Getenv("ZOT_FORCE_BROWSER") != "" {
-		return true
-	}
+	container := false
 	if _, err := os.Stat("/.dockerenv"); err == nil {
-		return false
+		container = true
 	}
 	if b, err := os.ReadFile("/proc/1/cgroup"); err == nil {
 		txt := string(b)
-		if strings.Contains(txt, "docker") || strings.Contains(txt, "kubepods") || strings.Contains(txt, "containerd") {
-			return false
-		}
+		container = container || strings.Contains(txt, "docker") || strings.Contains(txt, "kubepods") || strings.Contains(txt, "containerd")
 	}
-	switch runtime.GOOS {
+	return hasBrowser(runtime.GOOS, os.Getenv, container)
+}
+
+func hasBrowser(goos string, getenv func(string) string, container bool) bool {
+	if getenv("NCODE_NO_BROWSER") != "" {
+		return false
+	}
+	if getenv("NCODE_FORCE_BROWSER") != "" {
+		return true
+	}
+	if container {
+		return false
+	}
+	switch goos {
 	case "darwin", "windows":
 		return true
 	default:
-		if os.Getenv("DISPLAY") == "" && os.Getenv("WAYLAND_DISPLAY") == "" {
-			return false
-		}
-		return true
+		return getenv("DISPLAY") != "" || getenv("WAYLAND_DISPLAY") != ""
 	}
 }
 

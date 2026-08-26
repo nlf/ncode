@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // TestSessionExportImportRoundTrip writes a few messages to a live
@@ -83,7 +83,7 @@ func TestSessionExportImportRoundTrip(t *testing.T) {
 }
 
 // TestExportToFilePath writes to an explicit file path (no
-// directory guessing) and checks the .zotsession extension is
+// directory guessing) and checks the .ncodesession extension is
 // appended when missing.
 func TestExportToFilePath(t *testing.T) {
 	root := t.TempDir()
@@ -97,14 +97,17 @@ func TestExportToFilePath(t *testing.T) {
 	})
 	_ = sess.Close()
 
-	// No extension — should add .zotsession.
+	// No extension — should add .ncodesession.
 	dst := filepath.Join(t.TempDir(), "mysession")
 	out, err := ExportSession(sess.Path, dst)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.HasSuffix(out, PortableExt) {
-		t.Errorf("want .zotsession suffix on %q", out)
+	if PortableExt != ".ncodesession" {
+		t.Fatalf("PortableExt = %q, want .ncodesession", PortableExt)
+	}
+	if !strings.HasSuffix(out, ".ncodesession") {
+		t.Errorf("want .ncodesession suffix on %q", out)
 	}
 }
 

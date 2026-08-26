@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/extensions"
-	"github.com/patriceckhart/zot/packages/agent/extproto"
-	"github.com/patriceckhart/zot/packages/ignore"
+	"github.com/nlf/ncode/packages/agent/extensions"
+	"github.com/nlf/ncode/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/ignore"
 )
 
-// runExtCommand dispatches `zot ext ...` subcommands. Returns
+// runExtCommand dispatches `ncode ext ...` subcommands. Returns
 // (handled=true, err) if rawArgs starts with "ext"; otherwise
 // (handled=false, nil) so the main router falls through to the
 // regular flag parser.
@@ -54,20 +54,20 @@ func runExtCommand(rawArgs []string, version string) (handled bool, err error) {
 }
 
 func printExtHelp() {
-	fmt.Fprintln(os.Stderr, `zot ext — manage extensions
+	fmt.Fprintln(os.Stderr, `ncode ext — manage extensions
 
 usage:
-  zot ext list                    list installed extensions and their state
-  zot ext doctor                  diagnose installed extensions
-  zot ext logs <name> [-f]        cat / tail an extension's stderr log
-  zot ext enable <name>           re-enable a disabled extension
-  zot ext disable <name>          disable without removing
-  zot ext remove <name>           delete an extension directory
-  zot ext install <path|git-url>  copy / clone an extension into $ZOT_HOME/extensions/
+  ncode ext list                    list installed extensions and their state
+  ncode ext doctor                  diagnose installed extensions
+  ncode ext logs <name> [-f]        cat / tail an extension's stderr log
+  ncode ext enable <name>           re-enable a disabled extension
+  ncode ext disable <name>          disable without removing
+  ncode ext remove <name>           delete an extension directory
+  ncode ext install <path|git-url>  copy / clone an extension into $NCODE_HOME/extensions/
 
 extensions live under:
-  $ZOT_HOME/extensions/<name>/extension.json   (global)
-  ./.zot/extensions/<name>/extension.json      (project-local)`)
+  $NCODE_HOME/extensions/<name>/extension.json   (global)
+  ./.ncode/extensions/<name>/extension.json      (project-local)`)
 }
 
 // extList walks both the global and project-local extension dirs and
@@ -118,7 +118,7 @@ func extList() error {
 	}
 	if len(rows) == 0 {
 		fmt.Fprintln(os.Stderr, "no extensions installed")
-		fmt.Fprintln(os.Stderr, "see docs/extensions.md to write your own, or `zot ext install <path|url>`")
+		fmt.Fprintln(os.Stderr, "see docs/extensions.md to write your own, or `ncode ext install <path|url>`")
 		return nil
 	}
 	fmt.Printf("%-12s  %-20s  %-10s  %-8s  %-10s  %s\n", "scope", "name", "version", "enabled", "language", "dir")
@@ -161,14 +161,14 @@ func extDoctor(version string) error {
 	rows := scanExtDoctorStatic()
 	if len(rows) == 0 {
 		fmt.Fprintln(os.Stdout, "no extensions installed")
-		fmt.Fprintln(os.Stdout, "see docs/extensions.md to write your own, or `zot ext install <path|url>`")
+		fmt.Fprintln(os.Stdout, "see docs/extensions.md to write your own, or `ncode ext install <path|url>`")
 		return nil
 	}
 
 	cwd, _ := os.Getwd()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	mgr := extensions.New(ZotHome(), cwd, version, "", "", extDoctorHooks{})
+	mgr := extensions.New(NcodeHome(), cwd, version, "", "", extDoctorHooks{})
 	errs := mgr.Discover(ctx)
 	mgr.WaitForReady(3 * time.Second)
 	diags := mgr.Diagnostics()
@@ -179,7 +179,7 @@ func extDoctor(version string) error {
 		diagByDir[d.Dir] = d
 	}
 
-	fmt.Fprintln(os.Stdout, "zot extension doctor")
+	fmt.Fprintln(os.Stdout, "ncode extension doctor")
 	fmt.Fprintln(os.Stdout)
 	for _, row := range rows {
 		printExtDoctorRow(os.Stdout, row, diagByDir[row.Dir])
@@ -200,9 +200,9 @@ func scanExtDoctorStatic() []extDoctorStaticRow {
 	}
 	var dirs []scanDir
 	if cwd, err := os.Getwd(); err == nil {
-		dirs = append(dirs, scanDir{scope: "project", dir: filepath.Join(cwd, ".zot", "extensions")})
+		dirs = append(dirs, scanDir{scope: "project", dir: filepath.Join(cwd, ".ncode", "extensions")})
 	}
-	if h := ZotHome(); h != "" {
+	if h := NcodeHome(); h != "" {
 		dirs = append(dirs, scanDir{scope: "global", dir: filepath.Join(h, "extensions")})
 	}
 
@@ -349,17 +349,17 @@ func printExtDoctorRow(w io.Writer, row extDoctorStaticRow, diag extensions.Exte
 }
 
 func extDoctorLogPath(name string) string {
-	if name == "" || ZotHome() == "" {
+	if name == "" || NcodeHome() == "" {
 		return ""
 	}
-	return filepath.Join(ZotHome(), "logs", "ext-"+name+".log")
+	return filepath.Join(NcodeHome(), "logs", "ext-"+name+".log")
 }
 
 // extLogs locates the named extension's log file and either cats or
 // tails it (-f).
 func extLogs(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: zot ext logs <name> [-f]")
+		return fmt.Errorf("usage: ncode ext logs <name> [-f]")
 	}
 	name := args[0]
 	follow := false
@@ -368,7 +368,7 @@ func extLogs(args []string) error {
 			follow = true
 		}
 	}
-	logPath := filepath.Join(ZotHome(), "logs", "ext-"+name+".log")
+	logPath := filepath.Join(NcodeHome(), "logs", "ext-"+name+".log")
 	if _, err := os.Stat(logPath); err != nil {
 		return fmt.Errorf("no log for %q at %s", name, logPath)
 	}
@@ -394,7 +394,7 @@ func extToggle(args []string, enabled bool) error {
 		if !enabled {
 			verb = "disable"
 		}
-		return fmt.Errorf("usage: zot ext %s <name>", verb)
+		return fmt.Errorf("usage: ncode ext %s <name>", verb)
 	}
 	name := args[0]
 	dir, err := findExtensionDir(name)
@@ -430,7 +430,7 @@ func extToggle(args []string, enabled bool) error {
 // prompt (skip with --yes).
 func extRemove(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: zot ext remove <name> [--yes]")
+		return fmt.Errorf("usage: ncode ext remove <name> [--yes]")
 	}
 	name := args[0]
 	yes := false
@@ -460,14 +460,14 @@ func extRemove(args []string) error {
 }
 
 // extInstall copies a local directory or shallow-clones a git URL
-// into $ZOT_HOME/extensions/. Validates the destination contains an
+// into $NCODE_HOME/extensions/. Validates the destination contains an
 // extension.json before reporting success.
 func extInstall(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: zot ext install <path|git-url>")
+		return fmt.Errorf("usage: ncode ext install <path|git-url>")
 	}
 	src := args[0]
-	dest := filepath.Join(ZotHome(), "extensions")
+	dest := filepath.Join(NcodeHome(), "extensions")
 	if err := os.MkdirAll(dest, 0o755); err != nil {
 		return err
 	}
@@ -507,7 +507,7 @@ func extInstall(args []string) error {
 	// Resolve to an absolute, cleaned path before deriving the install
 	// name. Otherwise relative sources like "." or "./" collapse to a
 	// basename of ".", and the destination wrongly resolves to the
-	// extensions/ parent directory (which zot creates on first run),
+	// extensions/ parent directory (which ncode creates on first run),
 	// triggering a false "already exists" failure.
 	absSrc, err := filepath.Abs(src)
 	if err != nil {
@@ -530,11 +530,11 @@ func extInstall(args []string) error {
 
 func extensionDirs() map[string]string {
 	out := map[string]string{}
-	if h := ZotHome(); h != "" {
+	if h := NcodeHome(); h != "" {
 		out["global"] = filepath.Join(h, "extensions")
 	}
 	if cwd, err := os.Getwd(); err == nil {
-		out["project"] = filepath.Join(cwd, ".zot", "extensions")
+		out["project"] = filepath.Join(cwd, ".ncode", "extensions")
 	}
 	return out
 }
@@ -557,7 +557,7 @@ func dashIfEmpty(s string) string {
 }
 
 // copyDir does a recursive copy of src to dst preserving file mode
-// bits. Used by `zot ext install <local-path>`.
+// bits. Used by `ncode ext install <local-path>`.
 //
 // Entries matched by the source's root .gitignore are skipped, and
 // .git itself is always skipped. This keeps non-portable, regeneratable

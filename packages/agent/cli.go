@@ -15,16 +15,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/extensions"
-	"github.com/patriceckhart/zot/packages/agent/extproto"
-	"github.com/patriceckhart/zot/packages/agent/modes"
-	"github.com/patriceckhart/zot/packages/agent/skills"
-	"github.com/patriceckhart/zot/packages/agent/swarm"
-	"github.com/patriceckhart/zot/packages/agent/tools"
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/provider/auth"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/extensions"
+	"github.com/nlf/ncode/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/agent/modes"
+	"github.com/nlf/ncode/packages/agent/skills"
+	"github.com/nlf/ncode/packages/agent/swarm"
+	"github.com/nlf/ncode/packages/agent/tools"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/provider/auth"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // interactiveExtHooks is a tiny adapter that lets the extension
@@ -207,13 +207,13 @@ func prepareRuntimeCatalog() {
 	RefreshModelsAsync()
 }
 
-// Run is the top-level entrypoint for the zot binary.
+// Run is the top-level entrypoint for the ncode binary.
 func Run(rawArgs []string, version string) error {
 	// Apply network configuration before any subcommand can make an HTTP
 	// request. Standard proxy environment variables retain precedence.
 	applyConfiguredHTTPProxy()
 
-	// Subcommand router: `zot bot ...` is handled separately so the
+	// Subcommand router: `ncode bot ...` is handled separately so the
 	// generic flag parser doesn't reject "bot" as a positional arg.
 	if handled, err := runBotCommand(rawArgs, version); handled {
 		return err
@@ -231,7 +231,7 @@ func Run(rawArgs []string, version string) error {
 }
 
 func runWithArgsRaw(rawArgs []string, version string) error {
-	// `zot rpc` is shorthand for `zot --rpc` so third-party apps can
+	// `ncode rpc` is shorthand for `ncode --rpc` so third-party apps can
 	// spawn the binary with a clean argv. Strip the leading 'rpc'
 	// token and let the rest flow through the normal arg parser.
 	if len(rawArgs) > 0 && rawArgs[0] == "rpc" {
@@ -251,7 +251,7 @@ func runWithArgsRaw(rawArgs []string, version string) error {
 		return nil
 	}
 	if args.Version {
-		fmt.Println("zot", version)
+		fmt.Println("ncode", version)
 		return nil
 	}
 	// Model catalog: load any cached discovery data before we inspect
@@ -309,7 +309,7 @@ func (nonInteractiveExtHooks) ClosePanel(string, string)                        
 // wire tools into the resolved registry, and a cleanup closure to
 // defer. Mirrors the interactive-mode setup minus the TUI hooks.
 func setupNonInteractiveExtensions(ctx context.Context, args Args, r *Resolved, version string) (*extensions.Manager, func()) {
-	extMgr := extensions.New(ZotHome(), r.CWD, version, r.Provider, r.Model, nonInteractiveExtHooks{})
+	extMgr := extensions.New(NcodeHome(), r.CWD, version, r.Provider, r.Model, nonInteractiveExtHooks{})
 	for _, e := range extMgr.LoadExplicit(ctx, args.Exts) {
 		fmt.Fprintln(os.Stderr, "extension load:", e)
 	}
@@ -530,7 +530,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 	// the host hooks adapter can dereference it after construction.
 	var iv *modes.Interactive
 	extHooks := &interactiveExtHooks{ivPtr: &iv}
-	extMgr := extensions.New(ZotHome(), r.CWD, version, r.Provider, r.Model, extHooks)
+	extMgr := extensions.New(NcodeHome(), r.CWD, version, r.Provider, r.Model, extHooks)
 	var startupExtensionErrors []string
 	// --ext paths first so they win against installed extensions of
 	// the same name (loadOne's first-write-wins semantics).
@@ -562,7 +562,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 
 	// Build the swarm supervisor BEFORE the agent so the auto-swarm
 	// tool can reference it during tool-registry construction. State
-	// lives under ZotHome/swarm so per-agent meta/events survive
+	// lives under NcodeHome/swarm so per-agent meta/events survive
 	// restarts; the user can hunt orphaned agents down with
 	// `git worktree list` if anything misbehaves.
 	//
@@ -571,7 +571,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 	// in this outer scope rather than scoping it tighter.
 	var swarmMgr *swarm.Swarm
 	swarmMgr = swarm.New(swarm.Config{
-		Root:     filepath.Join(ZotHome(), "swarm"),
+		Root:     filepath.Join(NcodeHome(), "swarm"),
 		RepoRoot: r.CWD,
 		ResolveCredential: func(ctx context.Context, providerID string) (swarm.Credential, error) {
 			if providerID == "ollama" {
@@ -737,7 +737,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 	// rescue (a bad key, a typo'd base URL, or a corporate gateway that
 	// only the originally-picked provider needed). Re-resolving without
 	// them lets the rescue retry use env vars / auth.json / provider
-	// defaults the way zot would have without the overrides.
+	// defaults the way ncode would have without the overrides.
 	buildAgentForRescue := func(providerOverride, modelOverride string) (*core.Agent, string, string, error) {
 		next := args
 		next.APIKey = ""
@@ -1009,9 +1009,9 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		// Fresh session in the new cwd's bucket. We bypass
 		// openOrCreateSession's --continue / --resume branches
 		// because /cd's semantics are "start fresh here", matching
-		// what relaunching `zot --cwd <path>` would do today.
+		// what relaunching `ncode --cwd <path>` would do today.
 		if !args.NoSess {
-			newRoot := ZotHome()
+			newRoot := NcodeHome()
 			core.PruneEmptySessions(newRoot, absPath)
 			newSess, serr := core.NewSession(newRoot, absPath, newProvider, newModel, version)
 			if serr != nil {
@@ -1025,7 +1025,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 
 		// Push the new state into the running Interactive.
 		if iv != nil {
-			startupPaths := instructionContextPaths(loadAgentsContext(absPath, ZotHome()))
+			startupPaths := instructionContextPaths(loadAgentsContext(absPath, NcodeHome()))
 			iv.ApplyChangedCWDWithStartupContext(newAg, newProvider, newModel, absPath, startupPaths)
 		}
 
@@ -1044,7 +1044,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 	updateCh := make(chan modes.UpdateInfo, 1)
 	go func() {
 		defer close(updateCh)
-		src := <-CheckForUpdateAsync(ZotHome(), version)
+		src := <-CheckForUpdateAsync(NcodeHome(), version)
 		updateCh <- modes.UpdateInfo{
 			Current:   src.Current,
 			Latest:    src.Latest,
@@ -1091,10 +1091,10 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 	for idx, s := range initialCfg.QuickModelShortcuts {
 		quickModelShortcuts[idx] = modes.QuickModelShortcut{Provider: s.Provider, Model: s.Model}
 	}
-	theme, _, themeErr := tui.DetectThemeWithCustom(ZotHome(), initialCfg.Theme, 80*time.Millisecond)
+	theme, _, themeErr := tui.DetectThemeWithCustom(NcodeHome(), initialCfg.Theme, 80*time.Millisecond)
 	if themeErr != nil {
 		fmt.Fprintln(os.Stderr, "theme load:", themeErr)
-		if initialCfg.Theme != "" && !tui.ThemeExists(ZotHome(), initialCfg.Theme) {
+		if initialCfg.Theme != "" && !tui.ThemeExists(NcodeHome(), initialCfg.Theme) {
 			initialCfg.Theme = ""
 			_ = SaveConfig(initialCfg)
 		}
@@ -1110,7 +1110,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		swarmMgr.SetActiveSession(sess.ID)
 	}
 	// Best-effort shutdown on interactive exit: stop all running
-	// agents so they don't outlive their parent zot.
+	// agents so they don't outlive their parent ncode.
 	defer swarmMgr.StopAll()
 
 	var startupSkills []*skills.Skill
@@ -1152,8 +1152,8 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		StartupExtensionErrors:     startupExtensionErrors,
 		StartupSkillNames:          startupSkillNames(startupSkills),
 		ShowInstructionsAtStartup:  initialCfg.ShowInstructionsAtStartup,
-		ZotHome:                    ZotHome(),
-		SessionsRoot:               ZotHome(),
+		NcodeHome:                  NcodeHome(),
+		SessionsRoot:               NcodeHome(),
 		Version:                    version,
 		UpdateInfoChan:             updateCh,
 		Sandbox:                    sharedSandbox,
@@ -1244,7 +1244,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 			// model still sees them through the system-prompt
 			// manifest and the skill tool.
 			userHome, _ := os.UserHomeDir()
-			list, _ := skills.Discover(ZotHome(), r.CWD, userHome, args.WithSkills)
+			list, _ := skills.Discover(NcodeHome(), r.CWD, userHome, args.WithSkills)
 			return skills.VisibleSkills(list)
 		},
 		NoYolo:      args.NoYolo,
@@ -1273,7 +1273,7 @@ func runInteractive(ctx context.Context, args Args, version string) error {
 		})
 	}
 
-	// Signal-driven flush: a SIGTERM / SIGHUP to the zot process
+	// Signal-driven flush: a SIGTERM / SIGHUP to the ncode process
 	// (closed terminal window, system shutdown, kill) used to lose
 	// the entire in-memory transcript because the deferred post-Run
 	// flush below never ran. Per-message persistence above covers
@@ -1329,10 +1329,10 @@ func openOrCreateSession(args Args, r Resolved, ag *core.Agent, version string) 
 	if args.NoSess {
 		return nil, nil
 	}
-	// Sweep meta-only files left over from older zot versions (and from
+	// Sweep meta-only files left over from older ncode versions (and from
 	// any session that crashed before its first AppendMessage). Cheap;
 	// reads the first few bytes of each file in the cwd's session dir.
-	sessionsRoot := ZotHome()
+	sessionsRoot := NcodeHome()
 	core.PruneEmptySessions(sessionsRoot, args.CWD)
 	var (
 		s    *core.Session

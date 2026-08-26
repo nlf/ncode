@@ -16,9 +16,9 @@
 //
 // Install:
 //
-//	zot ext install .
+//	ncode ext install .
 //
-// Try it — ask zot something like:
+// Try it — ask ncode something like:
 //
 //	"Request approval to delete the temp directory."
 //
@@ -35,7 +35,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/patriceckhart/zot/packages/agent/ext"
+	"github.com/nlf/ncode/packages/agent/ext"
 )
 
 const schema = `{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -11,15 +12,15 @@ import (
 
 	"github.com/mattn/go-runewidth"
 
-	"github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 func timelineTestData() timelineData {
 	started := time.Date(2026, 8, 17, 12, 0, 0, 0, time.UTC)
 	finished := started.Add(1250 * time.Millisecond)
 	return timelineData{
-		System: "You are zot.",
+		System: "You are ncode.",
 		Tools: []provider.Tool{{
 			Name: "bash", Schema: json.RawMessage(`{"type":"object","properties":{"command":{"type":"string"}}}`),
 		}},
@@ -161,6 +162,9 @@ func TestTimelineExportOmitsImageDataAndUsesPrivatePermissions(t *testing.T) {
 	path, err := view.Export(t.TempDir(), data)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if name := filepath.Base(path); !strings.HasPrefix(name, "ncode-timeline-") || !strings.HasSuffix(name, ".json") {
+		t.Fatalf("export basename = %q, want ncode-timeline-*.json", name)
 	}
 	contents, err := os.ReadFile(path)
 	if err != nil {

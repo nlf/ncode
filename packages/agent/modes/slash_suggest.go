@@ -6,8 +6,8 @@ import (
 
 	"github.com/mattn/go-runewidth"
 
-	"github.com/patriceckhart/zot/packages/agent/skills"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/skills"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // slashCommand is one entry in the autocomplete popup. Header rows
@@ -55,13 +55,13 @@ var slashCatalog = []slashCommand{
 	{Name: "/telegram", Desc: "connect, disconnect, or show status of the telegram bridge"},
 	{Name: "/settings", Desc: "open settings"},
 	{Name: "/clear", Desc: "clear the chat transcript"},
-	{Name: "/exit", Desc: "exit zot"},
+	{Name: "/exit", Desc: "exit ncode"},
 }
 
 var sessionSlashCommands = []slashCommand{
 	{Name: "/session timeline", Desc: "inspect context, messages, and tool calls"},
-	{Name: "/session export", Desc: "write the current session to a .zotsession file"},
-	{Name: "/session import", Desc: "load a .zotsession file into this directory"},
+	{Name: "/session export", Desc: "write the current session to a .ncodesession file"},
+	{Name: "/session import", Desc: "load a .ncodesession file into this directory"},
 	{Name: "/session fork", Desc: "branch from a past user message"},
 	{Name: "/session tree", Desc: "switch between session branches"},
 }

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 type cleanupTestTerminal struct {

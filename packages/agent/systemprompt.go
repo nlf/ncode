@@ -19,13 +19,13 @@ type ToolSummary struct {
 
 // SystemPromptOpts configures BuildSystemPrompt.
 type SystemPromptOpts struct {
-	CWD        string
-	Tools      []ToolSummary
-	Custom     string   // when CustomSet, replaces the built-in identity and docs guidance
-	CustomSet  bool     // preserves an intentionally empty custom prompt
-	Append     []string // extra text appended at the end
-	Now        time.Time
-	ZotDocsDir string
+	CWD          string
+	Tools        []ToolSummary
+	Custom       string   // when CustomSet, replaces the built-in identity and docs guidance
+	CustomSet    bool     // preserves an intentionally empty custom prompt
+	Append       []string // extra text appended at the end
+	Now          time.Time
+	NcodeDocsDir string
 }
 
 // BuildSystemPrompt constructs the system prompt.
@@ -34,8 +34,8 @@ type SystemPromptOpts struct {
 // the cached prefix on every request, so bloat is cumulatively
 // expensive. We ship only:
 //
-//   - A one-paragraph identity (who zot is, what the name means,
-//     what the TUI expects for output format).
+//   - A one-paragraph identity (who ncode is and what the TUI expects
+//     for output format).
 //   - The date + cwd footer so the model has current-context.
 //
 // Everything else (tool listing, operating guidelines, "don't run
@@ -46,7 +46,7 @@ type SystemPromptOpts struct {
 //
 // Users who want extra biasing can use --system-prompt (replace),
 // --append-system-prompt (additive, repeatable), or drop a
-// SYSTEM.md in $ZOT_HOME that overrides the default identity.
+// SYSTEM.md in $NCODE_HOME that overrides the default identity.
 func BuildSystemPrompt(o SystemPromptOpts) string {
 	if o.Now.IsZero() {
 		o.Now = time.Now()
@@ -63,10 +63,10 @@ func BuildSystemPrompt(o SystemPromptOpts) string {
 		sb.WriteString(o.Custom)
 	} else {
 		sb.WriteString(defaultIdentity)
-		if strings.TrimSpace(o.ZotDocsDir) != "" {
-			sb.WriteString("\n\nZot's own docs are installed under ")
-			sb.WriteString(o.ZotDocsDir)
-			sb.WriteString("; use the read tool there when you need details about zot RPC, extensions, skills, or built-in behaviour.")
+		if strings.TrimSpace(o.NcodeDocsDir) != "" {
+			sb.WriteString("\n\nncode's own docs are installed under ")
+			sb.WriteString(o.NcodeDocsDir)
+			sb.WriteString("; use the read tool there when you need details about ncode RPC, extensions, skills, or built-in behaviour.")
 		}
 	}
 
@@ -82,7 +82,7 @@ func BuildSystemPrompt(o SystemPromptOpts) string {
 	return sb.String()
 }
 
-const defaultIdentity = `You are an expert coding assistant operating inside zot, a coding agent harness. The name "zot" stands for "zero-overhead-tool"; if the user asks what zot means, answer exactly that.
+const defaultIdentity = `You are an expert coding assistant operating inside ncode, a coding agent harness.
 
 Your output renders in a TUI that understands markdown for prose and plain text for tool output. Use markdown freely, keep answers concise, and let tool calls speak for themselves rather than narrating them in prose before you invoke them. Act first, then summarise what you did.
 

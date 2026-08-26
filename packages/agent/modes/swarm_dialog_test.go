@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/swarm"
-	"github.com/patriceckhart/zot/packages/provider"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/swarm"
+	"github.com/nlf/ncode/packages/provider"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // staticSnapshots returns a deterministic snapshot slice for the

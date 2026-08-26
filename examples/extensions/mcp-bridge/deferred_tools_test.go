@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/ext"
-	"github.com/patriceckhart/zot/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/agent/ext"
+	"github.com/nlf/ncode/packages/agent/extproto"
 )
 
 type bridgeExtensionHarness struct {
@@ -91,7 +91,7 @@ func (h *bridgeExtensionHarness) startAndCollectTools(t *testing.T) []extproto.R
 	if hello.Type != "hello" {
 		t.Fatalf("first extension frame = %q, want hello", hello.Type)
 	}
-	h.send(t, extproto.HelloAckFromHost{Type: "hello_ack", ProtocolVersion: extproto.ProtocolVersion})
+	h.send(t, extproto.HelloAckFromHost{Type: "hello_ack", Product: extproto.Product, ProtocolVersion: extproto.ProtocolVersion, NcodeVersion: "0.0.0-test"})
 
 	var tools []extproto.RegisterToolFromExt
 	for {

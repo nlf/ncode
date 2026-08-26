@@ -32,7 +32,7 @@ type toolCache struct {
 }
 
 func toolCachePath() string {
-	return filepath.Join(zotHome(), "mcp-tools-cache.json")
+	return filepath.Join(ncodeHome(), "mcp-tools-cache.json")
 }
 
 func serverFingerprint(cfg ServerConfig) string {

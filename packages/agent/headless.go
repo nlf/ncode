@@ -3,8 +3,8 @@ package agent
 import (
 	"context"
 
-	"github.com/patriceckhart/zot/packages/agent/extensions"
-	"github.com/patriceckhart/zot/packages/core"
+	"github.com/nlf/ncode/packages/agent/extensions"
+	"github.com/nlf/ncode/packages/core"
 )
 
 type headlessComposition struct {

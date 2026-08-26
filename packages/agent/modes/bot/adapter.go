@@ -7,7 +7,7 @@ package bot
 import (
 	"context"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // InboundMessage is a protocol-normalised message from a user.

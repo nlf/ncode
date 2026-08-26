@@ -1,4 +1,4 @@
-// scratchpad — a real .ts zot extension with no SDK and no build step.
+// scratchpad — a real .ts ncode extension with no SDK and no build step.
 //
 // Runs via `npx --yes tsx index.ts` (declared in extension.json).
 // First invocation downloads tsx into npm's cache; every subsequent
@@ -46,8 +46,9 @@ interface ToolCall {
 
 interface HelloAck {
   type: "hello_ack";
-  protocol_version: number;
-  zot_version: string;
+  product: "ncode";
+  protocol_version: 2;
+  ncode_version: string;
   provider: string;
   model: string;
   cwd: string;
@@ -83,29 +84,40 @@ interface ToolResult {
 
 const NAME = "scratchpad";
 const VERSION = "1.0.0";
+const ACK_KEYS = new Set([
+  "type",
+  "product",
+  "protocol_version",
+  "ncode_version",
+  "provider",
+  "model",
+  "cwd",
+  "extension_dir",
+  "data_dir",
+]);
 
 function send(frame: Frame): void {
   stdout.write(JSON.stringify(frame) + "\n");
 }
 
 function log(msg: string): void {
-  // stderr is captured by zot to $ZOT_HOME/logs/ext-<name>.log;
+  // stderr is captured by ncode to $NCODE_HOME/logs/ext-<name>.log;
   // safe for debug output. stdout is reserved for the protocol.
   stderr.write(`[${NAME}] ${msg}\n`);
 }
 
 // ---- the scratchpad state itself ----
 //
-// Notes persist as JSONL under <cwd>/.zot/scratchpad-notes.jsonl so
-// they survive zot restarts and stay scoped to the project. The path
+// Notes persist as JSONL under <cwd>/.ncode/scratchpad-notes.jsonl so
+// they survive ncode restarts and stay scoped to the project. The path
 // is resolved once HelloAck arrives (which carries cwd); until then
 // notesPath is empty and reads/writes no-op safely.
 //
 // One note per line, format:  {"at":"<iso>","text":"<body>"}
 // Append-only on /note; full rewrite on /clear-notes.
 //
-// Single-writer assumption: only one zot session per cwd at a time.
-// Concurrent writes from two zot instances would interleave but not
+// Single-writer assumption: only one ncode session per cwd at a time.
+// Concurrent writes from two ncode instances would interleave but not
 // corrupt JSONL line boundaries on POSIX (writes ≤ PIPE_BUF are
 // atomic). Good enough for a demo.
 
@@ -115,7 +127,7 @@ let notes: Note[] = [];
 let notesPath = "";
 
 function setNotesPath(cwd: string): void {
-  notesPath = join(cwd, ".zot", "scratchpad-notes.jsonl");
+  notesPath = join(cwd, ".ncode", "scratchpad-notes.jsonl");
   loadNotes();
 }
 
@@ -182,36 +194,38 @@ send({
   capabilities: ["commands", "tools"],
 });
 
-send({
-  type: "register_command",
-  name: "note",
-  description: "append text to the scratchpad",
-});
-send({
-  type: "register_command",
-  name: "notes",
-  description: "show the scratchpad",
-});
-send({
-  type: "register_command",
-  name: "clear-notes",
-  description: "wipe the scratchpad",
-});
+function registerCapabilities(): void {
+  send({
+    type: "register_command",
+    name: "note",
+    description: "append text to the scratchpad",
+  });
+  send({
+    type: "register_command",
+    name: "notes",
+    description: "show the scratchpad",
+  });
+  send({
+    type: "register_command",
+    name: "clear-notes",
+    description: "wipe the scratchpad",
+  });
 
-send({
-  type: "register_tool",
-  name: "read_notes",
-  description:
-    "Read the scratchpad. Use this when the user asks about notes or context they have stored, or refers to something from earlier they wanted you to remember.",
-  schema: {
-    type: "object",
-    properties: {},
-  },
-});
+  send({
+    type: "register_tool",
+    name: "read_notes",
+    description:
+      "Read the scratchpad. Use this when the user asks about notes or context they have stored, or refers to something from earlier they wanted you to remember.",
+    schema: {
+      type: "object",
+      properties: {},
+    },
+  });
 
-// Sentinel: tells zot all initial registrations are flushed so the
-// agent's tool registry can be built without racing the read loop.
-send({ type: "ready" });
+  // Sentinel: tells ncode all initial registrations are flushed so the
+  // agent's tool registry can be built without racing the read loop.
+  send({ type: "ready" });
+}
 
 // ---- frame loop ----
 
@@ -251,11 +265,22 @@ rl.on("close", () => {
 });
 
 function handleHelloAck(ack: HelloAck): void {
+  if (
+    ack.product !== "ncode" ||
+    ack.protocol_version !== 2 ||
+    typeof ack.ncode_version !== "string" ||
+    ack.ncode_version === "" ||
+    Object.keys(ack).some((key) => !ACK_KEYS.has(key))
+  ) {
+    log("incompatible host acknowledgement; ncode protocol v2 required");
+    process.exit(1);
+  }
   log(
-    `connected to zot ${ack.zot_version} ` +
+    `connected to ncode ${ack.ncode_version} ` +
       `(${ack.provider}/${ack.model}, cwd=${ack.cwd})`,
   );
   if (ack.cwd) setNotesPath(ack.cwd);
+  registerCapabilities();
 }
 
 function handleCommand(frame: CommandInvoked): void {

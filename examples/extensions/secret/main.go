@@ -20,9 +20,9 @@
 //
 // Install:
 //
-//	zot ext install .
+//	ncode ext install .
 //
-// Try it — ask zot something like:
+// Try it — ask ncode something like:
 //
 //	"Fetch https://internal.example.com/report — it needs a password."
 //
@@ -38,7 +38,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/patriceckhart/zot/packages/agent/ext"
+	"github.com/nlf/ncode/packages/agent/ext"
 )
 
 const schema = `{

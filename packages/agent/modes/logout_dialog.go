@@ -1,7 +1,7 @@
 package modes
 
 import (
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // logoutDialog is the picker shown when the user runs `/logout`

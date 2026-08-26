@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 // Agent is a stateful conversation bound to a provider client, a model,

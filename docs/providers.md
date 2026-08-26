@@ -1,12 +1,12 @@
-# zot providers
+# ncode providers
 
-zot ships with built-in providers and a model catalog. You can select models
-with `/model`, list them with `zot --list-models`, and add private models in
-`$ZOT_HOME/models.json`.
+ncode ships with built-in providers and a model catalog. You can select models
+with `/model`, list them with `ncode --list-models`, and add private models in
+`$NCODE_HOME/models.json`.
 
 ## HTTP proxy
 
-Set one global proxy for zot-managed HTTP and HTTPS traffic with the `http_proxy` key in `$ZOT_HOME/config.json`:
+Set one global proxy for ncode-managed HTTP and HTTPS traffic with the `http_proxy` key in `$NCODE_HOME/config.json`:
 
 ```json
 {
@@ -14,7 +14,7 @@ Set one global proxy for zot-managed HTTP and HTTPS traffic with the `http_proxy
 }
 ```
 
-zot applies this setting at startup. Existing `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, and `https_proxy` environment variables take precedence for their corresponding protocol. Standard `NO_PROXY` and `no_proxy` bypass lists remain effective. Restart zot after changing the setting.
+ncode applies this setting at startup. Existing `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, and `https_proxy` environment variables take precedence for their corresponding protocol. Standard `NO_PROXY` and `no_proxy` bypass lists remain effective. Restart ncode after changing the setting.
 
 `config.json` is not a credential store. If the proxy URL contains a username or password, prefer setting the proxy environment variables in a protected shell or service configuration rather than saving those credentials in `config.json`.
 
@@ -22,7 +22,7 @@ zot applies this setting at startup. Existing `HTTP_PROXY`, `HTTPS_PROXY`, `http
 
 Use `/login` in interactive mode. Type in either provider picker to filter the list by provider ID or display name.
 
-- `api key`: stores an API key in `$ZOT_HOME/auth.json` when the provider uses a normal key.
+- `api key`: stores an API key in `$NCODE_HOME/auth.json` when the provider uses a normal key.
 - `subscription`: stores OAuth credentials for subscription-backed providers.
 
 Use `/logout` to remove stored credentials.
@@ -34,7 +34,7 @@ sessions.
 
 ### Command-backed API keys
 
-A provider can obtain its API key from a password manager or another local program. Configure this directly in `$ZOT_HOME/auth.json`:
+A provider can obtain its API key from a password manager or another local program. Configure this directly in `$NCODE_HOME/auth.json`:
 
 ```json
 {
@@ -63,9 +63,9 @@ Custom provider credentials use the same object under `additional_api_key_creds`
 }
 ```
 
-The program is started directly rather than through a shell. The timeout defaults to 120 seconds. It must write one non-empty line to stdout, with no more than 64 KiB of output. Trailing CR/LF characters are removed. Successful results stay only in process memory and are reused until zot exits.
+The program is started directly rather than through a shell. The timeout defaults to 120 seconds. It must write one non-empty line to stdout, with no more than 64 KiB of output. Trailing CR/LF characters are removed. Successful results stay only in process memory and are reused until ncode exits.
 
-Command-backed credentials count as logged in without being executed. zot materializes one only when selecting that provider; background model discovery skips it. `/login` with a normal key replaces the command, while `/logout` clears it. Because `auth.json` can cause program execution, keep it user-writable only and do not use files from untrusted sources.
+Command-backed credentials count as logged in without being executed. ncode materializes one only when selecting that provider; background model discovery skips it. `/login` with a normal key replaces the command, while `/logout` clears it. Because `auth.json` can cause program execution, keep it user-writable only and do not use files from untrusted sources.
 
 Setup-instruction providers:
 
@@ -87,7 +87,7 @@ These providers support subscription login:
 | xAI | SuperGrok or X Premium device-code login. The browser URL is prefilled with the device code. |
 | GitHub Copilot | GitHub Copilot token flow. |
 
-OAuth tokens are stored in `$ZOT_HOME/auth.json` and refreshed when refresh is
+OAuth tokens are stored in `$NCODE_HOME/auth.json` and refreshed when refresh is
 available.
 
 ## API-key providers
@@ -130,14 +130,14 @@ show instructions and should be configured with environment variables.
 | Cloudflare AI Gateway | `CLOUDFLARE_API_KEY` | `cloudflare-ai-gateway` |
 | Azure OpenAI Responses | `AZURE_OPENAI_API_KEY` | `azure-openai-responses` |
 
-When Gondola credentials are available, zot refreshes its public text-model
+When Gondola credentials are available, ncode refreshes its public text-model
 catalog in the background and adds the discovered models to `/model`.
 
 Example:
 
 ```bash
 export OPENROUTER_API_KEY=...
-zot --provider openrouter
+ncode --provider openrouter
 ```
 
 ## Local llama.cpp router
@@ -151,7 +151,7 @@ brew install llama.cpp
 # use `brew upgrade llama.cpp` for an existing installation
 ```
 
-Start `llama-server` without `--model`, `-m`, or `-hf`. Those flags select one model and disable the router behavior zot expects.
+Start `llama-server` without `--model`, `-m`, or `-hf`. Those flags select one model and disable the router behavior ncode expects.
 
 ```bash
 mkdir -p ~/llama-models
@@ -168,7 +168,7 @@ llama-server \
 
 This configuration discovers GGUF files below `~/llama-models`, leaves model loading under explicit user control, enables chat templates, requests GPU offload, and sets a 32K context. Tune the GPU layers and context size for the available memory.
 
-Check the management API before opening zot:
+Check the management API before opening ncode:
 
 ```bash
 curl http://127.0.0.1:8080/health
@@ -177,7 +177,7 @@ curl http://127.0.0.1:8080/models
 
 `/models` must return JSON with a `data` array. A 404 indicates the wrong URL, an older server build, or single-model mode.
 
-To save the connection, run `/login`, choose `api key`, and select `llama.cpp`. Enter `http://127.0.0.1:8080`, without `/v1`, followed by an optional bearer key. zot validates the URL and stores both values in `$ZOT_HOME/auth.json`. Environment variables override the saved connection:
+To save the connection, run `/login`, choose `api key`, and select `llama.cpp`. Enter `http://127.0.0.1:8080`, without `/v1`, followed by an optional bearer key. ncode validates the URL and stores both values in `$NCODE_HOME/auth.json`. Environment variables override the saved connection:
 
 ```bash
 export LLAMA_BASE_URL=http://127.0.0.1:8080
@@ -196,7 +196,7 @@ Ollama downloads are stored in Ollama's internal layout and do not automatically
 
 ### Amazon Bedrock
 
-Bedrock is configured with AWS credentials, not a generic zot API-key entry.
+Bedrock is configured with AWS credentials, not a generic ncode API-key entry.
 Use one of these credential sources:
 
 ```bash
@@ -222,13 +222,13 @@ Example:
 
 ```bash
 AWS_BEARER_TOKEN_BEDROCK=bedrock-api-key-... AWS_REGION=us-east-1 \
-  zot --provider amazon-bedrock --model anthropic.claude-sonnet-4-5-20250929-v1:0
+  ncode --provider amazon-bedrock --model anthropic.claude-sonnet-4-5-20250929-v1:0
 ```
 
 Some Bedrock models require regional inference-profile IDs for on-demand
-throughput, such as `us.` or `eu.` prefixed model IDs. zot rewrites known
+throughput, such as `us.` or `eu.` prefixed model IDs. ncode rewrites known
 families automatically where possible. Claude Opus 5 uses
-`global.anthropic.claude-opus-5`; zot maps the bare foundation-model ID to that
+`global.anthropic.claude-opus-5`; ncode maps the bare foundation-model ID to that
 global profile and supports its adaptive reasoning levels. Explicit profile IDs
 and ARNs are left unchanged.
 
@@ -238,7 +238,7 @@ Vertex can use a Google API key when available:
 
 ```bash
 export GOOGLE_CLOUD_API_KEY=...
-zot --provider google-vertex
+ncode --provider google-vertex
 ```
 
 For service-account or application-default credentials, set the standard
@@ -252,7 +252,7 @@ Cloudflare AI Gateway needs a Cloudflare token plus account and gateway IDs:
 export CLOUDFLARE_API_KEY=...
 export CLOUDFLARE_ACCOUNT_ID=...
 export CLOUDFLARE_GATEWAY_ID=...
-zot --provider cloudflare-ai-gateway
+ncode --provider cloudflare-ai-gateway
 ```
 
 ### Cloudflare Workers AI
@@ -262,7 +262,7 @@ Workers AI needs a Cloudflare token and account ID:
 ```bash
 export CLOUDFLARE_API_KEY=...
 export CLOUDFLARE_ACCOUNT_ID=...
-zot --provider cloudflare-workers-ai
+ncode --provider cloudflare-workers-ai
 ```
 
 ### Azure OpenAI Responses
@@ -271,10 +271,10 @@ zot --provider cloudflare-workers-ai
 export AZURE_OPENAI_API_KEY=...
 export AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com
 export AZURE_OPENAI_API_VERSION=v1 # optional, v1 is the default
-zot --provider azure-openai-responses
+ncode --provider azure-openai-responses
 ```
 
-The provider uses Azure's Responses API. If deployment names differ from zot
+The provider uses Azure's Responses API. If deployment names differ from ncode
 model IDs, map them without changing the catalog:
 
 ```bash
@@ -283,8 +283,8 @@ export AZURE_OPENAI_DEPLOYMENT_NAME_MAP='gpt-5.6-luna=luna-preview,gpt-5.6-sol=s
 
 ## Auth file
 
-Credentials are stored in `$ZOT_HOME/auth.json` with user-only permissions
-when zot creates the file.
+Credentials are stored in `$NCODE_HOME/auth.json` with user-only permissions
+when ncode creates the file.
 
 Example:
 
@@ -302,11 +302,11 @@ Example:
 
 The top-level keys are used for providers with dedicated credential fields.
 Other API-key providers are stored under `additional_api_key_creds`. Prefer
-`/login` so zot writes the correct schema.
+`/login` so ncode writes the correct schema.
 
 ## Custom providers and models
 
-Use `$ZOT_HOME/models.json` for private models, deployment aliases, local
+Use `$NCODE_HOME/models.json` for private models, deployment aliases, local
 servers, or OpenAI-compatible gateways that are not in the built-in catalog.
 User entries override built-in entries with the same provider and model ID, and
 adding a `models.json` no longer hides the built-in catalog: your entries are
@@ -341,7 +341,7 @@ not expose a model-list endpoint, custom provider keys are accepted and stored
 without a verification probe; an invalid key surfaces on the first model call.
 
 To retrieve this custom provider's key from a password manager, add a matching
-entry to `$ZOT_HOME/auth.json`:
+entry to `$NCODE_HOME/auth.json`:
 
 ```json
 {
@@ -361,17 +361,17 @@ The provider IDs in `models.json` and `auth.json` must match. Then select the
 custom model directly:
 
 ```sh
-zot --provider my-company --model company-llm-v2
+ncode --provider my-company --model company-llm-v2
 ```
 
 ## Credential resolution
 
-For each request, zot checks credentials in this order:
+For each request, ncode checks credentials in this order:
 
 1. Explicit CLI key, such as `--api-key`.
 2. Provider-specific environment variables (including derived custom-provider
    variables such as `MY_COMPANY_API_KEY`).
-3. `$ZOT_HOME/auth.json`, including custom provider keys saved by `/login`.
+3. `$NCODE_HOME/auth.json`, including custom provider keys saved by `/login`.
 
 `models.json` itself never stores credentials; it only describes models and
 their endpoints.

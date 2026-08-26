@@ -1,4 +1,4 @@
-// hello — a tiny zot extension that registers /hello and /summon.
+// hello — a tiny ncode extension that registers /hello and /summon.
 //
 // Build it:
 //
@@ -6,14 +6,14 @@
 //	go build -o hello .
 //
 // Then drop it next to its extension.json under
-// $ZOT_HOME/extensions/hello/, or run `zot ext install ./hello`
+// $NCODE_HOME/extensions/hello/, or run `ncode ext install ./hello`
 // from this directory.
 package main
 
 import (
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/agent/ext"
+	"github.com/nlf/ncode/packages/agent/ext"
 )
 
 func main() {

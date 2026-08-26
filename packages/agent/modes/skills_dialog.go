@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/patriceckhart/zot/packages/agent/skills"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/skills"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // skillsDialog lists every discovered skill and lets the user view
@@ -100,7 +100,7 @@ func (d *skillsDialog) Render(th tui.Theme, width int) []string {
 	out := []string{frameHeader(th, "skills (enter to view, esc to close)", width)}
 	if len(d.skills) == 0 {
 		out = append(out, "  "+th.FG256(th.Muted, "no user skills loaded"))
-		out = append(out, "  "+th.FG256(th.Muted, "add SKILL.md under $ZOT_HOME/skills, .zot/skills, .claude/skills, or .agents/skills"))
+		out = append(out, "  "+th.FG256(th.Muted, "add SKILL.md under $NCODE_HOME/skills, .ncode/skills, .claude/skills, or .agents/skills"))
 		out = append(out, frameRule(th, width))
 		return out
 	}

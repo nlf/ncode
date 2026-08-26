@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/agent/extproto"
 )
 
 // ---------- test harness ----------
@@ -122,8 +122,9 @@ func (h *extHarness) handshake(t *testing.T) {
 	}
 	h.sendToExt(t, extproto.HelloAckFromHost{
 		Type:            "hello_ack",
+		Product:         extproto.Product,
 		ProtocolVersion: extproto.ProtocolVersion,
-		ZotVersion:      "0.0.0-test",
+		NcodeVersion:    "0.0.0-test",
 		Provider:        "anthropic",
 		Model:           "claude-test",
 	})
@@ -156,8 +157,9 @@ func TestOnHelloCanRegisterUsingHostInfo(t *testing.T) {
 	}
 	h.sendToExt(t, extproto.HelloAckFromHost{
 		Type:            "hello_ack",
+		Product:         extproto.Product,
 		ProtocolVersion: extproto.ProtocolVersion,
-		ZotVersion:      "0.0.0-test",
+		NcodeVersion:    "0.0.0-test",
 		Provider:        "anthropic",
 		Model:           "claude-test",
 		CWD:             "/tmp/project",
@@ -186,6 +188,34 @@ func TestOnHelloCanRegisterUsingHostInfo(t *testing.T) {
 		t.Fatalf("Host().CWD = %q, want /tmp/project", got)
 	}
 
+	h.hostW.Close()
+}
+
+func TestRunAcceptsNcodeProtocolV2AckAndExposesHostInfo(t *testing.T) {
+	h := newHarness("identity-ext")
+	hostInfo := make(chan HostInfo, 1)
+	h.ext.OnHello(func(host HostInfo) { hostInfo <- host })
+	runErr := make(chan error, 1)
+	go func() { runErr <- h.ext.Run() }()
+
+	if frame := h.next(t); frame.hdr.Type != "hello" {
+		t.Fatalf("first extension frame = %q, want hello", frame.hdr.Type)
+	}
+	ack := `{"type":"hello_ack","product":"ncode","protocol_version":2,"ncode_version":"0.4.0-test","provider":"anthropic","model":"claude-test","cwd":"/work"}` + "\n"
+	if _, err := h.hostW.Write([]byte(ack)); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case got := <-hostInfo:
+		if got.ProtocolVersion != 2 || got.NcodeVersion != "0.4.0-test" || got.CWD != "/work" {
+			t.Fatalf("HostInfo = %+v", got)
+		}
+	case err := <-runErr:
+		t.Fatalf("Run returned before OnHello: %v", err)
+	case <-time.After(2 * time.Second):
+		t.Fatal("timeout waiting for ncode HostInfo")
+	}
 	h.hostW.Close()
 }
 
@@ -263,7 +293,7 @@ func TestDeferredToolRegistrationAndActivation(t *testing.T) {
 	if frame := h.next(t); frame.hdr.Type != "hello" {
 		t.Fatalf("expected hello, got %q", frame.hdr.Type)
 	}
-	h.sendToExt(t, extproto.HelloAckFromHost{Type: "hello_ack", ProtocolVersion: extproto.ProtocolVersion})
+	h.sendToExt(t, extproto.HelloAckFromHost{Type: "hello_ack", Product: extproto.Product, ProtocolVersion: extproto.ProtocolVersion, NcodeVersion: "0.0.0-test"})
 
 	deferred := false
 	for {

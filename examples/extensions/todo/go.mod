@@ -1,7 +1,5 @@
-module zot-todo-extension
+module github.com/nlf/ncode/examples/extensions/todo
 
-go 1.22
+go 1.25.0
 
-require github.com/patriceckhart/zot v0.0.0
-
-replace github.com/patriceckhart/zot => /Users/pat/Developer/zot
+require github.com/nlf/ncode v0.2.47

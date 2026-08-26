@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 func TestSessionRoundTrip(t *testing.T) {
 	dir := t.TempDir()
-	os.Setenv("ZOT_HOME", dir)
+	os.Setenv("NCODE_HOME", dir)
 
 	sess, err := NewSession(dir, "/tmp/project", "anthropic", "claude-sonnet-4-5", "test")
 	if err != nil {

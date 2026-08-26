@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"github.com/patriceckhart/zot/packages/agent/extproto"
-	"github.com/patriceckhart/zot/packages/core"
+	"github.com/nlf/ncode/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/core"
 )
 
 // confirmationEventConfirmer decorates an interactive confirmer with an

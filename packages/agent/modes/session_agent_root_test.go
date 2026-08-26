@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/patriceckhart/zot/packages/core"
-	"github.com/patriceckhart/zot/packages/provider"
+	"github.com/nlf/ncode/packages/core"
+	"github.com/nlf/ncode/packages/provider"
 )
 
 func TestSessionsSlashUsesAgentSessionRoot(t *testing.T) {
-	zotHome := t.TempDir()
+	ncodeHome := t.TempDir()
 	agentRoot := t.TempDir()
 	cwd := t.TempDir()
 
@@ -28,7 +28,7 @@ func TestSessionsSlashUsesAgentSessionRoot(t *testing.T) {
 	}
 
 	i := NewInteractive(InteractiveConfig{
-		ZotHome:      zotHome,
+		NcodeHome:    ncodeHome,
 		SessionsRoot: agentRoot,
 		CWD:          cwd,
 	})
@@ -42,9 +42,9 @@ func TestSessionsSlashUsesAgentSessionRoot(t *testing.T) {
 	}
 }
 
-func TestSessionsRootDefaultsToZotHome(t *testing.T) {
-	i := &Interactive{cfg: InteractiveConfig{ZotHome: "/zot/home"}}
-	if got := i.sessionsRoot(); got != "/zot/home" {
-		t.Fatalf("sessions root = %q, want ZotHome fallback", got)
+func TestSessionsRootDefaultsToNcodeHome(t *testing.T) {
+	i := &Interactive{cfg: InteractiveConfig{NcodeHome: "/ncode/home"}}
+	if got := i.sessionsRoot(); got != "/ncode/home" {
+		t.Fatalf("sessions root = %q, want NcodeHome fallback", got)
 	}
 }

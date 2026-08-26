@@ -1,12 +1,12 @@
-// Package extensions implements the host side of zot's subprocess
+// Package extensions implements the host side of ncode's subprocess
 // extension protocol. The Manager discovers extensions in well-known
 // directories, spawns each one, completes the hello handshake, and
 // routes slash commands to the right extension.
 //
-// Each extension is its own process, communicating with zot over its
+// Each extension is its own process, communicating with ncode over its
 // stdin/stdout in newline-delimited JSON. Stderr is redirected to a
-// per-extension log file under $ZOT_HOME/logs/. Crashing one
-// extension does not affect the others or the host.
+// per-extension log file under the configured ncode logs directory.
+// Crashing one extension does not affect the others or the host.
 //
 // See docs/extensions.md for the user-facing reference and
 // packages/agent/extproto for the wire format.
@@ -28,12 +28,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/patriceckhart/zot/packages/agent/extproto"
-	"github.com/patriceckhart/zot/packages/tui"
+	"github.com/nlf/ncode/packages/agent/extproto"
+	"github.com/nlf/ncode/packages/tui"
 )
 
 // Manifest is the extension.json file shipped alongside an
-// extension's executable. It tells zot how to launch the extension
+// extension's executable. It tells ncode how to launch the extension
 // and provides display metadata.
 type Manifest struct {
 	Name        string   `json:"name"`
@@ -47,12 +47,12 @@ type Manifest struct {
 
 // IsEnabled returns the manifest's effective enabled state. Default
 // is true so adding a new extension folder Just Works without an
-// extra zot ext enable command.
+// extra ncode ext enable command.
 func (m Manifest) IsEnabled() bool {
 	return m.Enabled == nil || *m.Enabled
 }
 
-// Extension is a running extension subprocess and the metadata zot
+// Extension is a running extension subprocess and the metadata ncode
 // tracks about it.
 type Extension struct {
 	Manifest Manifest
@@ -137,14 +137,14 @@ type commandRegistration struct {
 	name string
 }
 
-// Manager owns every extension subprocess for the lifetime of zot.
+// Manager owns every extension subprocess for the lifetime of ncode.
 type Manager struct {
-	zotHome    string
-	cwd        string
-	zotVersion string
-	provider   string
-	model      string
-	hooks      HostHooks
+	ncodeHome    string
+	cwd          string
+	ncodeVersion string
+	provider     string
+	model        string
+	hooks        HostHooks
 
 	mu  sync.RWMutex
 	ext map[string]*Extension // keyed by manifest name
@@ -170,11 +170,11 @@ type Manager struct {
 
 // New constructs an empty Manager. Call Discover to populate it from
 // the on-disk extension directories.
-func New(zotHome, cwd, zotVersion, provider, model string, hooks HostHooks) *Manager {
+func New(ncodeHome, cwd, ncodeVersion, provider, model string, hooks HostHooks) *Manager {
 	return &Manager{
-		zotHome:      zotHome,
+		ncodeHome:    ncodeHome,
 		cwd:          cwd,
-		zotVersion:   zotVersion,
+		ncodeVersion: ncodeVersion,
 		provider:     provider,
 		model:        model,
 		hooks:        hooks,
@@ -240,10 +240,10 @@ func (m *Manager) Discover(ctx context.Context) []error {
 func (m *Manager) searchDirs() []string {
 	var dirs []string
 	if m.cwd != "" {
-		dirs = append(dirs, filepath.Join(m.cwd, ".zot", "extensions"))
+		dirs = append(dirs, filepath.Join(m.cwd, ".ncode", "extensions"))
 	}
-	if m.zotHome != "" {
-		dirs = append(dirs, filepath.Join(m.zotHome, "extensions"))
+	if m.ncodeHome != "" {
+		dirs = append(dirs, filepath.Join(m.ncodeHome, "extensions"))
 	}
 	return dirs
 }
@@ -268,7 +268,7 @@ func (m *Manager) loadOne(ctx context.Context, dir string) error {
 		return errors.New("manifest: exec is required")
 	}
 	if !mf.IsEnabled() {
-		// Quietly skip disabled extensions; zot ext list will show them.
+		// Quietly skip disabled extensions; ncode ext list will show them.
 		return nil
 	}
 
@@ -309,8 +309,8 @@ func (m *Manager) loadOne(ctx context.Context, dir string) error {
 }
 
 // LoadExplicit loads each path as an ad-hoc extension. Used for
-// `zot --ext <path>` so extension authors can iterate on a working
-// copy without having to `zot ext install` after every change.
+// `ncode --ext <path>` so extension authors can iterate on a working
+// copy without having to `ncode ext install` after every change.
 //
 // Loaded BEFORE Discover so explicit paths win on name conflicts
 // against installed extensions. Spawns happen in parallel like the
@@ -449,7 +449,7 @@ func (m *Manager) Reload(ctx context.Context, grace time.Duration) ReloadStats {
 	stats.Loaded = len(m.ext)
 	m.mu.RUnlock()
 
-	// Wait for ready frames. Use the same 3s grace zot uses at
+	// Wait for ready frames. Use the same 3s grace ncode uses at
 	// startup so the reload feels no slower than a cold boot.
 	readyDeadline := time.Now().Add(grace)
 	if time.Until(readyDeadline) < 3*time.Second {
@@ -479,7 +479,7 @@ func (m *Manager) Reload(ctx context.Context, grace time.Duration) ReloadStats {
 //
 // Waits run in parallel: total time is max(per-extension wait), not
 // sum. Without this, a single slow extension (e.g. `npx tsx` cold)
-// would gate every other extension's wait too and zot startup would
+// would gate every other extension's wait too and ncode startup would
 // scale linearly with the number of slow runtimes installed.
 //
 // Call after Discover and before relying on tool registrations.
@@ -504,7 +504,7 @@ func (m *Manager) WaitForReady(grace time.Duration) {
 				ext.readyTimedOut = true
 				ext.diagnostics = append(ext.diagnostics, "timed out waiting for ready frame")
 				ext.mu.Unlock()
-				fmt.Fprintf(ext.logFile, "[zot] timed out waiting for ready frame; proceeding\n")
+				fmt.Fprintf(ext.logFile, "[ncode] timed out waiting for ready frame; proceeding\n")
 				ext.readyOnce.Do(func() { close(ext.readyCh) })
 			}
 		}(ext)
@@ -520,7 +520,7 @@ const extensionExitGrace = time.Second
 // runs the synchronous portion of the hello handshake. Asynchronous
 // frames are processed in a goroutine started here.
 func (m *Manager) spawn(ctx context.Context, ext *Extension) error {
-	logsDir := filepath.Join(m.zotHome, "logs")
+	logsDir := filepath.Join(m.ncodeHome, "logs")
 	_ = os.MkdirAll(logsDir, 0o755)
 	logPath := filepath.Join(logsDir, "ext-"+ext.Manifest.Name+".log")
 	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
@@ -529,7 +529,7 @@ func (m *Manager) spawn(ctx context.Context, ext *Extension) error {
 	}
 	ext.LogPath = logPath
 	ext.logFile = logFile
-	fmt.Fprintf(logFile, "\n[zot] starting %s/%s at %s\n", ext.Manifest.Name, ext.Manifest.Version, time.Now().Format(time.RFC3339))
+	fmt.Fprintf(logFile, "\n[ncode] starting %s/%s at %s\n", ext.Manifest.Name, ext.Manifest.Version, time.Now().Format(time.RFC3339))
 
 	// Exec resolution rules:
 	//   - absolute path:                 used as-is.
@@ -622,8 +622,9 @@ func (m *Manager) spawn(ctx context.Context, ext *Extension) error {
 
 	ack, _ := extproto.Encode(extproto.HelloAckFromHost{
 		Type:            "hello_ack",
+		Product:         extproto.Product,
 		ProtocolVersion: extproto.ProtocolVersion,
-		ZotVersion:      m.zotVersion,
+		NcodeVersion:    m.ncodeVersion,
 		Provider:        m.provider,
 		Model:           m.model,
 		CWD:             m.cwd,
@@ -702,7 +703,7 @@ func (m *Manager) assumeReadyAfterIdle(ext *Extension) {
 				ext.autoReady = true
 				ext.diagnostics = append(ext.diagnostics, "no ready frame; auto-ready after idle")
 				ext.mu.Unlock()
-				fmt.Fprintf(ext.logFile, "[zot] no ready frame; auto-readying after idle (legacy SDK?)\n")
+				fmt.Fprintf(ext.logFile, "[ncode] no ready frame; auto-readying after idle (legacy SDK?)\n")
 				close(ext.readyCh)
 			})
 			return
@@ -731,7 +732,7 @@ func (m *Manager) readLoop(ext *Extension, scanner *bufio.Scanner) {
 		}
 		m.mu.Unlock()
 		ext.readyOnce.Do(func() { close(ext.readyCh) })
-		fmt.Fprintf(ext.logFile, "[zot] extension %s read loop exited at %s\n", ext.Manifest.Name, time.Now().Format(time.RFC3339))
+		fmt.Fprintf(ext.logFile, "[ncode] extension %s read loop exited at %s\n", ext.Manifest.Name, time.Now().Format(time.RFC3339))
 	}()
 
 	for scanner.Scan() {
@@ -742,7 +743,7 @@ func (m *Manager) readLoop(ext *Extension, scanner *bufio.Scanner) {
 		var frame extproto.Frame
 		if err := json.Unmarshal(line, &frame); err != nil {
 			ext.recordDiagnostic(fmt.Sprintf("malformed json frame: %v", err))
-			fmt.Fprintf(ext.logFile, "[zot] malformed json from extension: %v\n", err)
+			fmt.Fprintf(ext.logFile, "[ncode] malformed json from extension: %v\n", err)
 			continue
 		}
 		switch frame.Type {
@@ -768,7 +769,7 @@ func (m *Manager) readLoop(ext *Extension, scanner *bufio.Scanner) {
 		case "register_tool":
 			var rt extproto.RegisterToolFromExt
 			if err := json.Unmarshal(line, &rt); err != nil {
-				fmt.Fprintf(ext.logFile, "[zot] bad register_tool frame: %v\n", err)
+				fmt.Fprintf(ext.logFile, "[ncode] bad register_tool frame: %v\n", err)
 				continue
 			}
 			// Validate the schema parses as JSON. If not, refuse to
@@ -777,7 +778,7 @@ func (m *Manager) readLoop(ext *Extension, scanner *bufio.Scanner) {
 				var tmp any
 				if err := json.Unmarshal(rt.Schema, &tmp); err != nil {
 					ext.recordDiagnostic(fmt.Sprintf("tool %q schema is not valid json: %v", rt.Name, err))
-					fmt.Fprintf(ext.logFile, "[zot] tool %q: schema is not valid json (%v); skipped\n", rt.Name, err)
+					fmt.Fprintf(ext.logFile, "[ncode] tool %q: schema is not valid json (%v); skipped\n", rt.Name, err)
 					continue
 				}
 			}
@@ -866,7 +867,7 @@ func (m *Manager) readLoop(ext *Extension, scanner *bufio.Scanner) {
 				if strings.HasPrefix(text, "/") {
 					m.hooks.SubmitSlash(text)
 				} else {
-					fmt.Fprintf(ext.logFile, "[zot] submit_slash refused (not a slash command): %q\n", s.Text)
+					fmt.Fprintf(ext.logFile, "[ncode] submit_slash refused (not a slash command): %q\n", s.Text)
 				}
 			}
 		case "command_response":
@@ -904,7 +905,7 @@ func (m *Manager) readLoop(ext *Extension, scanner *bufio.Scanner) {
 			// Caller of Stop is waiting on the process exit, not this frame.
 		default:
 			ext.recordDiagnostic(fmt.Sprintf("unknown frame type %q", frame.Type))
-			fmt.Fprintf(ext.logFile, "[zot] unknown frame type %q\n", frame.Type)
+			fmt.Fprintf(ext.logFile, "[ncode] unknown frame type %q\n", frame.Type)
 		}
 	}
 }
@@ -947,7 +948,7 @@ type ExtensionDiagnostic struct {
 }
 
 // Diagnostics returns a snapshot of loaded extension state for commands such
-// as `zot ext doctor`. It is read-only and does not change manager behavior.
+// as `ncode ext doctor`. It is read-only and does not change manager behavior.
 func (m *Manager) Diagnostics() []ExtensionDiagnostic {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -1023,7 +1024,7 @@ func (m *Manager) Commands() []CommandInfo {
 }
 
 // CommandInfo is one extension-registered slash command, surfaced to
-// the rest of zot for display purposes.
+// the rest of ncode for display purposes.
 type CommandInfo struct {
 	Extension   string
 	Name        string
@@ -1261,7 +1262,7 @@ func stopExtensions(exts []*Extension, gracePeriod time.Duration) {
 }
 
 // All returns every extension currently tracked, enabled or not.
-// Used by `zot ext list`.
+// Used by `ncode ext list`.
 func (m *Manager) All() []*Extension {
 	m.mu.RLock()
 	defer m.mu.RUnlock()

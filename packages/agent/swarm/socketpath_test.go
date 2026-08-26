@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestInboxSocketPathUsesRuntimeDirectory(t *testing.T) {
+func TestInboxSocketPathUsesNcodeRuntimeDirectory(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("swarm inbox transport uses Unix-domain sockets")
 	}
@@ -21,8 +21,9 @@ func TestInboxSocketPathUsesRuntimeDirectory(t *testing.T) {
 	if err != nil {
 		t.Fatalf("inboxSocketPath: %v", err)
 	}
-	if !strings.HasPrefix(path, runtimeDir+string(filepath.Separator)) {
-		t.Fatalf("path = %q; want it below runtime dir %q", path, runtimeDir)
+	wantDir := filepath.Join(runtimeDir, "ncode-swarm-"+rootTag(stateRoot))
+	if filepath.Dir(path) != wantDir {
+		t.Fatalf("socket directory = %q, want exact ncode directory %q", filepath.Dir(path), wantDir)
 	}
 	if strings.HasPrefix(path, stateRoot+string(filepath.Separator)) {
 		t.Fatalf("path = %q; transient socket must not be below state root %q", path, stateRoot)
