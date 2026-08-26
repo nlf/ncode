@@ -50,7 +50,7 @@ permissions:
 }
 
 func TestDiscoverUsesNcodeProjectAndGlobalPaths(t *testing.T) {
-	t.Setenv("ZOT_AGENT_SKILLS", "")
+	t.Setenv("NCODE_AGENT_SKILLS", "")
 	root := t.TempDir()
 	ncodeHome := filepath.Join(root, "home")
 	cwd := filepath.Join(root, "project")
@@ -79,7 +79,7 @@ func TestDiscoverUsesNcodeProjectAndGlobalPaths(t *testing.T) {
 }
 
 func TestDiscoverProjectAndGlobalPriorityAndDedup(t *testing.T) {
-	t.Setenv("ZOT_AGENT_SKILLS", "")
+	t.Setenv("NCODE_AGENT_SKILLS", "")
 	tmp := t.TempDir()
 	ncodeHome := filepath.Join(tmp, "home")
 	cwd := filepath.Join(tmp, "proj")

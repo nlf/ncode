@@ -26,7 +26,7 @@ import (
 func DetectThemeFromBackground(timeout time.Duration) Theme {
 	// Honour explicit override env var first; some users / CI envs
 	// know better than the heuristic.
-	switch strings.ToLower(strings.TrimSpace(os.Getenv("ZOT_THEME"))) {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv("NCODE_THEME"))) {
 	case "dark":
 		return Dark
 	case "light":

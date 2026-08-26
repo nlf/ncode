@@ -86,12 +86,12 @@ type InteractiveConfig struct {
 
 	// FlatTools renders tool calls without the bordered panel (a quiet
 	// header line plus indented, frameless output). Mirrors the
-	// resolved tool_render config / ZOT_FLAT_TOOLS env at startup.
+	// resolved tool_render config / NCODE_FLAT_TOOLS env at startup.
 	FlatTools bool
 
 	// CompactUser renders sent user messages as a single quiet gutter
 	// line instead of a padded, tinted bubble. Mirrors the resolved
-	// compact_input config / ZOT_COMPACT_INPUT env at startup.
+	// compact_input config / NCODE_COMPACT_INPUT env at startup.
 	CompactUser bool
 
 	// CompactMode mirrors the persisted compact_mode flag at startup.

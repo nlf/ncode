@@ -237,7 +237,7 @@ func searchDirs(ncodeHome, cwd, userHome string) []location {
 		}
 		out = append(out, location{dir: dir, label: label})
 	}
-	if extra := os.Getenv("ZOT_AGENT_SKILLS"); extra != "" {
+	if extra := os.Getenv("NCODE_AGENT_SKILLS"); extra != "" {
 		for _, dir := range filepath.SplitList(extra) {
 			add(dir, "agent")
 		}

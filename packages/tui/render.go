@@ -31,7 +31,7 @@ type Renderer struct {
 	// prevHadImage tracks whether the previous frame contained an
 	// inline-image escape so we can force a full clear+repaint whenever
 	// the image set changes. Only matters when inline images are
-	// enabled via ZOT_INLINE_IMAGES; defaults to false.
+	// enabled via NCODE_INLINE_IMAGES; defaults to false.
 	prevHadImage bool
 
 	// Main-screen flow renderer state. logLines is the full logical
@@ -333,7 +333,7 @@ func (r *Renderer) Draw(lines []string, cursorRow, cursorCol int) {
 	// When inline images are in play we always full-repaint (clear
 	// screen first, then rewrite every row). Terminals manage image
 	// pixels in a layer we cannot diff against, so the per-line cache
-	// is unreliable. Inline images are opt-in via ZOT_INLINE_IMAGES;
+	// is unreliable. Inline images are opt-in via NCODE_INLINE_IMAGES;
 	// the common code path below is the fast cached diff.
 	curHasImage := false
 	curHasKittyImage := false

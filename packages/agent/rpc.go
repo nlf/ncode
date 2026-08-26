@@ -38,7 +38,7 @@ import (
 // Responses (stdout): {"type":"response","id":"1","command":"prompt","success":true}
 // Events (stdout): one JSON object per AgentEvent (same schema as --json mode).
 //
-// Auth: if $ZOTCORE_RPC_TOKEN is set, the first command must be
+// Auth: if $NCODE_RPC_TOKEN is set, the first command must be
 // {"type":"hello","token":"..."} or the connection is closed.
 func runRPCMode(ctx context.Context, args Args, version string) error {
 	if args.NoYolo {
@@ -185,7 +185,7 @@ type rpcServer struct {
 // compact) has finished, so a quick `echo cmd | zot rpc` invocation
 // still produces full output before the process exits.
 func (s *rpcServer) run(in io.Reader) error {
-	requireToken := os.Getenv("ZOTCORE_RPC_TOKEN") != ""
+	requireToken := os.Getenv("NCODE_RPC_TOKEN") != ""
 	s.authed = !requireToken
 
 	sc := bufio.NewScanner(in)
@@ -212,7 +212,7 @@ func (s *rpcServer) run(in io.Reader) error {
 				Token string `json:"token"`
 			}
 			_ = json.Unmarshal([]byte(line), &hello)
-			if hello.Token != os.Getenv("ZOTCORE_RPC_TOKEN") {
+			if hello.Token != os.Getenv("NCODE_RPC_TOKEN") {
 				s.writeError(head.ID, head.Type, "invalid token")
 				return fmt.Errorf("rpc: bad auth token")
 			}

@@ -1,17 +1,16 @@
 # Apply progress: clean-break-ncode-identity
 
-Updated: 2026-08-26T19:15:55Z
+Updated: 2026-08-26T19:34:44Z
 
 ## Attempt summary
 
-- **Status:** WU 1 is merged and WU 2–WU 5 are complete; the broader change remains in progress, with WU 6 next and unstarted.
-- **Assigned boundary:** exactly WU 5 — ncode-only state, project, and portable paths — complete. WU 6 was not started.
-- **Delivery:** WU 2–WU 12 remain on the single long-lived branch `feat/clean-break-ncode-identity-02`. Preserve WU 5 as an independently revertible commit, create no intermediate PRs, and open one final PR to `main` linked to issue #1 with exactly `type:breaking-change`.
-- **Review budget:** WU 5 implementation currently uses `898` changed lines (577 tracked additions/deletions plus 321 lines in seven new test files), below the native 1,400-line maximum; the combined final-PR size exception remains approved.
-- **Commits/branches/PRs:** WU 5 apply created no commit, push, PR, merge, branch switch, review, or settlement. Parent lifecycle owns the revertible WU 5 commit and native attempt settlement.
-- **Verification:** genuine RED → GREEN → TRIANGULATE → REFACTOR evidence, focused state/project/portable/session-UI tests, the complete nested MCP bridge suite, no-legacy-path searches, `git diff --check`, and `make test` passed.
-- **Review/gates:** clone-local bounded review remains disabled. Strict TDD, native SDD attempt authority, issue linkage, verification, CI, the final PR, and final merge gates remain.
-- **Native authority:** proceed token `sha256:b4ca7db27ff48bc49314bfb696cd493b4027cfeedf18ad4313930a3fb8665e0d` was consumed for WU 5 and remains unsettled for the parent.
+- **Status:** WU 1 is merged and WU 2–WU 6 are complete; the broader change remains in progress, with WU 7 next and unstarted.
+- **Assigned boundary:** exactly WU 6 — the NCODE environment namespace — complete. WU 7 was not started.
+- **Delivery:** WU 2–WU 12 remain on the single long-lived branch `feat/clean-break-ncode-identity-02`; no intermediate PR or branch change was made.
+- **Review budget:** WU 6 implementation and tests use `775` changed lines, below the native 1,300-line maximum; the combined final-PR size exception remains approved.
+- **Commits/branches/PRs:** no commit, push, PR, merge, branch switch, review, settlement, or WU 7 work occurred. Parent owns the revertible WU 6 commit and attempt settlement.
+- **Verification:** genuine RED → GREEN → TRIANGULATE → REFACTOR evidence, focused owner-package tests, exact legacy-environment searches, `git diff --check`, and final `make test` passed.
+- **Native authority:** parent supplied proceed token `sha256:d8e863fd687b62fe2707984b7db1fa1d0a74228bbc9a904a3372c6ced055ba2f`; the native CLI was unavailable locally, no extra acquire was possible, and settlement is intentionally deferred to the parent.
 
 ## Structured status consumed/produced
 
@@ -19,7 +18,16 @@ Updated: 2026-08-26T19:15:55Z
 schemaName: spec-driven
 changeName: clean-break-ncode-identity
 artifactStore: both
+planningHome:
+  root: /Users/nlf/Projects/nlf/ncode/openspec
+  changesDir: /Users/nlf/Projects/nlf/ncode/openspec/changes
 changeRoot: /Users/nlf/Projects/nlf/ncode/openspec/changes/clean-break-ncode-identity
+artifactPaths:
+  proposal: [openspec/changes/clean-break-ncode-identity/proposal.md]
+  specs: [openspec/changes/clean-break-ncode-identity/specs/ncode-identity/spec.md]
+  design: [openspec/changes/clean-break-ncode-identity/design.md]
+  tasks: [openspec/changes/clean-break-ncode-identity/tasks.md]
+  applyProgress: [openspec/changes/clean-break-ncode-identity/apply-progress.md]
 artifacts:
   proposal: done
   specs: done
@@ -28,50 +36,31 @@ artifacts:
   applyProgress: done
 taskProgress:
   total: 44
-  complete: 17
-  remaining: 27
+  complete: 21
+  remaining: 23
 deferredParentActions:
   total: 2
   complete: 2
   remaining: 0
+taskArtifactErrors: []
 applyState: ready
+dependencies:
+  apply: ready
+  verify: blocked
+  sync: blocked
+  archive: blocked
 actionContext:
   mode: repo-local
   workspaceRoot: /Users/nlf/Projects/nlf/ncode
   allowedEditRoots:
     - /Users/nlf/Projects/nlf/ncode
-  warnings: []
-workUnit: WU5-complete
-nextWorkUnit: WU6
-nextWorkUnitStarted: false
-attemptAuthority: sha256:b4ca7db27ff48bc49314bfb696cd493b4027cfeedf18ad4313930a3fb8665e0d
-attemptSettlement: deferred-to-parent
-changedLineBudget: { max: 1400, actualImplementation: 898 }
-sizeException: approved-combined-final-pr
-deliveryStrategy: single-long-lived-feature-branch
-deliveryBranch: feat/clean-break-ncode-identity-02
-workUnitCommits: independently-revertible
-checkpointPushes: allowed-as-appropriate
-intermediatePRs: disabled
-finalPRBase: main
-finalPRIssue: 1
-finalPRLabels:
-  - type:breaking-change
-finalPRSizeException: explicitly-approved
-cloneLocalBoundedReview: disabled
-retainedGates:
-  - strict-tdd
-  - native-sdd-attempt-authority
-  - issue-linkage
-  - focused-verification
-  - make-test-before-next-work-unit
-  - ci
-  - final-merge
+  warnings:
+    - native gentle-ai status/attempt CLI unavailable; authoritative OpenSpec state reconstructed from the installed status contract
 nextRecommended: parent-lifecycle
 isNonAuthoritative: false
 ```
 
-The active change and exact WU5 proceed token were supplied by the parent and matched the authoritative repo-local branch/root. Allowed edits stayed under `/Users/nlf/Projects/nlf/ncode`; warnings were empty. No malformed task ownership markers were found.
+The active change was explicit and unambiguous. All edits stayed under the allowed repository root. Ownership validation found no malformed markers. The accepted single-feature-branch size exception resolved the workload gate; WU 7 remains outside this attempt.
 
 ## Completed implementation tasks and persisted checkboxes
 
@@ -557,10 +546,6 @@ Triangulation was structural for the move itself because there is one command lo
 - The shared `Resolve` → `Resolved.NewClient` → `Resolved.NewAgent` spine, WU4 command identity, RPC v1, extension acknowledgement, swarm/runtime composed identifiers, and release/update endpoints remain outside this unit.
 
 ## Remaining implementation tasks (exact unchecked lines)
-- [ ] RED — add failing table-driven tests near the owning readers (`packages/agent/{config,build,args,rpc,swarm_agent}_test.go`, `packages/agent/modes/*_test.go`, and swarm tests) for every inventory mapping: `NCODE_HOME`, UI/image/theme, browser/debug, skills, API-key helpers, `NCODE_RPC_TOKEN`, and all `NCODE_SWARM_*`; assert ncode-only success, legacy-only non-use, and ncode-wins conflicts, then run focused tests and `make test` expecting those assertions to fail. <!-- sdd-owner: implementation -->
-- [ ] GREEN — rename each `os.Getenv`/`LookupEnv` product control discovered by `git grep -nI -E 'ZOTCORE_|ZOT_[A-Z0-9_]+' -- '*.go'` according to the 23-entry inventory table, with `ZOTCORE_RPC_TOKEN` becoming exactly `NCODE_RPC_TOKEN`; delete the already-removed consent control rather than mapping it, preserve provider/OS controls, and run focused tests plus `make test`. <!-- sdd-owner: implementation -->
-- [ ] TRIANGULATE — add dedicated `legacy_zot_env_test.go` fixtures for legacy-only and conflicting values across state, rendering, consent removal, API-key helpers, RPC authorization, and swarm metadata; prove old values neither configure nor authorize behavior, then run focused tests and `make test`. <!-- sdd-owner: implementation -->
-- [ ] REFACTOR — table-drive repeated environment setup without hiding the 23-name coverage; rerun `git grep -nI -E 'ZOTCORE_|ZOT_[A-Z0-9_]+' -- .`, focused tests, and `make test`. <!-- sdd-owner: implementation -->
 - [ ] RED — add failing RPC tests in `packages/agent/rpc_reasoning_test.go` and adjacent RPC test targets for token-unset prompt-first, `NCODE_RPC_TOKEN` first-frame hello success/failure, `ZOTCORE_RPC_TOKEN` ignored, and unchanged v1 neutral prompt/response/event/optional-hello behavior; run focused tests and `make test` expecting new cases to fail. <!-- sdd-owner: implementation -->
 - [ ] GREEN — update `packages/agent/rpc.go`, command invocation/help, `docs/rpc.md`, and `examples/rpc/{shell,go,python,node}` (renaming `zot-client.js`/`zot_client.py` to ncode names) to invoke `ncode rpc` and use `NCODE_RPC_TOKEN`; do not add RPC v2, product fields, mandatory hello, legacy token read, or frame-shape change; run focused tests, client syntax/build checks, and `make test`. <!-- sdd-owner: implementation -->
 - [ ] TRIANGULATE — add dedicated legacy RPC input coverage proving `ZOTCORE_RPC_TOKEN` alone neither enables nor gates RPC and an unknown explicit Zot-branded extra field has no authorization/configuration meaning; use fakes/local processes only, then run neutral-frame regressions and `make test`. <!-- sdd-owner: implementation -->
@@ -616,3 +601,85 @@ Both parent-owned rows are checked and were preserved. Clone-local bounded revie
 - **Tests written:** none; this was a cleanup and fresh nested-module verification correction.
 - **Test command:** `GOWORK=off GOFLAGS='' go test ./... -count=1` from the fresh external MCP bridge copy — PASS (`ok github.com/nlf/ncode/examples/extensions/mcp-bridge 0.409s`).
 - **Live providers/credentials:** none used.
+
+## WU 6 apply evidence
+
+### Completed implementation tasks and persisted checkboxes
+
+- [x] RED — positive NCODE environment tests and genuine failures, persisted in `tasks.md`.
+- [x] GREEN — all Go product readers and test helpers renamed, persisted in `tasks.md`.
+- [x] TRIANGULATE — dedicated legacy-only/conflict fixtures, persisted in `tasks.md`.
+- [x] REFACTOR — explicit 23-entry table, helper extraction, searches, and final tests, persisted in `tasks.md`.
+
+### Exact 23-entry environment mapping
+
+| Legacy inventory name | Ncode decision |
+|---|---|
+| `ZOT_HOME` | `NCODE_HOME` |
+| `ZOT_FLAT_TOOLS` | `NCODE_FLAT_TOOLS` |
+| `ZOT_COMPACT_INPUT` | `NCODE_COMPACT_INPUT` |
+| `ZOT_INLINE_IMAGES` | `NCODE_INLINE_IMAGES` |
+| `ZOT_CELL_ASPECT` | `NCODE_CELL_ASPECT` |
+| `ZOT_TOOL_ARG_WIDTH` | `NCODE_TOOL_ARG_WIDTH` |
+| `ZOT_THEME` | `NCODE_THEME` |
+| `ZOT_NO_BROWSER` | `NCODE_NO_BROWSER` |
+| `ZOT_FORCE_BROWSER` | `NCODE_FORCE_BROWSER` |
+| `ZOT_DEBUG_ANTHROPIC` | `NCODE_DEBUG_ANTHROPIC` |
+| `ZOT_AGENT_SKILLS` | `NCODE_AGENT_SKILLS` |
+| `ZOT_AGENT_CONSENT` | deleted with Zotfiles; no replacement |
+| `ZOTCORE_RPC_TOKEN` | `NCODE_RPC_TOKEN` exactly |
+| `ZOT_SWARM_AGENT_ID` | `NCODE_SWARM_AGENT_ID` |
+| `ZOT_SWARM_EVENT_LOG` | `NCODE_SWARM_EVENT_LOG` |
+| `ZOT_SWARM_CREDENTIAL_STDIN` | `NCODE_SWARM_CREDENTIAL_STDIN` |
+| `ZOT_VERSION` | `NCODE_VERSION` (installer reader remains WU 10) |
+| `ZOT_PREFIX` | `NCODE_PREFIX` (installer reader remains WU 10) |
+| `ZOT_AGENT_API_KEY_COMMAND_HELPER` | `NCODE_AGENT_API_KEY_COMMAND_HELPER` |
+| `ZOT_HELP_HELPER` | `NCODE_HELP_HELPER` |
+| `ZOT_SWARM_CREDENTIAL_HELPER` | `NCODE_SWARM_CREDENTIAL_HELPER` |
+| `ZOT_API_KEY_COMMAND_HELPER` | `NCODE_API_KEY_COMMAND_HELPER` |
+| `ZOT_API_KEY_COMMAND_VALUE` | `NCODE_API_KEY_COMMAND_VALUE` |
+
+The dedicated inventory test asserts exactly 23 unique legacy decisions, 22 unique ncode targets, and no consent replacement. All actual Go `Getenv` product controls use ncode names; standard provider and OS controls were not renamed. Installer `VERSION`/`PREFIX` readers are intentionally still owned by WU 10, and non-Go RPC clients/docs remain WU 7/WU 11 work.
+
+### TDD Cycle Evidence
+
+| Task | Test files | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|---|---|---|---|---|---|---|---|
+| WU6 RED | `config_env_test.go`, `rpc_env_test.go`, package `ncode_env_test.go` files, `swarm/runner_test.go` | Package/integration | Focused seven-package suite and baseline `make test` passed | Config overrides returned old config values; wrong NCODE RPC token was accepted; four TUI controls ignored NCODE; browser disable was ignored; debug file was absent; extra skills were absent; swarm helper exited 2. Corrected RED focused suites and RED `make test` failed on the new contracts. | N/A | N/A | N/A |
+| WU6 GREEN | production readers plus existing helper tests | Package/integration | RED above | RED above | Focused owner tests and `make test` passed after exact namespace replacement. | Existing ncode tests exercised alternate values and retained provider/OS behavior. | N/A |
+| WU6 TRIANGULATE | five dedicated `legacy_zot_env_test.go` files | Negative/package/local subprocess | GREEN above | New injectable browser and swarm-reader tests initially failed to compile because `hasBrowser`, `swarmCredentialStdinEnabled`, and `swarmEventLogPath` did not exist. | Minimal helper extraction preserved behavior and made those cases pass. | State/config, rendering, browser/debug, skills, API-key helpers, RPC authorization, and swarm child metadata cover legacy-only and conflicting values with local files, subprocesses, and `httptest`. | N/A |
+| WU6 REFACTOR | same tables and owning tests | Regression/race | TRIANGULATE green | N/A | N/A | Exact mapping remains visible as 23 rows. | Environment setup is table-driven; browser and swarm reads are testable without behavior drift; focused tests, searches, `git diff --check`, and final `make test` passed. |
+
+Two initial RED fixtures were corrected before production edits: the theme assertion compared an uncomparable struct, and the debug fixture used an unknown model. The corrected fixtures then failed for the intended missing NCODE behavior.
+
+### Verification and search evidence
+
+- Focused safety net: `go test ./packages/agent ./packages/agent/modes ./packages/agent/skills ./packages/agent/swarm ./packages/provider ./packages/provider/auth ./packages/tui -count=1` — PASS.
+- Baseline `make test` (`go test -race ./...`) — PASS.
+- Corrected RED focused runs — FAIL on every owning package for missing NCODE behavior; RED `make test` — FAIL on the new contracts.
+- GREEN focused tests and `make test` — PASS.
+- TRIANGULATE focused package suite and `make test` — PASS.
+- Final focused command over `examples/rpc/go` and the six owning packages — PASS.
+- Exact tracked-Go search `git grep -nI -E 'ZOTCORE_|ZOT_[A-Z0-9_]+' -- '*.go'` emitted only four pre-existing WU5 rejection lines in `legacy_zot_home_test.go` / `legacy_zot_project_path_test.go` because new files were untracked.
+- All-worktree scan found 56 legacy Go lines, all in dedicated `legacy_zot_*` files; active old `os.Getenv`/`LookupEnv` readers were zero.
+- Full-repository exact search still reports planned active docs, non-Go RPC clients, installer variables, provenance, and rejection fixtures assigned to WU 7/WU 10/WU 11/WU 12; none is an active Go reader owned by WU 6.
+- `NCODE_AGENT_CONSENT` appears only as a negative assertion in `packages/agent/legacy_zot_env_test.go`; no production or active test helper reads it.
+- `git diff --check` — PASS.
+- Final `make test` — PASS (`go test -race ./...`).
+- No live provider, credential, release network, commit, push, PR, branch switch, review, settlement, or WU 7 action occurred.
+
+### Files and scope
+
+- Production/env edges: `examples/rpc/go/main.go`; `packages/agent/{config.go,rpc.go,swarm_agent.go}`; `packages/agent/skills/skills.go`; `packages/agent/swarm/runner.go`; `packages/provider/anthropic.go`; `packages/provider/auth/manager.go`; `packages/tui/{detect_bg.go,image.go,render.go,view.go}`.
+- Updated existing tests/helpers: `packages/agent/{args_test.go,config_command_test.go}`; `packages/agent/modes/interactive.go`; `packages/agent/skills/skills_test.go`; `packages/agent/swarm/runner_test.go`; `packages/provider/auth/api_key_command_test.go`; `packages/tui/{image_test.go,view_tool_arg_width_test.go}`.
+- New positive tests: `packages/agent/{config_env_test.go,rpc_env_test.go}`, `packages/agent/skills/ncode_env_test.go`, `packages/provider/ncode_env_test.go`, `packages/provider/auth/ncode_env_test.go`, `packages/tui/ncode_env_test.go`.
+- New rejection fixtures: `packages/agent/legacy_zot_env_test.go`, `packages/agent/skills/legacy_zot_env_test.go`, `packages/provider/legacy_zot_env_test.go`, `packages/provider/auth/legacy_zot_env_test.go`, `packages/tui/legacy_zot_env_test.go`.
+- SDD artifacts: `tasks.md` and this cumulative `apply-progress.md`.
+- Implementation/test scope: 775 changed lines before this progress artifact, below the 1,300-line cap.
+
+### Deviations, risks, and next boundary
+
+- No runtime design deviation occurred. RPC v1 frame/hello semantics, WU5 path behavior, provider/OS variables, and swarm event/control schemas remain unchanged.
+- The Go RPC example token read moved in WU6 because it is an actual Go `Getenv` product control; broader RPC invocation, clients, docs, and diagnostics remain WU7.
+- Full-repository old-environment output is not yet a zero-active audit because WU7 owns remaining non-Go RPC clients/docs, WU10 owns installer `ZOT_VERSION`/`ZOT_PREFIX`, WU11 owns active prose, and WU12 owns the final allowlist gate.
+- WU7 is the exact next unchecked implementation boundary. Parent must settle and preserve WU6 as an independently revertible commit before starting it.

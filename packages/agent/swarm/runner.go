@@ -173,8 +173,8 @@ func (r *execRunner) Run(ctx context.Context, sink Sink) error {
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 	cmd.Dir = r.agent.Dir
 	cmd.Env = append(os.Environ(),
-		"ZOT_SWARM_AGENT_ID="+r.agent.ID,
-		"ZOT_SWARM_EVENT_LOG="+logPath,
+		"NCODE_SWARM_AGENT_ID="+r.agent.ID,
+		"NCODE_SWARM_EVENT_LOG="+logPath,
 	)
 	if r.resolveCredential != nil {
 		credential, resolveErr := r.resolveCredential(ctx, r.agent.Provider)
@@ -187,7 +187,7 @@ func (r *execRunner) Run(ctx context.Context, sink Sink) error {
 				return fmt.Errorf("encode swarm credential: %w", encodeErr)
 			}
 			cmd.Stdin = bytes.NewReader(encoded)
-			cmd.Env = append(cmd.Env, "ZOT_SWARM_CREDENTIAL_STDIN=1")
+			cmd.Env = append(cmd.Env, "NCODE_SWARM_CREDENTIAL_STDIN=1")
 		}
 	}
 

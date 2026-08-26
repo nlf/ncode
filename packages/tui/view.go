@@ -2216,19 +2216,19 @@ func toolResultBlock(th Theme, text string, width int, color int) []string {
 
 // defaultToolArgWidth is the number of cells the tool-call header
 // truncates the primary argument (path/command/query) to when the
-// ZOT_TOOL_ARG_WIDTH environment variable is unset or invalid.
+// NCODE_TOOL_ARG_WIDTH environment variable is unset or invalid.
 const defaultToolArgWidth = 60
 
 // toolArgWidth returns the maximum cell width for the truncated
 // primary argument shown in a tool-call header. It defaults to
 // defaultToolArgWidth but can be raised or lowered with the
-// ZOT_TOOL_ARG_WIDTH environment variable, which is useful for wide
+// NCODE_TOOL_ARG_WIDTH environment variable, which is useful for wide
 // terminals where the default clips long queries too aggressively.
 // Values outside the sane range [20, 500] are ignored so a stray or
 // malformed setting can never produce an unreadable header or an
 // out-of-range slice.
 func toolArgWidth() int {
-	v := strings.TrimSpace(os.Getenv("ZOT_TOOL_ARG_WIDTH"))
+	v := strings.TrimSpace(os.Getenv("NCODE_TOOL_ARG_WIDTH"))
 	if v == "" {
 		return defaultToolArgWidth
 	}
@@ -2248,7 +2248,7 @@ func toolArgWidth() int {
 // the legacy "path or command, truncated" shape.
 //
 // The truncation width defaults to 60 cells but can be tuned via
-// the ZOT_TOOL_ARG_WIDTH environment variable (see toolArgWidth).
+// the NCODE_TOOL_ARG_WIDTH environment variable (see toolArgWidth).
 //
 // Exported because the interactive mode pre-populates the
 // ToolCallView.Args field with this value as soon as the tool

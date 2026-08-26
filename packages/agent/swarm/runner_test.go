@@ -31,11 +31,17 @@ import (
 // positions. If a flag is renamed, update both the runner and this
 // test so we notice immediately.
 func TestCredentialStdinHelperProcess(t *testing.T) {
-	if os.Getenv("ZOT_SWARM_CREDENTIAL_HELPER") != "1" {
+	if os.Getenv("NCODE_SWARM_CREDENTIAL_HELPER") != "1" {
 		return
 	}
-	if os.Getenv("ZOT_SWARM_CREDENTIAL_STDIN") != "1" {
+	if os.Getenv("NCODE_SWARM_CREDENTIAL_STDIN") != "1" {
 		os.Exit(2)
+	}
+	if os.Getenv("NCODE_SWARM_AGENT_ID") != "credential-test" {
+		os.Exit(7)
+	}
+	if !strings.HasSuffix(os.Getenv("NCODE_SWARM_EVENT_LOG"), "events.jsonl") {
+		os.Exit(8)
 	}
 	var credential Credential
 	if err := json.NewDecoder(os.Stdin).Decode(&credential); err != nil {
@@ -58,8 +64,8 @@ func TestCredentialStdinHelperProcess(t *testing.T) {
 	os.Exit(0)
 }
 
-func TestExecRunnerTransfersCredentialOnlyOnStdin(t *testing.T) {
-	t.Setenv("ZOT_SWARM_CREDENTIAL_HELPER", "1")
+func TestExecRunnerTransfersCredentialAndNcodeMetadata(t *testing.T) {
+	t.Setenv("NCODE_SWARM_CREDENTIAL_HELPER", "1")
 	root := t.TempDir()
 	a := &Agent{
 		ID:           "credential-test",

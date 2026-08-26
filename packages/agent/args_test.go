@@ -92,10 +92,10 @@ func TestRemovedPortableAgentConsentFlagsAreRejected(t *testing.T) {
 }
 
 func TestRunHelpHelperProcess(t *testing.T) {
-	if os.Getenv("ZOT_HELP_HELPER") == "" {
+	if os.Getenv("NCODE_HELP_HELPER") == "" {
 		return
 	}
-	if err := runWithArgsRaw(strings.Fields(os.Getenv("ZOT_HELP_HELPER")), "test"); err != nil {
+	if err := runWithArgsRaw(strings.Fields(os.Getenv("NCODE_HELP_HELPER")), "test"); err != nil {
 		os.Exit(1)
 	}
 	os.Exit(0)
@@ -105,7 +105,7 @@ func TestHelpOutputStreams(t *testing.T) {
 	run := func(args string) (stdout, stderr string, err error) {
 		t.Helper()
 		cmd := exec.Command(os.Args[0], "-test.run=^TestRunHelpHelperProcess$")
-		cmd.Env = append(os.Environ(), "ZOT_HELP_HELPER="+args)
+		cmd.Env = append(os.Environ(), "NCODE_HELP_HELPER="+args)
 		var outBuf, errBuf bytes.Buffer
 		cmd.Stdout = &outBuf
 		cmd.Stderr = &errBuf

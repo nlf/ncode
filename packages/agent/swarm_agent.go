@@ -16,6 +16,14 @@ import (
 	"github.com/nlf/ncode/packages/provider"
 )
 
+func swarmCredentialStdinEnabled() bool {
+	return os.Getenv("NCODE_SWARM_CREDENTIAL_STDIN") == "1"
+}
+
+func swarmEventLogPath() string {
+	return os.Getenv("NCODE_SWARM_EVENT_LOG")
+}
+
 // runSwarmAgentMode is the daemon-mode entry point used by every
 // swarm-spawned zot subprocess. It's intentionally close in shape to
 // runJSONMode but with two key differences:
@@ -25,7 +33,7 @@ import (
 //     turns arrive through the inbox unix socket at args.SwarmAgent.
 //
 //   - Output: every emitted JSON line is also mirrored verbatim into
-//     events.jsonl (see ZOT_SWARM_EVENT_LOG) so a separate zot
+//     events.jsonl (see NCODE_SWARM_EVENT_LOG) so a separate zot
 //     process can /swarm open this agent and replay its full history
 //     even after the parent that spawned us is long gone.
 //
@@ -37,7 +45,7 @@ func runSwarmAgentMode(ctx context.Context, args Args, version string) error {
 	if args.SwarmAgent == "" {
 		return fmt.Errorf("--swarm-agent requires a socket path")
 	}
-	if os.Getenv("ZOT_SWARM_CREDENTIAL_STDIN") == "1" {
+	if swarmCredentialStdinEnabled() {
 		var inherited swarm.Credential
 		dec := json.NewDecoder(io.LimitReader(os.Stdin, 1<<20))
 		if err := dec.Decode(&inherited); err != nil {
@@ -79,7 +87,7 @@ func runSwarmAgentMode(ctx context.Context, args Args, version string) error {
 	// running headless). The env var is set by the runner; if it's
 	// empty we silently skip the second mirror.
 	var logMirror *swarm.EventLog
-	if path := os.Getenv("ZOT_SWARM_EVENT_LOG"); path != "" {
+	if path := swarmEventLogPath(); path != "" {
 		logMirror, _ = swarm.OpenEventLog(path)
 	}
 	if logMirror != nil {

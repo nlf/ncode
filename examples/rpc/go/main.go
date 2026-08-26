@@ -30,7 +30,7 @@ func main() {
 	must(err)
 	must(cmd.Start())
 
-	if tok := os.Getenv("ZOTCORE_RPC_TOKEN"); tok != "" {
+	if tok := os.Getenv("NCODE_RPC_TOKEN"); tok != "" {
 		send(stdin, map[string]any{"id": "0", "type": "hello", "token": tok})
 	}
 	send(stdin, map[string]any{
